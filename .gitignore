@@ -1,0 +1,13 @@
+# Python embeddable installation
+python/
+
+# Backups
+backups/
+*.bak
+
+# Temporary files
+debug_buffer.txt
+
+# Artifacts
+.tempmediaStorage/
+*.md

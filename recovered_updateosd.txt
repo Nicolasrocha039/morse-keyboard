@@ -1,0 +1,169 @@
+Created At: 2026-06-28T21:00:25Z
+Completed At: 2026-06-28T21:00:26Z
+
+				The command completed successfully.
+				Output:
+				<truncated 1 lines>
+  morse_keyboard.ahk:1405:; �
+  morse_keyboard.ahk:1406:; FUN�ES PRINCIPAIS
+  morse_keyboard.ahk:1407:; �
+  morse_keyboard.ahk:1408:
+  morse_keyboard.ahk:1409:GetCaretOrMousePos(&targetX, &targetY, w, h) {
+  morse_keyboard.ahk:1410:    CoordMode("Caret", "Screen")
+  morse_keyboard.ahk:1411:    if CaretGetPos(&caretX, &caretY) {
+  morse_keyboard.ahk:1412:        targetX := caretX
+  morse_keyboard.ahk:1413:        targetY := caretY + 20
+  morse_keyboard.ahk:1414:    } else {
+  morse_keyboard.ahk:1415:        CoordMode("Mouse", "Screen")
+  morse_keyboard.ahk:1416:        MouseGetPos(&mouseX, &mouseY)
+  morse_keyboard.ahk:1417:        targetX := mouseX
+  morse_keyboard.ahk:1418:        targetY := mouseY + 20
+  morse_keyboard.ahk:1419:    }
+  morse_keyboard.ahk:1420:    
+  morse_keyboard.ahk:1421:    ; Ajustar limites da tela
+  morse_keyboard.ahk:1422:    screenW := A_ScreenWidth
+> morse_keyboard.ahk:1436:UpdateOSD() {
+  morse_keyboard.ahk:1437:    global morseActive, currentSequence, statusText, seqText, hintText, showMaps, 
+visualBuffer
+  morse_keyboard.ahk:1438:    global osd, osdMini, miniStatus, sepLine, osdWord, wordText, USE_BROWSER_OSD
+  morse_keyboard.ahk:1439:
+  morse_keyboard.ahk:1440:    ; Formata o texto de exibi�o (usado por OSD e navegador)
+  morse_keyboard.ahk:1441:    displayText := ""
+  morse_keyboard.ahk:1442:    if morseActive {
+  morse_keyboard.ahk:1443:        if currentSequence != "" {
+  morse_keyboard.ahk:1444:            if visualBuffer != "" {
+  morse_keyboard.ahk:1445:                displayText := visualBuffer . " + [ " . FormatSequence(currentSequence) . " 
+]"
+  morse_keyboard.ahk:1446:            } else {
+  morse_keyboard.ahk:1447:                displayText := "[ " . FormatSequence(currentSequence) . " ]"
+  morse_keyboard.ahk:1448:            }
+  morse_keyboard.ahk:1449:        } else {
+  morse_keyboard.ahk:1450:            if visualBuffer != "" {
+  morse_keyboard.ahk:1451:                displayText := "Acumulado: " . visualBuffer
+  morse_keyboard.ahk:1452:            } else {
+  morse_keyboard.ahk:1453:                displayText := "aguardando..."
+  morse_keyboard.ahk:1454:            }
+  morse_keyboard.ahk:1455:        }
+  morse_keyboard.ahk:1456:    }
+> morse_keyboard.ahk:1688:    UpdateOSD()
+  morse_keyboard.ahk:1689:}
+  morse_keyboard.ahk:1690:
+  morse_keyboard.ahk:1691:AddToSequence(key) {
+  morse_keyboard.ahk:1692:    global currentSequence
+  morse_keyboard.ahk:1693:    currentSequence .= key
+  morse_keyboard.ahk:1694:    LogBuffers("AddToSequence: " . key)
+> morse_keyboard.ahk:1695:    UpdateOSD()
+  morse_keyboard.ahk:1696:}
+  morse_keyboard.ahk:1697:
+  morse_keyboard.ahk:1698:CancelSequence() {
+  morse_keyboard.ahk:1699:    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+  morse_keyboard.ahk:1700:    LogBuffers("CancelSequence Start")
+  morse_keyboard.ahk:1701:    if currentSequence != "" {
+  morse_keyboard.ahk:1702:        currentSequence := ""
+  morse_keyboard.ahk:1703:    } else {
+  morse_keyboard.ahk:1704:        wordBuffer := ""
+  morse_keyboard.ahk:1705:        visualBuffer := ""
+  morse_keyboard.ahk:1706:        historyBuffer := []
+  morse_keyboard.ahk:1707:    }
+  morse_keyboard.ahk:1708:    LogBuffers("CancelSequence End")
+> morse_keyboard.ahk:1709:    UpdateOSD()
+  morse_keyboard.ahk:1710:}
+  morse_keyboard.ahk:1711:
+  morse_keyboard.ahk:1712:
+  morse_keyboard.ahk:1713:; �
+  morse_keyboard.ahk:1714:; MOVIMENTA�O DO OSD (Arrastar e Soltar)
+  morse_keyboard.ahk:1715:; �
+  morse_keyboard.ahk:1716:WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
+  morse_keyboard.ahk:1717:    ; Permite arrastar janelas sem barra de t�tulo
+  morse_keyboard.ahk:1718:    PostMessage(0xA1, 2, , , "ahk_id " hwnd)
+  morse_keyboard.ahk:1719:}
+  morse_keyboard.ahk:1720:OnMessage(0x0201, WM_LBUTTONDOWN)
+  morse_keyboard.ahk:1721:
+  morse_keyboard.ahk:1722:
+  morse_keyboard.ahk:1723:; �
+  morse_keyboard.ahk:1724:; HOTKEYS
+  morse_keyboard.ahk:1725:; �
+  morse_keyboard.ahk:1726:
+  morse_keyboard.ahk:1727:; Toggle Morse Keyboard com CapsLock
+  morse_keyboard.ahk:1728:CapsLock:: {
+  morse_keyboard.ahk:1729:    global morseActive
+> morse_keyboard.ahk:1732:    UpdateOSD()
+  morse_keyboard.ahk:1733:
+  morse_keyboard.ahk:1734:    ; Feedback sonoro
+  morse_keyboard.ahk:1735:    if morseActive
+  morse_keyboard.ahk:1736:        SoundBeep(600, 100), SoundBeep(900, 100)
+  morse_keyboard.ahk:1737:    else
+  morse_keyboard.ahk:1738:        SoundBeep(900, 100), SoundBeep(600, 100)
+  morse_keyboard.ahk:1739:}
+  morse_keyboard.ahk:1740:
+  morse_keyboard.ahk:1741:; Cancelar sequ�ncia com Escape ou LWin (quando Morse ativo)
+  morse_keyboard.ahk:1742:#HotIf morseActive
+  morse_keyboard.ahk:1743:Escape:: CancelSequence()
+  morse_keyboard.ahk:1744:LWin:: CancelSequence()
+  morse_keyboard.ahk:1745:
+  morse_keyboard.ahk:1746:; Navega�o de abas no OSD (teclas n�o utilizadas para digita�o)
+  morse_keyboard.ahk:1747:w:: TabGoLeft()
+  morse_keyboard.ahk:1748:s:: TabGoRight()
+  morse_keyboard.ahk:1749:\:: ToggleMaps()
+  morse_keyboard.ahk:1750:b:: ToggleBrowserMode()
+  morse_keyboard.ahk:1751:
+  morse_keyboard.ahk:1752:; As 4 teclas operacionais do Morse Keyboard
+> morse_keyboard.ahk:1775:    UpdateOSD()
+  morse_keyboard.ahk:1776:}
+  morse_keyboard.ahk:1777:
+  morse_keyboard.ahk:1778:; Space f�sico confirma a sequ�ncia ativa e adiciona espa�o ao buffer de digita�o (limpando 
+o visual)
+  morse_keyboard.ahk:1779:$Space:: {
+  morse_keyboard.ahk:1780:    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+  morse_keyboard.ahk:1781:    LogBuffers("Physical Space Start")
+  morse_keyboard.ahk:1782:    if currentSequence != "" {
+  morse_keyboard.ahk:1783:        ProcessSequence()
+  morse_keyboard.ahk:1784:    }
+  morse_keyboard.ahk:1785:    wordBuffer .= " "
+  morse_keyboard.ahk:1786:    visualBuffer := ""
+  morse_keyboard.ahk:1787:    historyBuffer.Push(" ")
+  morse_keyboard.ahk:1788:    LogBuffers("Physical Space End")
+> morse_keyboard.ahk:1789:    UpdateOSD()
+  morse_keyboard.ahk:1790:}
+  morse_keyboard.ahk:1791:
+  morse_keyboard.ahk:1792:; Enter confirma a sequ�ncia imediatamente, ou envia o buffer acumulado de digita�o
+  morse_keyboard.ahk:1793:$Enter:: {
+  morse_keyboard.ahk:1794:    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+  morse_keyboard.ahk:1795:    LogBuffers("Physical Enter Start")
+  morse_keyboard.ahk:1796:    if currentSequence != "" {
+  morse_keyboard.ahk:1797:        ProcessSequence()
+  morse_keyboard.ahk:1798:    } else {
+  morse_keyboard.ahk:1799:        if wordBuffer != "" {
+  morse_keyboard.ahk:1800:            SendText(wordBuffer)
+  morse_keyboard.ahk:1801:            wordBuffer := ""
+  morse_keyboard.ahk:1802:            visualBuffer := ""
+  morse_keyboard.ahk:1803:            historyBuffer := []
+  morse_keyboard.ahk:1804:            LogBuffers("Sent Word Buffer")
+> morse_keyboard.ahk:1805:            UpdateOSD()
+  morse_keyboard.ahk:1806:        } else {
+  morse_keyboard.ahk:1807:            Send("{Enter}")
+  morse_keyboard.ahk:1808:        }
+  morse_keyboard.ahk:1809:    }
+  morse_keyboard.ahk:1810:    LogBuffers("Physical Enter End")
+  morse_keyboard.ahk:1811:}
+  morse_keyboard.ahk:1812:#HotIf
+  morse_keyboard.ahk:1813:
+  morse_keyboard.ahk:1814:
+  morse_keyboard.ahk:1815:; �
+  morse_keyboard.ahk:1816:; INICIALIZA�O
+  morse_keyboard.ahk:1817:; �
+  morse_keyboard.ahk:1818:; Executa o servidor WebSocket do Python em segundo plano automaticamente
+  morse_keyboard.ahk:1819:try {
+  morse_keyboard.ahk:1820:    Run('"C:\Program Files\Python313\python.exe" "' . A_ScriptDir . '\websocket_server.py"', 
+A_ScriptDir, "Hide")
+  morse_keyboard.ahk:1821:}
+  morse_keyboard.ahk:1822:
+> morse_keyboard.ahk:1823:UpdateOSD()
+  morse_keyboard.ahk:1824:
+  morse_keyboard.ahk:1825:; Tooltip inicial
+  morse_keyboard.ahk:1826:ToolTip("Morse Keyboard carregado!`nCapsLock para ativar/desativar", A_ScreenWidth/2 - 150, 
+A_ScreenHeight/2 - 50)
+  morse_keyboard.ahk:1827:SetTimer(() => ToolTip(), -2500)
+
+
+

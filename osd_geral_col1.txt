@@ -1,0 +1,19 @@
+﻿MINÚSCULAS (Q, A, R)
+Q + [Q:a A:b R:c]  QQ + [Q:d A:e R:f]
+QA+ [Q:g A:h R:i]  QR + [Q:j A:k R:l]
+A + [Q:m A:n R:o]  AQ + [Q:p A:q R:r]
+AA+ [Q:s A:t R:u]  AR + [Q:v A:w R:x]
+R + [Q:y A:z]      MAIÚS = RR + Letra
+
+ACENTOS E CRASE
+Agudos: AQQ+[Q:á A:é R:í] AQR+[Q:ó A:ú]
+Circ.:  QAR+[Q:â A:ê R:ô] 
+Til:    QAQ+[Q:ã A:õ R:ões] AQRR:ão
+Crase/Cedilha: RQQQ:à | RAQQ:ç
+
+SÍLABAS UNIVERSAIS (ba, ce, di...)
+Regra: [Consoante] + [Vogal] + R
+Vogais: QQ:a | QA:e | QR:i | AQ:o | AA:u
+Ex: QA(b) + QQ(a) + R = QAQQR (ba)
+Maiús: RR + Sílaba (ex: RRQAQQR = Ba)
+

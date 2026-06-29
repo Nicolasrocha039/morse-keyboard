@@ -1,0 +1,159 @@
+Created At: 2026-06-28T21:27:33Z
+Completed At: 2026-06-28T21:27:33Z
+File Path: `file:///c:/Users/Nicolas/.gemini/antigravity-ide/scratch/morse_keyboard/morse_keyboard.ahk`
+Total Lines: 1129
+Total Bytes: 41521
+Showing lines 450 to 600
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+450:     if val = "{Delete}"
+451:         return "Del"
+452:     if val = "{Tab}"
+453:         return "Tab"
+454:     if val = "{Escape}"
+455:         return "Esc"
+456:     if val = "{Up}"
+457:         return "▲ Cima"
+458:     if val = "{Down}"
+459:         return "▼ Baixo"
+460:     if val = "{Left}"
+461:         return "◀ Esq"
+462:     if val = "{Right}"
+463:         return "▶ Dir"
+464:     if val = "{Home}"
+465:         return "Home"
+466:     if val = "{End}"
+467:         return "End"
+468:     if val = "{PgUp}"
+469:         return "PgUp"
+470:     if val = "{PgDn}"
+471:         return "PgDn"
+472:     if val = "{Insert}"
+473:         return "Ins"
+474:     if SubStr(val, 1, 1) = "^"
+475:         return "Ctrl+" . Format("{:U}", SubStr(val, 2))
+476:     if SubStr(val, 1, 1) = "{" && SubStr(val, -1) = "}" {
+477:         return SubStr(val, 2, -1)
+478:     }
+479:     return val
+480: }
+481: 
+482: CreateKeyCard(guiObj, keyName, x, y) {
+483:     card := guiObj.AddText("x" . x . " y" . y . " w105 h55 +Background0x1c1c2e +Border", "")
+484:     label := guiObj.AddText("x" . (x+6) . " y" . (y+4) . " w40 h15 +BackgroundTrans c0x9999bb", keyName)
+485:     label.SetFont("s8 Bold", "Segoe UI")
+486:     val := guiObj.AddText("x" . (x+6) . " y" . (y+20) . " w93 h30 Center +BackgroundTrans cWhite", "")
+487:     val.SetFont("s12 Bold", "Consolas")
+488:     return {card: card, label: label, val: val}
+489: }
+490: 
+491: UpdateCard(key, valText, isActive) {
+492:     global cards
+493:     cardObj := cards[key]
+494:     
+495:     if isActive {
+496:         cardObj.card.Opt("+Background0x1c1c2e") ; Active card background
+497:         cardObj.label.Opt("c0x9999bb")           ; Dim gold/white label
+498:         cardObj.val.Opt("c0x00FFCC")             ; Neon cyan value
+499:         cardObj.val.Text := valText
+500:     } else {
+501:         cardObj.card.Opt("+Background0x0b0b14") ; Inactive card background (same as GUI)
+502:         cardObj.label.Opt("c0x222233")           ; Dim inactive label
+503:         cardObj.val.Opt("c0x222233")             ; Dim inactive value
+504:         cardObj.val.Text := "-"
+505:     }
+506:     cardObj.card.Redraw()
+507:     cardObj.label.Redraw()
+508:     cardObj.val.Redraw()
+509: }
+510: 
+511: UpdateKeyGuide(seq) {
+512:     global morseMap
+513:     
+514:     ; Mapeamento de tecla digitada para o nome correspondente do Card
+515:     keyMapping := Map("Q", "Q", "A", "A", "R", "Right")
+516:     
+517:     for k, cardKey in keyMapping {
+518:         nextSeq := seq . k
+519:         
+520:         ; 1. Check exact match
+521:         if morseMap.Has(nextSeq) {
+522:             val := morseMap[nextSeq]
+523:             formattedVal := FormatForCard(val)
+524:             UpdateCard(cardKey, formattedVal, true)
+525:         }
+526:         ; 2. Check if prefix for other sequences
+527:         else {
+528:             hasPrefix := false
+529:             for mapKey, mapVal in morseMap {
+530:                 if StrLen(mapKey) > StrLen(nextSeq) && SubStr(mapKey, 1, StrLen(nextSeq)) = nextSeq {
+531:                     hasPrefix := true
+532:                     break
+533:                 }
+534:             }
+535:             if hasPrefix {
+536:                 UpdateCard(cardKey, "...", true)
+537:             } else {
+538:                 UpdateCard(cardKey, "-", false)
+539:             }
+540:         }
+541:     }
+542:     
+543:     ; O card do Enter sempre serve para confirmar
+544:     UpdateCard("Enter", "Confirmar", true)
+545: }
+546: 
+547: ; ── GUI pequena (OFF) ──
+548: global osdMini := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize")
+549: osdMini.BackColor := "0x12121e"
+550: osdMini.MarginX := 10
+551: osdMini.MarginY := 6
+552: 
+553: global miniStatus := osdMini.AddText("cWhite w200 Center", "⌨ MORSE KB: OFF")
+554: miniStatus.SetFont("s10 Bold", "Segoe UI")
+555: 
+556: global miniHint := osdMini.AddText("c0x555577 w200 Center", "CapsLock para ativar")
+557: miniHint.SetFont("s8", "Segoe UI")
+558: 
+559: osdMini.Show("x10 y10 NoActivate")
+560: WinSetTransparent(220, osdMini)
+561: 
+562: ; ── GUI de palavra flutuante (Abaixo do caret) ──
+563: global osdWord := Gui("+AlwaysOnTop -Caption +ToolWindow +Border", "MorseWordOSD")
+564: osdWord.BackColor := "0x0b0b14" ; Deep dark background
+565: osdWord.MarginX := 20
+566: osdWord.MarginY := 12
+567: 
+568: global wordText := osdWord.AddText("w600 c0x00d4ff", "Palavra: [Vazio]")
+569: wordText.SetFont("s22 Bold", MONO_FONT)
+570: 
+571: ; ── GUI completa (ON) ──
+572: global osd := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize", "MorseGuideOSD")
+573: osd.BackColor := "0x0b0b14" ; Deep dark background
+574: osd.MarginX := 15
+575: osd.MarginY := 10
+576: 
+577: ; Status e Informações da Sequência
+578: global statusText := osd.AddText("x15 y10 w890 h24 c0x00FFCC", "⌨ MORSE KEYBOARD: ATIVO")
+579: statusText.SetFont("s12 Bold", "Segoe UI")
+580: 
+581: global seqLabel := osd.AddText("x15 y34 w70 h20 c0x8888aa", "Sequência:")
+582: seqLabel.SetFont("s9", "Segoe UI")
+583: 
+584: global seqText := osd.AddText("x90 y30 w800 h30 c0x00d4ff", "aguardando...")
+585: seqText.SetFont("s16 Bold", MONO_FONT)
+586: 
+587: global hintText := osd.AddText("x670 y34 w235 h20 Right c0x666688", "Espaço / \ para confirmar")
+588: hintText.SetFont("s9 Italic", "Segoe UI")
+589: 
+590: global sepLine := osd.AddText("x15 y65 w890 h1 +Background0x222233", "")
+591: 
+592: ; Coluna Esquerda: Guia de Teclas
+593: global guideHeader := osd.AddText("x15 y75 w218 h20 c0xFFD700", "GUIA DE TECLAS (Próxima)")
+594: guideHeader.SetFont("s9 Bold", "Segoe UI")
+595: 
+596: global cards := Map()
+597: 
+598: CreateKeyCards() {
+599:     global osd, cards
+600:     cardCoords := Map(
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

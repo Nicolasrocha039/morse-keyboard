@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a18">
+  <title>Morse OSD — Monitor ao Vivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #0a0a18;
+      --panel:     rgba(16, 16, 38, 0.92);
+      --border:    rgba(60, 60, 120, 0.5);
+      --text:      #e8e8f4;
+      --muted:     #5a5a80;
+      --q:  #ff6b9d;
+      --a:  #c084fc;
+      --r:  #60a5fa;
+      --en: #f97316;
+      --green: #34d399;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient glow */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 15% 15%, rgba(255,107,157,.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 85% 85%, rgba(96,165,250,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .55rem 1rem;
+      background: rgba(10,10,24,.8);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .status-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: .2rem .65rem;
+      border-radius: 100px;
+      border: 1px solid;
+      transition: all .35s;
+    }
+    .status-pill::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .pill-active      { color: var(--green); border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.08); }
+    .pill-idle        { color: var(--muted);  border-color: rgba(90,90,128,.3);   background: rgba(90,90,128,.06); }
+    .pill-offline     { color: #f87171;       border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.07); }
+    .pill-connecting  { color: var(--r);      border-color: rgba(96,165,250,.3);  background: rgba(96,165,250,.07); }
+
+    .ws-label {
+      font-size: .62rem;
+      color: var(--muted);
+    }
+
+    /* ── WORD AREA ── */
+    .word-area {
+      flex-shrink: 0;
+      padding: .75rem 1rem .6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .word-caption {
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .3rem;
+    }
+
+    .word-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(.9rem, 4.5vw, 1.35rem);
+      font-weight: 600;
+      line-height: 1.4;
+      min-height: 1.8rem;
+      word-break: break-all;
+      color: var(--text);
+    }
+
+    .word-display .wd-word { color: var(--green); }
+    .word-display .wd-seq  { color: var(--a); }
+    .word-display .wd-plus { color: var(--muted); margin: 0 .2rem; }
+    .word-display .wd-idle { color: var(--muted); font-size: .85em; font-weight: 400; }
+
+    /* ── SEQUENCE KEYS ── */
+    .seq-area {
+      flex-shrink: 0;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .seq-caption {
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+    }
+
+    .seq-keys-row {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      flex-wrap: wrap;
+      min-height: 2rem;
+    }
+
+    .key-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      font-weight: 700;
+      width: 2rem; height: 2rem;
+      border-radius: .45rem;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid;
+      animation: popIn .15s ease;
+      transition: box-shadow .2s;
+    }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .badge-q { color: var(--q); background: rgba(255,107,157,.12); border-color: rgba(255,107,157,.35); }
+    .badge-a { color: var(--a); background: rgba(192,132,252,.12); border-color: rgba(192,132,252,.35); }
+    .badge-r { color: var(--r); background: rgba(96,165,250,.12);  border-color: rgba(96,165,250,.35); }
+
+    .key-dot { color: var(--muted); font-size: .9rem; }
+
+    .seq-match {
+      margin-left: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--green);
+      animation: popIn .15s ease;
+    }
+
+    .seq-idle { color: var(--muted); font-size: .8rem; font-weight: 400; }
+
+    /* ── HINT ── */
+    .hint-area {
+      flex-shrink: 0;
+      padding: .45rem 1rem;
+      border-bottom: 1px solid var(--border);
+      min-height: 2rem;
+    }
+
+    .hint-text {
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hint-text .h-seq { font-family: 'JetBrains Mono', monospace; color: var(--a); }
+    .hint-text .h-out { color: var(--text); font-weight: 600; }
+
+    /* ── MATCH GRID (possible chars for current prefix) ── */
+    .matches-area {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding: .5rem .75rem .75rem;
+    }
+
+    .matches-caption {
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+    }
+
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: .35rem;
+    }
+
+    .match-card {
+      background: rgba(22,22,50,.7);
+      border: 1px solid var(--border);
+      border-radius: .6rem;
+      padding: .4rem .3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .15rem;
+      cursor: default;
+      transition: background .2s, border-color .2s;
+    }
+
+    .match-card.exact {
+      border-color: rgba(52,211,153,.5);
+      background: rgba(52,211,153,.07);
+    }
+
+    .match-out {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .match-out.small {
+      font-size: .65rem;
+      font-weight: 600;
+      color: var(--r);
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .match-seq {
+      display: flex;
+      gap: .1rem;
+    }
+
+    .match-seq-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .5rem;
+      font-weight: 700;
+      width: 1rem; height: 1rem;
+      border-radius: .25rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .mk-q { background: rgba(255,107,157,.15); color: var(--q); }
+    .mk-a { background: rgba(192,132,252,.15); color: var(--a); }
+    .mk-r { background: rgba(96,165,250,.15);  color: var(--r); }
+    .mk-extra { opacity: .5; font-size: .4rem; color: var(--muted); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: .75rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .empty-icon { font-size: 2.5rem; opacity: .4; }
+
+    .empty-text {
+      font-size: .85rem;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <span class="status-label">⌨ Morse Keyboard</span>
+  <span class="status-pill pill-offline" id="statusPill">OFFLINE</span>
+</div>
+
+<!-- Word buffer -->
+<div class="word-area">
+  <div class="word-caption">Palavra / Frase</div>
+  <div class="word-display" id="wordDisplay">
+    <span class="wd-idle">Aguardando digitação...</span>
+  </div>
+</div>
+
+<!-- Current sequence keys -->
+<div class="seq-area">
+  <div class="seq-caption">Sequência Atual</div>
+  <div class="seq-keys-row" id="seqRow">
+    <span class="seq-idle">Nenhuma sequência em progresso</span>
+  </div>
+</div>
+
+<!-- Hint -->
+<div class="hint-area">
+  <div class="hint-text" id="hintText">—</div>
+</div>
+
+<!-- Possible matches -->
+<div class="matches-area" id="matchesArea">
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">⌨</div>
+    <div class="empty-text">
+      Ative o Morse Keyboard (CapsLock)<br>e comece a digitar uma sequência.
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Sequence data ──────────────────────────────────────────────────────────
+// Hardcoded from morseMap (Q=Esq, A=Esq2, R=Dir)
+const SEQ = [
+  {s:"QQ",o:"a"},
+  {s:"QA",o:"b"},
+  {s:"QR",o:"c"},
+  {s:"QQQ",o:"d"},
+  {s:"QQA",o:"e"},
+  {s:"QQR",o:"f"},
+  {s:"QAQ",o:"g"},
+  {s:"QAA",o:"h"},
+  {s:"QAR",o:"i"},
+  {s:"QRQ",o:"j"},
+  {s:"QRA",o:"k"},
+  {s:"QRR",o:"l"},
+  {s:"AQ",o:"m"},
+  {s:"AA",o:"n"},
+  {s:"AR",o:"o"},
+  {s:"AQQ",o:"p"},
+  {s:"AQA",o:"q"},
+  {s:"AQR",o:"r"},
+  {s:"AAQ",o:"s"},
+  {s:"AAA",o:"t"},
+  {s:"AAR",o:"u"},
+  {s:"ARQ",o:"v"},
+  {s:"ARA",o:"w"},
+  {s:"ARR",o:"x"},
+  {s:"RQ",o:"y"},
+  {s:"RA",o:"z"},
+  {s:"RR",o:" "},
+  {s:"RQAQ",o:"{Backspace}"},
+  {s:"RQAA",o:"{Enter}"},
+  {s:"RQAR",o:"{Escape}"},
+  {s:"RQQ",o:"1"},
+  {s:"RQA",o:"2"},
+  {s:"RQR",o:"3"},
+  {s:"RAQ",o:"4"},
+  {s:"RAA",o:"5"},
+  {s:"RAR",o:"6"},
+  {s:"RRQ",o:"7"},
+  {s:"RRA",o:"8"},
+  {s:"RRR",o:"9"},
+  {s:"RRRRR",o:"0"},
+  {s:"RRRRQ",o:"."},
+  {s:"RRRRA",o:","},
+  {s:"RRQQ",o:"A"},
+  {s:"RRQA",o:"B"},
+  {s:"RRQR",o:"C"},
+  {s:"RRQQQ",o:"D"},
+  {s:"RRQQA",o:"E"},
+  {s:"RRQQR",o:"F"},
+  {s:"RRQAQ",o:"G"},
+  {s:"RRQAA",o:"H"},
+  {s:"RRQAR",o:"I"},
+  {s:"RRQRQ",o:"J"},
+  {s:"RRQRA",o:"K"},
+  {s:"RRQRR",o:"L"},
+  {s:"RRAQ",o:"M"},
+  {s:"RRAA",o:"N"},
+  {s:"RRAR",o:"O"},
+  {s:"RRAQQ",o:"P"},
+  {s:"RRAQA",o:"Q"},
+  {s:"RRAQR",o:"R"},
+  {s:"RRAAQ",o:"S"},
+  {s:"RRAAA",o:"T"},
+  {s:"RRAAR",o:"U"},
+  {s:"RRARQ",o:"V"},
+  {s:"RRARA",o:"W"},
+  {s:"RRARR",o:"X"},
+  {s:"RRRQ",o:"Y"},
+  {s:"RRRA",o:"Z"},
+  {s:"RRRAQQ",o:"Ç"},
+  {s:"RAQQ",o:"ç"},
+  {s:"AQQQ",o:"á"},
+  {s:"AQQA",o:"é"},
+  {s:"AQQR",o:"í"},
+  {s:"AQRQ",o:"ó"},
+  {s:"AQRA",o:"ú"},
+  {s:"QARQ",o:"â"},
+  {s:"QARA",o:"ê"},
+  {s:"QARR",o:"ô"},
+  {s:"QAQQ",o:"ã"},
+  {s:"QAQA",o:"õ"},
+  {s:"QAQR",o:"ões"},
+  {s:"AQRR",o:"ão"},
+  {s:"RQQQ",o:"à"},
+  {s:"RRAQQQ",o:"Á"},
+  {s:"RRAQQA",o:"É"},
+  {s:"RRAQQR",o:"Í"},
+  {s:"RRAQRQ",o:"Ó"},
+  {s:"RRAQRA",o:"Ú"},
+  {s:"RRQARQ",o:"Â"},
+  {s:"RRQARA",o:"Ê"},
+  {s:"RRQARR",o:"Ô"},
+  {s:"RRQAQQ",o:"Ã"},
+  {s:"RRQAQA",o:"Õ"},
+  {s:"RRQAQR",o:"ÕES"},
+  {s:"RRAQRR",o:"ÃO"},
+  {s:"RRRQQQ",o:"À"},
+  {s:"RAQA",o:"^c"},
+  {s:"RAQR",o:"^v"},
+  {s:"RAAQ",o:"^x"},
+  {s:"RAAA",o:"^z"},
+  {s:"RAAR",o:"^s"},
+  {s:"RARQ",o:"^a"},
+  {s:"QAAQ",o:"ch"},
+  {s:"QAAA",o:"lh"},
+  {s:"QAAR",o:"nh"},
+  {s:"AQAQ",o:"qu"},
+  {s:"AQAA",o:"que"},
+  {s:"AQAR",o:"qui"},
+  {s:"QRQQ",o:"as"},
+  {s:"QRQA",o:"es"},
+  {s:"QRQR",o:"is"},
+  {s:"QRAQ",o:"os"},
+  {s:"QRAA",o:"us"},
+  {s:"QQQQ",o:"an"},
+  {s:"QQQA",o:"en"},
+  {s:"QQQR",o:"in"},
+  {s:"QQAQ",o:"on"},
+  {s:"QQAA",o:"un"},
+  {s:"ARQQ",o:"am"},
+  {s:"ARQA",o:"em"},
+  {s:"ARQR",o:"im"},
+  {s:"ARAQ",o:"om"},
+  {s:"ARAA",o:"um"},
+  {s:"AAQQ",o:"al"},
+  {s:"AAQA",o:"el"},
+  {s:"AAQR",o:"il"},
+  {s:"AAAQ",o:"ol"},
+  {s:"AAAA",o:"ul"},
+  {s:"RQRQ",o:"{Tab}"},
+  {s:"RQRA",o:"{Delete}"},
+  {s:"RQRR",o:"{Home}"},
+  {s:"RQRRRQ",o:"{End}"},
+  {s:"RQRRA",o:"{PgUp}"},
+  {s:"RQRRR",o:"{PgDn}"},
+  {s:"RQRRRA",o:"+{Tab}"},
+  {s:"RQRQQ",o:"{Left}"},
+  {s:"RQRQA",o:"{Down}"},
+  {s:"RQRQR",o:"{Right}"},
+  {s:"RQRRQ",o:"{Up}"},
+  {s:"RARAQ",o:"?"},
+  {s:"RARAA",o:"!"},
+  {s:"RARAR",o:";"},
+  {s:"RARRQ",o:":"},
+  {s:"RARRA",o:"/"},
+  {s:"RARRR",o:"\\"},
+  {s:"RARAQQ",o:"@"},
+  {s:"RARAQA",o:"#"},
+  {s:"RARAQR",o:"$"},
+  {s:"RARAAQ",o:"%"},
+  {s:"RARAAA",o:"&"},
+  {s:"RARAAR",o:"*"},
+  {s:"RARRQQ",o:"("},
+  {s:"RARRQA",o:")"},
+  {s:"RARRQR",o:"-"},
+  {s:"RARRAQ",o:"_"},
+  {s:"RARRAA",o:"+"},
+  {s:"RARRAR",o:"="},
+  {s:"RARRRA",o:"'"},
+  {s:"RARRRR",o:"{"},
+  {s:"RARRRAR",o:"}"},
+  {s:"RARRRQQ",o:"["},
+  {s:"RARRRQA",o:"]"},
+  {s:"RARAQQQ",o:"<"},
+  {s:"RARAQQA",o:">"},
+  {s:"RARAQQR",o:"^"},
+  {s:"RARAQAQ",o:"~"},
+  {s:"RAQQQ",o:"^f"},
+  {s:"RAQQA",o:"^n"},
+  {s:"RAQQR",o:"^t"},
+  {s:"RAQAQ",o:"^w"},
+  {s:"RAQAR",o:"^y"}
+];
+
+const seqMap = new Map(SEQ.map(e => [e.s, e]));
+
+function getMatches(prefix) {
+  if (!prefix) return [];
+  return SEQ.filter(e => e.s.startsWith(prefix)).sort((a,b)=>a.s.length-b.s.length);
+}
+
+// ── UI ─────────────────────────────────────────────────────────────────────
+const statusPill   = document.getElementById('statusPill');
+const wordDisplay  = document.getElementById('wordDisplay');
+const seqRow       = document.getElementById('seqRow');
+const hintText     = document.getElementById('hintText');
+const matchesArea  = document.getElementById('matchesArea');
+const emptyState   = document.getElementById('emptyState');
+
+const KEY_CLASS = {Q:'badge-q', A:'badge-a', R:'badge-r'};
+const MK_CLASS  = {Q:'mk-q', A:'mk-a', R:'mk-r'};
+
+function escH(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderState(data) {
+  const { word='', seq='', active=false, visual='' } = data;
+
+  // Status pill — reflects both WS connection and Morse active state
+  if (!wsConnected) {
+    statusPill.textContent = 'OFFLINE';
+    statusPill.className = 'status-pill pill-offline';
+  } else if (active) {
+    statusPill.textContent = 'ATIVO ⌨';
+    statusPill.className = 'status-pill pill-active';
+  } else {
+    statusPill.textContent = 'MORSE OFF';
+    statusPill.className = 'status-pill pill-connecting';
+  }
+
+  // Word display
+  let wHtml = '';
+  if (!word && !seq) {
+    wHtml = '<span class="wd-idle">Aguardando digitação...</span>';
+  } else {
+    if (word) wHtml += `<span class="wd-word">${escH(word)}</span>`;
+    if (seq)  {
+      if (word) wHtml += '<span class="wd-plus"> + </span>';
+      wHtml += `<span class="wd-seq">[ ${seq.split('').join(' ')} ]</span>`;
+    }
+  }
+  wordDisplay.innerHTML = wHtml;
+
+  // Sequence keys row
+  if (!seq) {
+    seqRow.innerHTML = '<span class="seq-idle">Nenhuma sequência em progresso</span>';
+  } else {
+    let kHtml = seq.split('').map((k,i) =>
+      `${i>0?'<span class="key-dot">·</span>':''}<span class="key-badge ${KEY_CLASS[k]||''}">${k}</span>`
+    ).join('');
+    const exact = seqMap.get(seq);
+    if (exact) {
+      kHtml += `<span class="key-dot"> → </span><span class="seq-match">${escH(exact.o)}</span>`;
+    }
+    seqRow.innerHTML = kHtml;
+  }
+
+  // Matches / hint
+  const candidates = getMatches(seq);
+  const exact = seq ? seqMap.get(seq) : null;
+
+  if (!seq) {
+    hintText.textContent = active ? 'Digite Q, A ou R para iniciar uma sequência' : 'Ative o Morse Keyboard com CapsLock';
+  } else if (exact) {
+    hintText.innerHTML = `Corresponde a <span class="h-out">${escH(exact.o)}</span> — Pressione Enter para confirmar`;
+  } else {
+    const ext = candidates.filter(e => e.s !== seq).slice(0,6);
+    hintText.innerHTML = ext.length
+      ? `+${candidates.length} possível(is): ` + ext.map(e=>`<span class="h-seq">${e.s}</span>→<span class="h-out">${escH(e.o)}</span>`).join('  ')
+      : 'Sem correspondência para esta sequência';
+  }
+
+  // Matches grid
+  if (!seq || candidates.length === 0) {
+    matchesArea.innerHTML = `<div class="empty-state"><div class="empty-icon">⌨</div><div class="empty-text">${
+      active ? 'Digite Q, A ou R para ver as possibilidades.' : 'Ative o Morse Keyboard (CapsLock)<br>e comece a digitar.'
+    }</div></div>`;
+    return;
+  }
+
+  const shown = candidates.slice(0,64);
+  const cards = shown.map(e => {
+    const isExact = e.s === seq;
+    const isSmall = e.o.length > 2;
+    const keyBadges = e.s.split('').slice(0,4).map(k =>
+      `<span class="match-seq-key ${MK_CLASS[k]||''}">${k}</span>`
+    ).join('');
+    const extraKeys = e.s.length > 4 ? `<span class="match-seq-key mk-extra">+${e.s.length-4}</span>` : '';
+    return `<div class="match-card${isExact?' exact':''}">
+      <span class="match-out${isSmall?' small':''}">${escH(e.o)}</span>
+      <div class="match-seq">${keyBadges}${extraKeys}</div>
+    </div>`;
+  }).join('');
+
+  matchesArea.innerHTML = `<div class="matches-caption">${candidates.length} possibilidade(s)</div><div class="matches-grid">${cards}</div>`;
+}
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+let wsState = { word:'', seq:'', active:false, visual:'' };
+let wsConnected = false;
+
+function connectWS() {
+  const host = window.location.hostname || 'localhost';
+  const ws = new WebSocket(`ws://${host}:8765`);
+
+  ws.onopen = () => {
+    wsConnected = true;
+    statusPill.textContent = 'CONECTADO';
+    statusPill.className = 'status-pill pill-connecting';
+  };
+
+  ws.onmessage = ev => {
+    try {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === 'state') {
+        wsState = { ...wsState, ...msg.data };
+        renderState(wsState);
+      }
+    } catch(e) {}
+  };
+
+  ws.onclose = () => {
+    wsConnected = false;
+    statusPill.textContent = 'OFFLINE';
+    statusPill.className = 'status-pill pill-offline';
+    renderState({ word:'', seq:'', active:false });
+    setTimeout(connectWS, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+connectWS();
+renderState(wsState);
+</script>
+</body>
+</html>

@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Keyboard — Mapa Visual de Sequências</title>
+    <meta name="description" content="Mapa visual interativo de todas as sequências do Morse Keyboard AHK">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #111128;
+            --bg-card: #16163a;
+            --bg-card-hover: #1e1e52;
+            --border: #2a2a5a;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888aa;
+            --text-muted: #555570;
+            --accent-q: #ff6b9d;
+            --accent-a: #c084fc;
+            --accent-z: #60a5fa;
+            --accent-w: #34d399;
+            --accent-s: #fbbf24;
+            --accent-x: #f97316;
+            --glow-q: rgba(255, 107, 157, 0.3);
+            --glow-a: rgba(192, 132, 252, 0.3);
+            --glow-z: rgba(96, 165, 250, 0.3);
+            --glow-w: rgba(52, 211, 153, 0.3);
+            --glow-s: rgba(251, 191, 36, 0.3);
+            --glow-x: rgba(249, 115, 22, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 800px 600px at 20% 20%, rgba(255, 107, 157, 0.06), transparent),
+                radial-gradient(ellipse 600px 800px at 80% 80%, rgba(96, 165, 250, 0.06), transparent),
+                radial-gradient(ellipse 600px 400px at 50% 50%, rgba(192, 132, 252, 0.04), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-q), var(--accent-a), var(--accent-z));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* Search + Filter bar */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 0 1 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.8rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-a);
+            box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .pill {
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .pill:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .pill.active {
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.2), rgba(96, 165, 250, 0.2));
+            border-color: var(--accent-a);
+            color: var(--text-primary);
+        }
+
+        /* Live keyboard preview (4 Keys layout: Q, A, Right, Enter) */
+        .keyboard-preview {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            perspective: 600px;
+            flex-wrap: wrap;
+        }
+
+        .kb-key {
+            width: 80px;
+            height: 80px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        .kb-key.key-q { background: linear-gradient(145deg, rgba(255,107,157,0.15), rgba(255,107,157,0.05)); color: var(--accent-q); border-color: rgba(255,107,157,0.3); }
+        .kb-key.key-a { background: linear-gradient(145deg, rgba(192,132,252,0.15), rgba(192,132,252,0.05)); color: var(--accent-a); border-color: rgba(192,132,252,0.3); }
+        .kb-key.key-r { background: linear-gradient(145deg, rgba(96,165,250,0.15), rgba(96,165,250,0.05)); color: var(--accent-z); border-color: rgba(96,165,250,0.3); }
+        .kb-key.key-enter { background: linear-gradient(145deg, rgba(249,115,22,0.15), rgba(249,115,22,0.05)); color: var(--accent-x); border-color: rgba(249,115,22,0.3); }
+
+        .kb-key:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .kb-key.pressed {
+            transform: scale(0.92);
+            filter: brightness(1.4);
+        }
+
+        .kb-key .key-number {
+            position: absolute;
+            bottom: 6px;
+            font-size: 0.55rem;
+            opacity: 0.5;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        /* Sequence display */
+        .sequence-display {
+            text-align: center;
+            margin-bottom: 2rem;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(17, 17, 40, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .seq-keys {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .seq-key {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            animation: popIn 0.2s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .seq-separator {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .seq-result {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-height: 2rem;
+        }
+
+        .seq-result .match {
+            padding: 0.3rem 1rem;
+            background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05));
+            border: 1px solid rgba(52,211,153,0.3);
+            border-radius: 8px;
+            color: var(--accent-w);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .seq-result .no-match {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .seq-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Category sections */
+        .category {
+            margin-bottom: 2.5rem;
+            animation: fadeUp 0.5s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .category-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        /* Sequence cards grid */
+        .seq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .seq-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .seq-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .seq-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            border-color: transparent;
+        }
+
+        .seq-card:hover::before {
+            opacity: 1;
+        }
+
+        .seq-card.highlight {
+            border-color: var(--accent-a);
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.15);
+        }
+
+        /* Card colors based on first key */
+        .seq-card[data-first="Q"]::before { background: linear-gradient(90deg, var(--accent-q), transparent); }
+        .seq-card[data-first="A"]::before { background: linear-gradient(90deg, var(--accent-a), transparent); }
+        .seq-card[data-first="R"]::before { background: linear-gradient(90deg, var(--accent-z), transparent); }
+
+        .seq-card[data-first="Q"]:hover { border-color: var(--accent-q); box-shadow: 0 4px 20px var(--glow-q); }
+        .seq-card[data-first="A"]:hover { border-color: var(--accent-a); box-shadow: 0 4px 20px var(--glow-a); }
+        .seq-card[data-first="R"]:hover { border-color: var(--accent-z); box-shadow: 0 4px 20px var(--glow-z); }
+
+        .card-output {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            min-height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-output.special {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            background: rgba(96, 165, 250, 0.1);
+            border-radius: 6px;
+            color: var(--accent-z);
+        }
+
+        .card-output.shortcut {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            background: rgba(249, 115, 22, 0.1);
+            border-radius: 6px;
+            color: var(--accent-x);
+        }
+
+        .card-seq {
+            display: flex;
+            gap: 0.2rem;
+            align-items: center;
+        }
+
+        .card-seq-key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-seq-key.k-q { background: rgba(255,107,157,0.15); color: var(--accent-q); }
+        .card-seq-key.k-a { background: rgba(192,132,252,0.15); color: var(--accent-a); }
+        .card-seq-key.k-r { background: rgba(96,165,250,0.15); color: var(--accent-z); }
+
+        .card-seq-dot {
+            color: var(--text-muted);
+            font-size: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-q), var(--accent-z));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        footer kbd {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            .seq-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .kb-key { width: 60px; height: 60px; font-size: 1.1rem; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .search-box { flex: 1; }
+        }
+
+        /* Scroll to top */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-top:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-a);
+        }
+
+        /* Tree view styles */
+        .view-toggle {
+            display: flex;
+            gap: 0.3rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 0.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .view-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn.active {
+            background: rgba(192, 132, 252, 0.15);
+            color: var(--accent-a);
+        }
+
+        /* Tree view */
+        .tree-container {
+            display: none;
+        }
+
+        .tree-container.active {
+            display: block;
+        }
+
+        .grid-container.active {
+            display: block;
+        }
+
+        .grid-container {
+            display: none;
+        }
+
+        .tree-level {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .tree-node {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            min-width: 200px;
+            max-width: 320px;
+            flex: 1;
+            transition: all 0.25s;
+        }
+
+        .tree-node:hover {
+            border-color: var(--accent-a);
+        }
+
+        .tree-node-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tree-node-key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tree-node-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .tree-children {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.4rem;
+        }
+
+        .tree-child {
+            text-align: center;
+            padding: 0.4rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            cursor: default;
+        }
+
+        .tree-child:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--border);
+        }
+
+        .tree-child-key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .tree-child-output {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .tree-child-output.small {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.3rem;
+            background: rgba(96,165,250,0.1);
+            border-radius: 4px;
+            color: var(--accent-z);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⌨ Morse Keyboard</h1>
+        <p>Mapa visual interativo — todas as sequências usando Q, A, Right (R)</p>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label">Sequências</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Teclas Físicas</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">2-5</div>
+            <div class="stat-label">Toques</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">⏎ Enter</div>
+            <div class="stat-label">Confirmar</div>
+        </div>
+    </div>
+
+    <!-- Interactive keyboard -->
+    <div class="keyboard-preview">
+        <div class="kb-key key-q" data-key="Q" onclick="pressKey('Q')">Q<span class="key-number">Mão Esq</span></div>
+        <div class="kb-key key-a" data-key="A" onclick="pressKey('A')">A<span class="key-number">Mão Esq</span></div>
+        <div class="kb-key key-r" data-key="R" onclick="pressKey('R')">▶ R<span class="key-number">Mão Dir</span></div>
+        <div class="kb-key key-enter" data-key="Enter" onclick="confirmSequence()">⏎<span class="key-number">Confirmar</span></div>
+    </div>
+
+    <!-- Sequence display -->
+    <div class="sequence-display">
+        <div class="seq-keys" id="seqKeys"></div>
+        <div class="seq-result" id="seqResult">
+            <span class="no-match">Clique nas teclas ou use o teclado físico (Q, A, Seta Direita, Enter)</span>
+        </div>
+        <div class="seq-hint" id="seqHint"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar caractere, sequência ou descrição...">
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="grid" onclick="setView('grid')">Grade</button>
+            <button class="view-btn" data-view="tree" onclick="setView('tree')">Árvore</button>
+        </div>
+    </div>
+
+    <div class="filter-pills" id="filterPills">
+        <div class="pill active" data-filter="all" onclick="setFilter('all')">Todos</div>
+        <div class="pill" data-filter="lowercase" onclick="setFilter('lowercase')">🔤 Minúsculas</div>
+        <div class="pill" data-filter="accented" onclick="setFilter('accented')">ã Acentos & Cedilha</div>
+        <div class="pill" data-filter="uppercase" onclick="setFilter('uppercase')">🔠 Maiúsculas</div>
+        <div class="pill" data-filter="numbers" onclick="setFilter('numbers')">🔢 Números</div>
+        <div class="pill" data-filter="punctuation" onclick="setFilter('punctuation')">❗ Símbolos & Pontuação</div>
+        <div class="pill" data-filter="special" onclick="setFilter('special')">⌨ Especiais & Navegação</div>
+        <div class="pill" data-filter="shortcuts" onclick="setFilter('shortcuts')">⚡ Atalhos (Ctrl+)</div>
+    </div>
+
+    <!-- Grid view -->
+    <div class="grid-container active" id="gridView"></div>
+
+    <!-- Tree view -->
+    <div class="tree-container" id="treeView"></div>
+
+    <footer>
+        <p>
+            <kbd>CapsLock</kbd> ativa/desativa &nbsp;·&nbsp;
+            <kbd>Enter</kbd> confirma sequência &nbsp;·&nbsp;
+            <kbd>Esc</kbd> ou <kbd>LWin</kbd> cancela sequência &nbsp;·&nbsp;
+            <kbd>w</kbd> / <kbd>s</kbd> muda abas no OSD &nbsp;·&nbsp;
+            <kbd>\</kbd> oculta/mostra abas
+        </p>
+    </footer>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+    // ══════════════════════════════════════════════════════════════════
+    // DADOS — Todas as sequências extraídas do script AHK
+    // ══════════════════════════════════════════════════════════════════
+    const sequences = [
+        {
+                "seq": "QQ",
+                "output": "a",
+                "cat": "lowercase",
+                "desc": "Letra a"
+        },
+        {
+                "seq": "QA",
+                "output": "b",
+                "cat": "lowercase",
+                "desc": "Letra b"
+        },
+        {
+                "seq": "QR",
+                "output": "c",
+                "cat": "lowercase",
+                "desc": "Letra c"
+        },
+        {
+                "seq": "QQQ",
+                "output": "d",
+                "cat": "lowercase",
+                "desc": "Letra d"
+        },
+        {
+                "seq": "QQA",
+                "output": "e",
+                "cat": "lowercase",
+                "desc": "Letra e"
+        },
+        {
+                "seq": "QQR",
+                "output": "f",
+                "cat": "lowercase",
+                "desc": "Letra f"
+        },
+        {
+                "seq": "QAQ",
+                "output": "g",
+                "cat": "lowercase",
+                "desc": "Letra g"
+        },
+        {
+                "seq": "QAA",
+                "output": "h",
+                "cat": "lowercase",
+                "desc": "Letra h"
+        },
+        {
+                "seq": "QAR",
+                "output": "i",
+                "cat": "lowercase",
+                "desc": "Letra i"
+        },
+        {
+                "seq": "QRQ",
+                "output": "j",
+                "cat": "lowercase",
+                "desc": "Letra j"
+        },
+        {
+                "seq": "QRA",
+                "output": "k",
+                "cat": "lowercase",
+                "desc": "Letra k"
+        },
+        {
+                "seq": "QRR",
+                "output": "l",
+                "cat": "lowercase",
+                "desc": "Letra l"
+        },
+        {
+                "seq": "AQ",
+                "output": "m",
+                "cat": "lowercase",
+                "desc": "Letra m"
+        },
+        {
+                "seq": "AA",
+                "output": "n",
+                "cat": "lowercase",
+                "desc": "Letra n"
+        },
+        {
+                "seq": "AR",
+                "output": "o",
+                "cat": "lowercase",
+                "desc": "Letra o"
+        },
+        {
+                "seq": "AQQ",
+                "output": "p",
+                "cat": "lowercase",
+                "desc": "Letra p"
+        },
+        {
+                "seq": "AQA",
+                "output": "q",
+                "cat": "lowercase",
+                "desc": "Letra q"
+        },
+        {
+                "seq": "AQR",
+                "output": "r",
+                "cat": "lowercase",
+                "desc": "Letra r"
+        },
+        {
+                "seq": "AAQ",
+                "output": "s",
+                "cat": "lowercase",
+                "desc": "Letra s"
+        },
+        {
+                "seq": "AAA",
+                "output": "t",
+                "cat": "lowercase",
+                "desc": "Letra t"
+        },
+        {
+                "seq": "AAR",
+                "output": "u",
+                "cat": "lowercase",
+                "desc": "Letra u"
+        },
+        {
+                "seq": "ARQ",
+                "output": "v",
+                "cat": "lowercase",
+                "desc": "Letra v"
+        },
+        {
+                "seq": "ARA",
+                "output": "w",
+                "cat": "lowercase",
+                "desc": "Letra w"
+        },
+        {
+                "seq": "ARR",
+                "output": "x",
+                "cat": "lowercase",
+                "desc": "Letra x"
+        },
+        {
+                "seq": "RQ",
+                "output": "y",
+                "cat": "lowercase",
+                "desc": "Letra y"
+        },
+        {
+                "seq": "RA",
+                "output": "z",
+                "cat": "lowercase",
+                "desc": "Letra z"
+        },
+        {
+                "seq": "RR",
+                "output": " ",
+                "cat": "special",
+                "desc": "Espaço"
+        },
+        {
+                "seq": "RQAQ",
+                "output": "{Backspace}",
+                "cat": "special",
+                "desc": "Backspace"
+        },
+        {
+                "seq": "RQAA",
+                "output": "{Enter}",
+                "cat": "special",
+                "desc": "Enter"
+        },
+        {
+                "seq": "RQAR",
+                "output": "{Escape}",
+                "cat": "special",
+                "desc": "Escape"
+        },
+        {
+                "seq": "RQQ",
+                "output": "1",
+                "cat": "numbers",
+                "desc": "Número 1"
+        },
+        {
+                "seq": "RQA",
+                "output": "2",
+                "cat": "numbers",
+                "desc": "Número 2"
+        },
+        {
+                "seq": "RQR",
+                "output": "3",
+                "cat": "numbers",
+                "desc": "Número 3"
+        },
+        {
+                "seq": "RAQ",
+                "output": "4",
+                "cat": "numbers",
+                "desc": "Número 4"
+        },
+        {
+                "seq": "RAA",
+                "output": "5",
+                "cat": "numbers",
+                "desc": "Número 5"
+        },
+        {
+                "seq": "RAR",
+                "output": "6",
+                "cat": "numbers",
+                "desc": "Número 6"
+        },
+        {
+                "seq": "RRQ",
+                "output": "7",
+                "cat": "numbers",
+                "desc": "Número 7"
+        },
+        {
+                "seq": "RRA",
+                "output": "8",
+                "cat": "numbers",
+                "desc": "Número 8"
+        },
+        {
+                "seq": "RRR",
+                "output": "9",
+                "cat": "numbers",
+                "desc": "Número 9"
+        },
+        {
+                "seq": "RRRRR",
+                "output": "0",
+                "cat": "numbers",
+                "desc": "Número 0"
+        },
+        {
+                "seq": "RRRRQ",
+                "output": ".",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba '.'"
+        },
+        {
+                "seq": "RRRRA",
+                "output": ",",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba ','"
+        },
+        {
+                "seq": "RRQQ",
+                "output": "A",
+                "cat": "uppercase",
+                "desc": "Letra A maiúscula"
+        },
+        {
+                "seq": "RRQA",
+                "output": "B",
+                "cat": "uppercase",
+                "desc": "Letra B maiúscula"
+        },
+        {
+                "seq": "RRQR",
+                "output": "C",
+                "cat": "uppercase",
+                "desc": "Letra C maiúscula"
+        },
+        {
+                "seq": "RRQQQ",
+                "output": "D",
+                "cat": "uppercase",
+                "desc": "Letra D maiúscula"
+        },
+        {
+                "seq": "RRQQA",
+                "output": "E",
+                "cat": "accented",
+                "desc": "Letra E acentuada"
+        },
+        {
+                "seq": "RRQQR",
+                "output": "F",
+                "cat": "uppercase",
+                "desc": "Letra F maiúscula"
+        },
+        {
+                "seq": "RRQAQ",
+                "output": "G",
+                "cat": "uppercase",
+                "desc": "Letra G maiúscula"
+        },
+        {
+                "seq": "RRQAA",
+                "output": "H",
+                "cat": "uppercase",
+                "desc": "Letra H maiúscula"
+        },
+        {
+                "seq": "RRQAR",
+                "output": "I",
+                "cat": "uppercase",
+                "desc": "Letra I maiúscula"
+        },
+        {
+                "seq": "RRQRQ",
+                "output": "J",
+                "cat": "uppercase",
+                "desc": "Letra J maiúscula"
+        },
+        {
+                "seq": "RRQRA",
+                "output": "K",
+                "cat": "uppercase",
+                "desc": "Letra K maiúscula"
+        },
+        {
+                "seq": "RRQRR",
+                "output": "L",
+                "cat": "uppercase",
+                "desc": "Letra L maiúscula"
+        },
+        {
+                "seq": "RRAQ",
+                "output": "M",
+                "cat": "uppercase",
+                "desc": "Letra M maiúscula"
+        },
+        {
+                "seq": "RRAA",
+                "output": "N",
+                "cat": "uppercase",
+                "desc": "Letra N maiúscula"
+        },
+        {
+                "seq": "RRAR",
+                "output": "O",
+                "cat": "accented",
+                "desc": "Letra O acentuada"
+        },
+        {
+                "seq": "RRAQQ",
+                "output": "P",
+                "cat": "uppercase",
+                "desc": "Letra P maiúscula"
+        },
+        {
+                "seq": "RRAQA",
+                "output": "Q",
+                "cat": "uppercase",
+                "desc": "Letra Q maiúscula"
+        },
+        {
+                "seq": "RRAQR",
+                "output": "R",
+                "cat": "uppercase",
+                "desc": "Letra R maiúscula"
+        },
+        {
+                "seq": "RRAAQ",
+                "output": "S",
+                "cat": "accented",
+                "desc": "Letra S acentuada"
+        },
+        {
+                "seq": "RRAAA",
+                "output": "T",
+                "cat": "uppercase",
+                "desc": "Letra T maiúscula"
+        },
+        {
+                "seq": "RRAAR",
+                "output": "U",
+                "cat": "uppercase",
+                "desc": "Letra U maiúscula"
+        },
+        {
+                "seq": "RRARQ",
+                "output": "V",
+                "cat": "uppercase",
+                "desc": "Letra V maiúscula"
+        },
+        {
+                "seq": "RRARA",
+                "output": "W",
+                "cat": "uppercase",
+                "desc": "Letra W maiúscula"
+        },
+        {
+                "seq": "RRARR",
+                "output": "X",
+                "cat": "uppercase",
+                "desc": "Letra X maiúscula"
+        },
+        {
+                "seq": "RRRQ",
+                "output": "Y",
+                "cat": "uppercase",
+                "desc": "Letra Y maiúscula"
+        },
+        {
+                "seq": "RRRA",
+                "output": "Z",
+                "cat": "uppercase",
+                "desc": "Letra Z maiúscula"
+        },
+        {
+                "seq": "RRRAQQ",
+                "output": "Ç",
+                "cat": "accented",
+                "desc": "Letra Ç acentuada"
+        },
+        {
+                "seq": "RAQQ",
+                "output": "ç",
+                "cat": "lowercase",
+                "desc": "Letra ç"
+        },
+        {
+                "seq": "AQQQ",
+                "output": "á",
+                "cat": "lowercase",
+                "desc": "Letra á"
+        },
+        {
+                "seq": "AQQA",
+                "output": "é",
+                "cat": "lowercase",
+                "desc": "Letra é"
+        },
+        {
+                "seq": "AQQR",
+                "output": "í",
+                "cat": "lowercase",
+                "desc": "Letra í"
+        },
+        {
+                "seq": "AQRQ",
+                "output": "ó",
+                "cat": "lowercase",
+                "desc": "Letra ó"
+        },
+        {
+                "seq": "AQRA",
+                "output": "ú",
+                "cat": "lowercase",
+                "desc": "Letra ú"
+        },
+        {
+                "seq": "QARQ",
+                "output": "â",
+                "cat": "lowercase",
+                "desc": "Letra â"
+        },
+        {
+                "seq": "QARA",
+                "output": "ê",
+                "cat": "lowercase",
+                "desc": "Letra ê"
+        },
+        {
+                "seq": "QARR",
+                "output": "ô",
+                "cat": "lowercase",
+                "desc": "Letra ô"
+        },
+        {
+                "seq": "QAQQ",
+                "output": "ã",
+                "cat": "lowercase",
+                "desc": "Letra ã"
+        },
+        {
+                "seq": "QAQA",
+                "output": "õ",
+                "cat": "lowercase",
+                "desc": "Letra õ"
+        },
+        {
+                "seq": "QAQR",
+                "output": "ões",
+                "cat": "accented",
+                "desc": "Letra ões acentuada"
+        },
+        {
+                "seq": "AQRR",
+                "output": "ão",
+                "cat": "accented",
+                "desc": "Letra ão acentuada"
+        },
+        {
+                "seq": "RQQQ",
+                "output": "à",
+                "cat": "lowercase",
+                "desc": "Letra à"
+        },
+        {
+                "seq": "RRAQQQ",
+                "output": "Á",
+                "cat": "accented",
+                "desc": "Letra Á acentuada"
+        },
+        {
+                "seq": "RRAQQA",
+                "output": "É",
+                "cat": "accented",
+                "desc": "Letra É acentuada"
+        },
+        {
+                "seq": "RRAQQR",
+                "output": "Í",
+                "cat": "accented",
+                "desc": "Letra Í acentuada"
+        },
+        {
+                "seq": "RRAQRQ",
+                "output": "Ó",
+                "cat": "accented",
+                "desc": "Letra Ó acentuada"
+        },
+        {
+                "seq": "RRAQRA",
+                "output": "Ú",
+                "cat": "accented",
+                "desc": "Letra Ú acentuada"
+        },
+        {
+                "seq": "RRQARQ",
+                "output": "Â",
+                "cat": "accented",
+                "desc": "Letra Â acentuada"
+        },
+        {
+                "seq": "RRQARA",
+                "output": "Ê",
+                "cat": "accented",
+                "desc": "Letra Ê acentuada"
+        },
+        {
+                "seq": "RRQARR",
+                "output": "Ô",
+                "cat": "accented",
+                "desc": "Letra Ô acentuada"
+        },
+        {
+                "seq": "RRQAQQ",
+                "output": "Ã",
+                "cat": "accented",
+                "desc": "Letra Ã acentuada"
+        },
+        {
+                "seq": "RRQAQA",
+                "output": "Õ",
+                "cat": "accented",
+                "desc": "Letra Õ acentuada"
+        },
+        {
+                "seq": "RRQAQR",
+                "output": "ÕES",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'ÕES'"
+        },
+        {
+                "seq": "RRAQRR",
+                "output": "ÃO",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'ÃO'"
+        },
+        {
+                "seq": "RRRQQQ",
+                "output": "À",
+                "cat": "accented",
+                "desc": "Letra À acentuada"
+        },
+        {
+                "seq": "RAQA",
+                "output": "^c",
+                "cat": "shortcuts",
+                "desc": "Copiar"
+        },
+        {
+                "seq": "RAQR",
+                "output": "^v",
+                "cat": "shortcuts",
+                "desc": "Colar"
+        },
+        {
+                "seq": "RAAQ",
+                "output": "^x",
+                "cat": "shortcuts",
+                "desc": "Recortar"
+        },
+        {
+                "seq": "RAAA",
+                "output": "^z",
+                "cat": "shortcuts",
+                "desc": "Desfazer"
+        },
+        {
+                "seq": "RAAR",
+                "output": "^s",
+                "cat": "shortcuts",
+                "desc": "Salvar"
+        },
+        {
+                "seq": "RARQ",
+                "output": "^a",
+                "cat": "shortcuts",
+                "desc": "Selecionar tudo"
+        },
+        {
+                "seq": "QAAQ",
+                "output": "ch",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'ch'"
+        },
+        {
+                "seq": "QAAA",
+                "output": "lh",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'lh'"
+        },
+        {
+                "seq": "QAAR",
+                "output": "nh",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'nh'"
+        },
+        {
+                "seq": "AQAQ",
+                "output": "qu",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'qu'"
+        },
+        {
+                "seq": "AQAA",
+                "output": "que",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'que'"
+        },
+        {
+                "seq": "AQAR",
+                "output": "qui",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'qui'"
+        },
+        {
+                "seq": "QRQQ",
+                "output": "as",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'as'"
+        },
+        {
+                "seq": "QRQA",
+                "output": "es",
+                "cat": "accented",
+                "desc": "Letra es acentuada"
+        },
+        {
+                "seq": "QRQR",
+                "output": "is",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'is'"
+        },
+        {
+                "seq": "QRAQ",
+                "output": "os",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'os'"
+        },
+        {
+                "seq": "QRAA",
+                "output": "us",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'us'"
+        },
+        {
+                "seq": "QQQQ",
+                "output": "an",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'an'"
+        },
+        {
+                "seq": "QQQA",
+                "output": "en",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'en'"
+        },
+        {
+                "seq": "QQQR",
+                "output": "in",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'in'"
+        },
+        {
+                "seq": "QQAQ",
+                "output": "on",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'on'"
+        },
+        {
+                "seq": "QQAA",
+                "output": "un",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'un'"
+        },
+        {
+                "seq": "ARQQ",
+                "output": "am",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'am'"
+        },
+        {
+                "seq": "ARQA",
+                "output": "em",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'em'"
+        },
+        {
+                "seq": "ARQR",
+                "output": "im",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'im'"
+        },
+        {
+                "seq": "ARAQ",
+                "output": "om",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'om'"
+        },
+        {
+                "seq": "ARAA",
+                "output": "um",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'um'"
+        },
+        {
+                "seq": "AAQQ",
+                "output": "al",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'al'"
+        },
+        {
+                "seq": "AAQA",
+                "output": "el",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'el'"
+        },
+        {
+                "seq": "AAQR",
+                "output": "il",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'il'"
+        },
+        {
+                "seq": "AAAQ",
+                "output": "ol",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'ol'"
+        },
+        {
+                "seq": "AAAA",
+                "output": "ul",
+                "cat": "special",
+                "desc": "Dígrafo/Sílaba 'ul'"
+        },
+        {
+                "seq": "RQRQ",
+                "output": "{Tab}",
+                "cat": "special",
+                "desc": "Tab"
+        },
+        {
+                "seq": "RQRA",
+                "output": "{Delete}",
+                "cat": "special",
+                "desc": "Delete"
+        },
+        {
+                "seq": "RQRR",
+                "output": "{Home}",
+                "cat": "special",
+                "desc": "Home"
+        },
+        {
+                "seq": "RQRRRQ",
+                "output": "{End}",
+                "cat": "special",
+                "desc": "End"
+        },
+        {
+                "seq": "RQRRA",
+                "output": "{PgUp}",
+                "cat": "special",
+                "desc": "PgUp"
+        },
+        {
+                "seq": "RQRRR",
+                "output": "{PgDn}",
+                "cat": "special",
+                "desc": "PgDn"
+        },
+        {
+                "seq": "RQRRRA",
+                "output": "+{Tab}",
+                "cat": "special",
+                "desc": "Shift+Tab"
+        },
+        {
+                "seq": "RQRQQ",
+                "output": "{Left}",
+                "cat": "special",
+                "desc": "Left"
+        },
+        {
+                "seq": "RQRQA",
+                "output": "{Down}",
+                "cat": "special",
+                "desc": "Down"
+        },
+        {
+                "seq": "RQRQR",
+                "output": "{Right}",
+                "cat": "special",
+                "desc": "Right"
+        },
+        {
+                "seq": "RQRRQ",
+                "output": "{Up}",
+                "cat": "special",
+                "desc": "Up"
+        },
+        {
+                "seq": "RARAQ",
+                "output": "?",
+                "cat": "punctuation",
+                "desc": "Interrogação"
+        },
+        {
+                "seq": "RARAA",
+                "output": "!",
+                "cat": "punctuation",
+                "desc": "Exclamação"
+        },
+        {
+                "seq": "RARAR",
+                "output": ";",
+                "cat": "punctuation",
+                "desc": "Ponto e vírgula"
+        },
+        {
+                "seq": "RARRQ",
+                "output": ":",
+                "cat": "punctuation",
+                "desc": "Dois pontos"
+        },
+        {
+                "seq": "RARRA",
+                "output": "/",
+                "cat": "punctuation",
+                "desc": "Barra"
+        },
+        {
+                "seq": "RARRR",
+                "output": "\\",
+                "cat": "punctuation",
+                "desc": "Barra invertida"
+        },
+        {
+                "seq": "RARAQQ",
+                "output": "@",
+                "cat": "punctuation",
+                "desc": "Arroba"
+        },
+        {
+                "seq": "RARAQA",
+                "output": "#",
+                "cat": "punctuation",
+                "desc": "Hashtag"
+        },
+        {
+                "seq": "RARAQR",
+                "output": "$",
+                "cat": "punctuation",
+                "desc": "Cifrão"
+        },
+        {
+                "seq": "RARAAQ",
+                "output": "%",
+                "cat": "punctuation",
+                "desc": "Porcentagem"
+        },
+        {
+                "seq": "RARAAA",
+                "output": "&",
+                "cat": "punctuation",
+                "desc": "E comercial"
+        },
+        {
+                "seq": "RARAAR",
+                "output": "*",
+                "cat": "punctuation",
+                "desc": "Asterisco"
+        },
+        {
+                "seq": "RARRQQ",
+                "output": "(",
+                "cat": "punctuation",
+                "desc": "Parêntese abre"
+        },
+        {
+                "seq": "RARRQA",
+                "output": ")",
+                "cat": "punctuation",
+                "desc": "Parêntese fecha"
+        },
+        {
+                "seq": "RARRQR",
+                "output": "-",
+                "cat": "punctuation",
+                "desc": "Hífen"
+        },
+        {
+                "seq": "RARRAQ",
+                "output": "_",
+                "cat": "punctuation",
+                "desc": "Sublinhado"
+        },
+        {
+                "seq": "RARRAA",
+                "output": "+",
+                "cat": "punctuation",
+                "desc": "Mais"
+        },
+        {
+                "seq": "RARRAR",
+                "output": "=",
+                "cat": "punctuation",
+                "desc": "Igual"
+        },
+        {
+                "seq": "RARRRQ",
+                "output": "\"",
+                "cat": "punctuation",
+                "desc": "Aspas duplas"
+        },
+        {
+                "seq": "RARRRA",
+                "output": "'",
+                "cat": "punctuation",
+                "desc": "Aspas simples"
+        },
+        {
+                "seq": "RARRRR",
+                "output": "{",
+                "cat": "punctuation",
+                "desc": "Chave abre"
+        },
+        {
+                "seq": "RARRRAR",
+                "output": "}",
+                "cat": "punctuation",
+                "desc": "Chave fecha"
+        },
+        {
+                "seq": "RARRRQQ",
+                "output": "[",
+                "cat": "punctuation",
+                "desc": "Colchete abre"
+        },
+        {
+                "seq": "RARRRQA",
+                "output": "]",
+                "cat": "punctuation",
+                "desc": "Colchete fecha"
+        },
+        {
+                "seq": "RARAQQQ",
+                "output": "<",
+                "cat": "punctuation",
+                "desc": "Menor que"
+        },
+        {
+                "seq": "RARAQQA",
+                "output": ">",
+                "cat": "punctuation",
+                "desc": "Maior que"
+        },
+        {
+                "seq": "RARAQQR",
+                "output": "^",
+                "cat": "punctuation",
+                "desc": "Acento circunflexo / Grau"
+        },
+        {
+                "seq": "RARAQAQ",
+                "output": "~",
+                "cat": "punctuation",
+                "desc": "Til"
+        },
+        {
+                "seq": "RAQQQ",
+                "output": "^f",
+                "cat": "shortcuts",
+                "desc": "Buscar"
+        },
+        {
+                "seq": "RAQQA",
+                "output": "^n",
+                "cat": "shortcuts",
+                "desc": "Novo"
+        },
+        {
+                "seq": "RAQQR",
+                "output": "^t",
+                "cat": "shortcuts",
+                "desc": "Nova aba"
+        },
+        {
+                "seq": "RAQAQ",
+                "output": "^w",
+                "cat": "shortcuts",
+                "desc": "Fechar aba"
+        },
+        {
+                "seq": "RAQAR",
+                "output": "^y",
+                "cat": "shortcuts",
+                "desc": "Refazer"
+        }
+];
+
+    const categories = {
+        lowercase:   { icon: "🔤", title: "Letras Minúsculas", order: 0 },
+        accented:    { icon: "ã",  title: "Acentos & Cedilha", order: 1 },
+        uppercase:   { icon: "🔠", title: "Letras Maiúsculas", order: 2 },
+        numbers:     { icon: "🔢", title: "Números", order: 3 },
+        punctuation: { icon: "❗", title: "Símbolos & Pontuação", order: 4 },
+        special:     { icon: "⌨",  title: "Especiais & Navegação", order: 5 },
+        shortcuts:   { icon: "⚡", title: "Atalhos (Ctrl+)", order: 6 }
+    };
+
+    // Build lookup map
+    const seqMap = new Map();
+    sequences.forEach(s => seqMap.set(s.seq, s));
+
+    // ══════════════════════════════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════════════════════════════
+    let currentSeq = "";
+    let wordBuffer = "";
+    let currentFilter = "all";
+    let currentView = "grid";
+
+    // ══════════════════════════════════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════════════════════════════════
+
+    function getKeyClass(k) {
+        return `k-${k.toLowerCase()}`;
+    }
+
+    function renderSeqKeys(seq) {
+        return seq.split('').map(k =>
+            `<span class="card-seq-key ${getKeyClass(k)}">${k}</span>`
+        ).join('<span class="card-seq-dot">·</span>');
+    }
+
+    function isSpecialOutput(item) {
+        return item.cat === 'special';
+    }
+
+    function isShortcut(item) {
+        return item.cat === 'shortcuts';
+    }
+
+    function renderCardOutput(item) {
+        if (isShortcut(item)) {
+            return `<span class="card-output shortcut">${item.output}</span>`;
+        }
+        if (isSpecialOutput(item)) {
+            return `<span class="card-output special">${item.output}</span>`;
+        }
+        return `<span class="card-output">${escapeHtml(item.output)}</span>`;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderGrid() {
+        const container = document.getElementById('gridView');
+        container.innerHTML = '';
+
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        // Group by category
+        const grouped = {};
+        sequences.forEach(item => {
+            if (currentFilter !== 'all' && item.cat !== currentFilter) return;
+            if (searchTerm) {
+                const match = item.output.toLowerCase().includes(searchTerm) ||
+                              item.seq.toLowerCase().includes(searchTerm) ||
+                              item.desc.toLowerCase().includes(searchTerm);
+                if (!match) return;
+            }
+            if (!grouped[item.cat]) grouped[item.cat] = [];
+            grouped[item.cat].push(item);
+        });
+
+        const sortedCats = Object.keys(grouped).sort((a, b) => categories[a].order - categories[b].order);
+
+        let totalShown = 0;
+
+        sortedCats.forEach(cat => {
+            const items = grouped[cat];
+            totalShown += items.length;
+            const catInfo = categories[cat];
+
+            const section = document.createElement('div');
+            section.className = 'category';
+            section.innerHTML = `
+                <div class="category-header">
+                    <span class="category-icon">${catInfo.icon}</span>
+                    <span class="category-title">${catInfo.title}</span>
+                    <span class="category-count">${items.length}</span>
+                </div>
+                <div class="seq-grid">
+                    ${items.map(item => `
+                        <div class="seq-card" data-first="${item.seq[0]}" data-seq="${item.seq}"
+                             onclick="highlightCard(this, '${item.seq}')"
+                             title="${item.desc}: ${item.seq}">
+                            ${renderCardOutput(item)}
+                            <div class="card-seq">${renderSeqKeys(item.seq)}</div>
+                            <div class="card-desc">${item.desc}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(section);
+        });
+
+        document.getElementById('totalCount').textContent = totalShown;
+    }
+
+    function renderTree() {
+        const container = document.getElementById('treeView');
+        container.innerHTML = '';
+
+        const keys = ['Q', 'A', 'R'];
+        const keyColors = { Q: 'var(--accent-q)', A: 'var(--accent-a)', R: 'var(--accent-z)' };
+
+        // Level 1: First key groups
+        const level = document.createElement('div');
+        level.className = 'tree-level';
+
+        keys.forEach(firstKey => {
+            const children = sequences.filter(s => s.seq[0] === firstKey && s.seq.length <= 2);
+
+            const node = document.createElement('div');
+            node.className = 'tree-node';
+            node.innerHTML = `
+                <div class="tree-node-header">
+                    <div class="tree-node-key" style="background: ${keyColors[firstKey]}20; color: ${keyColors[firstKey]}">${firstKey}</div>
+                    <div class="tree-node-title">Grupo ${firstKey} · ${children.length} itens</div>
+                </div>
+                <div class="tree-children">
+                    ${children.map(item => {
+                        const lastKey = item.seq.length === 1 ? '⏎' : item.seq[item.seq.length - 1];
+                        const lastKeyColor = item.seq.length === 1 ? 'var(--text-muted)' : keyColors[lastKey];
+                        const outputClass = (isSpecialOutput(item) || isShortcut(item)) ? 'small' : '';
+                        return `
+                            <div class="tree-child" title="${item.desc}">
+                                <div class="tree-child-key" style="color: ${lastKeyColor}">${item.seq.length === 1 ? '(só)' : '+' + lastKey}</div>
+                                <div class="tree-child-output ${outputClass}">${escapeHtml(item.output)}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            level.appendChild(node);
+        });
+
+        container.appendChild(level);
+
+        // Level 2: Three-key sequences grouped by first two keys
+        const threeKey = sequences.filter(s => s.seq.length === 3);
+        const grouped2 = {};
+        threeKey.forEach(s => {
+            const prefix = s.seq.substring(0, 2);
+            if (!grouped2[prefix]) grouped2[prefix] = [];
+            grouped2[prefix].push(s);
+        });
+
+        const title2 = document.createElement('div');
+        title2.className = 'category-header';
+        title2.style.marginTop = '1.5rem';
+        title2.innerHTML = `
+            <span class="category-icon">🌳</span>
+            <span class="category-title">Sequências de 3 Teclas (por prefixo)</span>
+            <span class="category-count">${threeKey.length}</span>
+        `;
+        container.appendChild(title2);
+
+        const level2 = document.createElement('div');
+        level2.className = 'tree-level';
+
+        Object.keys(grouped2).sort().forEach(prefix => {
+            const items = grouped2[prefix];
+            const k1 = prefix[0], k2 = prefix[1];
+
+            const node = document.createElement('div');
+            node.className = 'tree-node';
+            node.innerHTML = `
+                <div class="tree-node-header">
+                    <div class="tree-node-key" style="background: ${keyColors[k1]}20; color: ${keyColors[k1]}">${k1}</div>
+                    <div class="tree-node-key" style="background: ${keyColors[k2]}20; color: ${keyColors[k2]}; margin-left: -0.3rem">${k2}</div>
+                    <div class="tree-node-title">${items.length} itens</div>
+                </div>
+                <div class="tree-children">
+                    ${items.map(item => {
+                        const lastKey = item.seq[2];
+                        const outputClass = (isSpecialOutput(item) || isShortcut(item)) ? 'small' : '';
+                        return `
+                            <div class="tree-child" title="${item.desc}">
+                                <div class="tree-child-key" style="color: ${keyColors[lastKey]}">+${lastKey}</div>
+                                <div class="tree-child-output ${outputClass}">${escapeHtml(item.output)}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            level2.appendChild(node);
+        });
+
+        container.appendChild(level2);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // INTERACTIVITY
+    // ══════════════════════════════════════════════════════════════════
+
+    function pressKey(key) {
+        const el = document.querySelector(`.kb-key[data-key="${key}"]`);
+        if (!el) return;
+        el.classList.add('pressed');
+        setTimeout(() => el.classList.remove('pressed'), 150);
+
+        currentSeq += key;
+        updateSequenceDisplay();
+    }
+
+    function confirmSequence() {
+        const el = document.querySelector(`.kb-key[data-key="Enter"]`);
+        if (el) {
+            el.classList.add('pressed');
+            setTimeout(() => el.classList.remove('pressed'), 150);
+        }
+        
+        if (currentSeq !== "") {
+            const match = seqMap.get(currentSeq);
+            if (match) {
+                const output = match.output;
+                
+                // Verificar se é comando
+                const isCommand = output.includes('^') || output.includes('+{') || 
+                                  (output.startsWith('{') && !output.includes('Space') && !output.includes('Enter') && !output.includes('Backspace') && !output.includes('Escape'));
+                
+                if (isCommand) {
+                    wordBuffer = "";
+                } else {
+                    if (output === "{Space}" || output === " ") {
+                        wordBuffer += " ";
+                    } else if (output === "{Backspace}") {
+                        if (wordBuffer.length > 0) wordBuffer = wordBuffer.slice(0, -1);
+                    } else if (output === "{Enter}") {
+                        wordBuffer += "\n";
+                    } else if (output === "{Escape}") {
+                        wordBuffer = "";
+                    } else {
+                        wordBuffer += output;
+                    }
+                }
+            }
+            currentSeq = "";
+        } else {
+            if (wordBuffer !== "") {
+                wordBuffer = "";
+            }
+        }
+        updateSequenceDisplay();
+    }
+
+    function clearSequence() {
+        currentSeq = "";
+        updateSequenceDisplay();
+    }
+
+    function updateSequenceDisplay() {
+        const keysEl = document.getElementById('seqKeys');
+        const resultEl = document.getElementById('seqResult');
+        const hintEl = document.getElementById('seqHint');
+
+        if (currentSeq === "" && wordBuffer === "") {
+            keysEl.innerHTML = '';
+            resultEl.innerHTML = '<span class="no-match">Clique nas teclas ou use o teclado físico (Q, A, Seta Direita, Enter)</span>';
+            hintEl.textContent = '';
+            return;
+        }
+
+        // Render typed keys
+        const keyColors = { Q: 'var(--accent-q)', A: 'var(--accent-a)', R: 'var(--accent-z)' };
+
+        keysEl.innerHTML = currentSeq.split('').map((k, i) => {
+            const bg = keyColors[k] || '#fff';
+            return `<div class="seq-key" style="background: ${bg}22; color: ${bg}; border: 2px solid ${bg}44">${k}</div>`;
+        }).join('<span class="seq-separator">·</span>');
+
+        // Check result
+        const match = seqMap.get(currentSeq);
+        if (currentSeq !== "") {
+            if (match) {
+                resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="match">${escapeHtml(match.output)}</span>`;
+                hintEl.textContent = match.desc;
+            } else {
+                const extensions = sequences.filter(s => s.seq.startsWith(currentSeq) && s.seq !== currentSeq);
+                if (extensions.length > 0) {
+                    resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="no-match">+${extensions.length} possibilidades...</span>`;
+                    hintEl.textContent = extensions.slice(0, 5).map(e => `${e.seq} → ${e.output}`).join('  ·  ');
+                } else {
+                    resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="no-match" style="color: #ff6b6b">✗ Sem match</span>`;
+                    hintEl.textContent = 'Pressione Escape para limpar';
+                }
+            }
+        } else {
+            resultEl.innerHTML = `<span class="match" style="border-color: var(--accent-z); color: var(--accent-z)">Acumulado: ${escapeHtml(wordBuffer)}</span>`;
+            hintEl.textContent = 'Pressione Enter para confirmar e enviar a palavra';
+        }
+
+        // Highlight matching cards
+        document.querySelectorAll('.seq-card').forEach(card => {
+            card.classList.toggle('highlight', card.dataset.seq === currentSeq);
+        });
+    }
+
+    function highlightCard(el, seq) {
+        currentSeq = seq;
+        updateSequenceDisplay();
+
+        el.style.transform = 'scale(0.95)';
+        setTimeout(() => el.style.transform = '', 150);
+    }
+
+    function setFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.filter === filter);
+        });
+        renderGrid();
+    }
+
+    function setView(view) {
+        currentView = view;
+        document.querySelectorAll('.view-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.view === view);
+        });
+        document.getElementById('gridView').classList.toggle('active', view === 'grid');
+        document.getElementById('treeView').classList.toggle('active', view === 'tree');
+
+        if (view === 'tree') renderTree();
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+        const key = e.key.toUpperCase();
+        if (key === 'Q' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            pressKey('Q');
+        } else if (key === 'A' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            pressKey('A');
+        } else if (e.key === 'ArrowRight' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            pressKey('R');
+        } else if (e.key === 'Enter' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            confirmSequence();
+        } else if (e.key === 'Escape') {
+            if (currentSeq !== "") {
+                currentSeq = "";
+            } else {
+                wordBuffer = "";
+            }
+            updateSequenceDisplay();
+        } else if (e.key === 'Backspace' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            if (currentSeq !== "") {
+                currentSeq = currentSeq.slice(0, -1);
+            } else if (wordBuffer !== "") {
+                wordBuffer = wordBuffer.slice(0, -1);
+            }
+            updateSequenceDisplay();
+        } else if (e.key === ' ' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            if (currentSeq !== "") {
+                confirmSequence();
+            }
+            wordBuffer += " ";
+            updateSequenceDisplay();
+        }
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', () => {
+        renderGrid();
+    });
+
+    // Scroll to top button
+    window.addEventListener('scroll', () => {
+        document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+    });
+
+    // Conexão WebSocket para rastreamento em tempo real
+    function connectWebSocket() {
+        const host = window.location.hostname || 'localhost';
+        const ws = new WebSocket(`ws://${host}:8765`);
+        
+        ws.onopen = () => {
+            console.log("WebSocket conectado ao Morse Server");
+        };
+        
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === "state") {
+                    wordBuffer = msg.data.word;
+                    currentSeq = msg.data.seq;
+                    updateSequenceDisplay();
+                }
+            } catch (err) {
+                console.error("Erro no processamento da mensagem do WebSocket:", err);
+            }
+        };
+        
+        ws.onclose = () => {
+            console.log("WebSocket desconectado. Tentando reconectar em 2 segundos...");
+            setTimeout(connectWebSocket, 2000);
+        };
+        
+        ws.onerror = (err) => {
+            ws.close();
+        };
+    }
+    connectWebSocket();
+
+    // ══════════════════════════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════════════════════════
+    renderGrid();
+    document.getElementById('totalCount').textContent = sequences.length;
+</script>
+</body>
+</html>

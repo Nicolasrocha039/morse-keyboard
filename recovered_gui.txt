@@ -1,0 +1,477 @@
+; ── GUI pequena (OFF) ──
+global osdMini := Gui("+AlwaysOnTop -Caption +ToolWindow")
+osdMini.BackColor := "0x12121e"
+osdMini.MarginX := 10
+osdMini.MarginY := 6
+
+global miniStatus := osdMini.AddText("cWhite w200 Center", "⌨ MORSE KB: OFF")
+miniStatus.SetFont("s10 Bold", "Segoe UI")
+
+global miniHint := osdMini.AddText("c0x555577 w200 Center", "CapsLock para ativar")
+miniHint.SetFont("s8", "Segoe UI")
+
+osdMini.Show("x10 y10 NoActivate")
+WinSetTransparent(220, osdMini)
+
+; ── GUI de palavra flutuante (Abaixo do caret) ──
+global osdWord := Gui("+AlwaysOnTop -Caption +ToolWindow +Border", "MorseWordOSD")
+osdWord.BackColor := "0x0b0b14" ; Deep dark background
+osdWord.MarginX := 10
+osdWord.MarginY := 6
+
+global wordText := osdWord.AddText("c0x00d4ff", "aguardando...")
+wordText.SetFont("s14 Bold", MONO_FONT)
+
+; ── GUI completa (ON) ──
+global osd := Gui("+AlwaysOnTop -Caption +ToolWindow", "MorseGuideOSD")
+osd.BackColor := "0x0b0b14" ; Deep dark background
+osd.MarginX := 15
+osd.MarginY := 10
+
+; Status e Informações da Sequência
+global statusText := osd.AddText("x15 y10 w820 h24 c0x00FFCC", "⌨ MORSE KEYBOARD: ATIVO")
+statusText.SetFont("s12 Bold", "Segoe UI")
+
+global seqLabel := osd.AddText("x15 y34 w70 h20 c0x8888aa", "Sequência:")
+seqLabel.SetFont("s9", "Segoe UI")
+
+global seqText := osd.AddText("x90 y30 w500 h30 c0x00d4ff", "aguardando...")
+seqText.SetFont("s16 Bold", MONO_FONT)
+
+global hintText := osd.AddText("x600 y34 w235 h20 Right c0x666688", "Espaço / \ para confirmar")
+hintText.SetFont("s9 Italic", "Segoe UI")
+
+global sepLine := osd.AddText("x15 y65 w820 h1 +Background0x222233", "")
+
+; Coluna Esquerda: Guia de Teclas
+global guideHeader := osd.AddText("x15 y75 w218 h20 c0xFFD700", "GUIA DE TECLAS (Próxima)")
+guideHeader.SetFont("s9 Bold", "Segoe UI")
+
+global cards := Map()
+
+CreateKeyCards() {
+    global osd, cards
+    cardCoords := Map(
+        "Q",     {x: 15,  y: 95},
+        "Right", {x: 128, y: 95},
+        "A",     {x: 15,  y: 158},
+        "Enter", {x: 128, y: 158}
+    )
+    for key, coord in cardCoords {
+        cards[key] := CreateKeyCard(osd, key, coord.x, coord.y)
+    }
+}
+
+CreateKeyCards()
+
+; Coluna Direita: Tab Control com Mapas de Referência
+global mapTab := osd.Add("Tab3", "x255 y75 w580 h300 cWhite +Background0x12121e", ["Letras", "Números/Símbolos", "Atalhos", "Teclas Especiais", "Sílabas/Ajuda"])
+mapTab.SetFont("s9 Bold", "Segoe UI")
+
+mapTab.UseTab(1)
+global letrasText := osd.AddText("x265 y105 w560 h260 c0xaaaacc", BuildLetrasText())
+letrasText.SetFont("s9", MONO_FONT)
+
+mapTab.UseTab(2)
+global numSimboloText := osd.AddText("x265 y105 w560 h260 c0xaaaacc", BuildNumSimboloText())
+numSimboloText.SetFont("s9", MONO_FONT)
+
+mapTab.UseTab(3)
+global atalhosText := osd.AddText("x265 y105 w560 h260 c0xaaaacc", BuildAtalhosText())
+atalhosText.SetFont("s9", MONO_FONT)
+
+mapTab.UseTab(4)
+global especiaisText := osd.AddText("x265 y105 w560 h260 c0xaaaacc", BuildEspeciaisText())
+especiaisText.SetFont("s9", MONO_FONT)
+
+mapTab.UseTab(5)
+global fKeysText := osd.AddText("x265 y105 w560 h260 c0xaaaacc", BuildFKeysText())
+fKeysText.SetFont("s9", MONO_FONT)
+
+mapTab.UseTab()
+
+; Rodapé
+global footerText := osd.AddText("x15 y390 w820 h20 Center c0x444455", "Modo Morse Keyboard — Projetado para digitação simplificada de 4 teclas")
+footerText.SetFont("s8 Italic", "Segoe UI")
+
+
+TabGoRight() {
+    global mapTab, showMaps
+    if !showMaps
+        return
+    current := mapTab.Value
+    if current < 5
+        mapTab.Value := current + 1
+    else
+        mapTab.Value := 1
+    UpdateOSD()
+}
+
+TabGoLeft() {
+    global mapTab, showMaps
+    if !showMaps
+        return
+    current := mapTab.Value
+    if current > 1
+        mapTab.Value := current - 1
+    else
+        mapTab.Value := 5
+    UpdateOSD()
+}
+
+ToggleMaps() {
+    global showMaps, mapTab, osd, letrasText, numSimboloText, atalhosText, especiaisText, fKeysText, footerText
+    showMaps := !showMaps
+    
+    if showMaps {
+        mapTab.Visible := true
+        activeTab := mapTab.Value
+        letrasText.Visible := (activeTab = 1)
+        numSimboloText.Visible := (activeTab = 2)
+        atalhosText.Visible := (activeTab = 3)
+        especiaisText.Visible := (activeTab = 4)
+        fKeysText.Visible := (activeTab = 5)
+        footerText.Visible := true
+    } else {
+        mapTab.Visible := false
+        letrasText.Visible := false
+        numSimboloText.Visible := false
+        atalhosText.Visible := false
+        especiaisText.Visible := false
+        fKeysText.Visible := false
+        footerText.Visible := false
+    }
+    
+    UpdateOSD()
+}
+
+ToggleBrowserMode() {
+    global USE_BROWSER_OSD, osd, osdWord, osdMini
+    USE_BROWSER_OSD := !USE_BROWSER_OSD
+    if USE_BROWSER_OSD {
+        ; Esconder tudo ao ativar modo navegador
+        osd.Hide()
+        osdWord.Hide()
+        osdMini.Hide()
+        ToolTip("Modo Navegador ATIVO ─ http://localhost:8766", A_ScreenWidth/2 - 200, A_ScreenHeight/2 - 30)
+    } else {
+        ToolTip("Modo OSD ATIVO", A_ScreenWidth/2 - 100, A_ScreenHeight/2 - 30)
+    }
+    SetTimer(() => ToolTip(), -1800)
+    UpdateOSD()
+}
+
+; ═══════════════════════════════════════════════════════════════════════════════
+; FUNÇÕES PRINCIPAIS
+; ═══════════════════════════════════════════════════════════════════════════════
+
+GetCaretOrMousePos(&targetX, &targetY, w, h) {
+    CoordMode("Caret", "Screen")
+    if CaretGetPos(&caretX, &caretY) {
+        targetX := caretX
+        targetY := caretY + 20
+    } else {
+        CoordMode("Mouse", "Screen")
+        MouseGetPos(&mouseX, &mouseY)
+        targetX := mouseX
+        targetY := mouseY + 20
+    }
+    
+    ; Ajustar limites da tela
+    screenW := A_ScreenWidth
+    screenH := A_ScreenHeight
+    
+    if targetX + w > screenW
+        targetX := screenW - w
+    if targetX < 0
+        targetX := 0
+        
+    if targetY + h > screenH
+        targetY := screenH - h
+    if targetY < 0
+        targetY := 0
+}
+
+UpdateOSD() {
+    global morseActive, currentSequence, statusText, seqText, hintText, showMaps, visualBuffer
+    global osd, osdMini, miniStatus, sepLine, osdWord, wordText, USE_BROWSER_OSD
+
+    ; Formata o texto de exibição (usado por OSD e navegador)
+    displayText := ""
+    if morseActive {
+        if currentSequence != "" {
+            if visualBuffer != "" {
+                displayText := visualBuffer . " + [ " . FormatSequence(currentSequence) . " ]"
+            } else {
+                displayText := "[ " . FormatSequence(currentSequence) . " ]"
+            }
+        } else {
+            if visualBuffer != "" {
+                displayText := "Acumulado: " . visualBuffer
+            } else {
+                displayText := "aguardando..."
+            }
+        }
+    }
+
+    if USE_BROWSER_OSD {
+        ; Modo Navegador: esconder todas as janelas OSD
+        osd.Hide()
+        osdWord.Hide()
+        osdMini.Hide()
+    } else {
+        ; Modo OSD clássico
+        if morseActive {
+            osdMini.Hide()
+
+            ; Atualiza os textos nas GUIs
+            seqText.Text := displayText
+            wordText.Text := displayText
+            if currentSequence != "" {
+                hintText.Text := GetPossibleMatches(currentSequence)
+            } else {
+                hintText.Text := "Confirmar: Enter   |   Abas: w/s   |   Mapas: d"
+            }
+
+            ; Atualizar o guia de teclas dinâmico
+            UpdateKeyGuide(currentSequence)
+
+            ; Mostrar OSD principal de guia
+            if showMaps {
+                statusText.Opt("w820")
+                statusText.Text := "⌨ MORSE KEYBOARD: ATIVO"
+                seqText.Opt("w500")
+                hintText.Visible := true
+                sepLine.Opt("w820")
+                try osd.Show("x10 y10 w850 h420 NoActivate")
+                try WinSetTransparent(140, osd)
+            } else {
+                statusText.Opt("w220")
+                statusText.Text := "⌨ MORSE KB: ATIVO"
+                seqText.Opt("w140")
+                hintText.Visible := false
+                sepLine.Opt("w220")
+                try osd.Show("x10 y10 w250 h230 NoActivate")
+                try WinSetTransparent(140, osd)
+            }
+
+            ; OSD de palavra flutuante (posicionado pelo Python)
+            try osdWord.Show("x-2000 y-2000 AutoSize NoActivate")
+            try WinSetTransparent(220, osdWord)
+
+            statusText.Redraw()
+            seqText.Redraw()
+            sepLine.Redraw()
+        } else {
+            osd.Hide()
+            osdWord.Hide()
+            miniStatus.Text := "⌨ MORSE KB: OFF"
+            try osdMini.Show("x10 y10 NoActivate")
+        }
+    }
+
+    ; Sempre sincronizar com o servidor Python (alimenta o navegador)
+    SendStateToPython()
+}
+
+SendStateToPython() {
+    global wordBuffer, visualBuffer, currentSequence, morseActive
+    
+    ; Tratar escapes JSON simples
+    escapedWord := StrReplace(wordBuffer, '\', '\\')
+    escapedWord := StrReplace(escapedWord, '"', '\"')
+    escapedWord := StrReplace(escapedWord, '`n', '\n')
+    escapedWord := StrReplace(escapedWord, '`r', '\r')
+    
+    escapedVisual := StrReplace(visualBuffer, '\', '\\')
+    escapedVisual := StrReplace(escapedVisual, '"', '\"')
+    escapedVisual := StrReplace(escapedVisual, '`n', '\n')
+    escapedVisual := StrReplace(escapedVisual, '`r', '\r')
+
+    jsonData := '{"word": "' . escapedWord . '", "visual": "' . escapedVisual . '", "seq": "' . currentSequence . '", "active": ' . (morseActive ? "true" : "false") . '}'
+    
+    try {
+        http := ComObject("Msxml2.XMLHTTP")
+        http.open("POST", "http://localhost:8766/state", true) ; POST assíncrono para o Python
+        http.setRequestHeader("Content-Type", "application/json")
+        http.send(jsonData)
+    }
+}
+
+
+
+FormatSequence(seq) {
+    result := ""
+    Loop Parse, seq {
+        if A_Index > 1
+            result .= " · "
+        result .= A_LoopField
+    }
+    return result
+}
+
+GetPossibleMatches(seq) {
+    global morseMap
+    matches := ""
+    count := 0
+
+    ; Verificar match exato
+    if morseMap.Has(seq) {
+        val := morseMap[seq]
+        matches .= "→ " . FormatOutput(val)
+    }
+
+    ; Verificar possíveis extensões
+    for key, val in morseMap {
+        if StrLen(key) > StrLen(seq) && SubStr(key, 1, StrLen(seq)) = seq {
+            count++
+        }
+    }
+
+    if count > 0 {
+        if matches != ""
+            matches .= " | "
+        matches .= "+" . count . " opções"
+    }
+
+    return matches != "" ? matches : "sem match"
+}
+
+FormatOutput(val) {
+    if SubStr(val, 1, 1) = "{" {
+        inner := SubStr(val, 2, StrLen(val) - 2)
+        return "[" . inner . "]"
+    }
+    if SubStr(val, 1, 1) = "^" {
+        return "Ctrl+" . SubStr(val, 2)
+    }
+    if SubStr(val, 1, 2) = "+{" {
+        inner := SubStr(val, 3, StrLen(val) - 3)
+        return "Shift+[" . inner . "]"
+    }
+    return val
+}
+
+UpdateVisualBufferFromWordBuffer() {
+    global wordBuffer, visualBuffer
+    if wordBuffer = "" {
+        visualBuffer := ""
+        return
+    }
+    lastSpaceIdx := InStr(wordBuffer, " ", , -1)
+    if lastSpaceIdx = 0 {
+        visualBuffer := wordBuffer
+    } else {
+        visualBuffer := SubStr(wordBuffer, lastSpaceIdx + 1)
+    }
+}
+
+LogBuffers(action) {
+    global wordBuffer, visualBuffer, currentSequence
+    try {
+        FileAppend("[" . A_Now . "] Action: " . action . " | seq: '" . currentSequence . "' | word: '" . wordBuffer . "' | vis: '" . visualBuffer . "'`n", "debug_buffer.txt", "UTF-8")
+    }
+}
+
+ProcessSequence() {
+    global currentSequence, morseMap, wordBuffer, visualBuffer
+
+    if currentSequence = ""
+        return
+
+    seq := currentSequence
+    currentSequence := ""
+    
+    LogBuffers("ProcessSequence Start (seq: " . seq . ")")
+
+    if morseMap.Has(seq) {
+        output := morseMap[seq]
+
+        ; Verificar se é um comando de sistema (atalho Ctrl, navegação por setas, Tab, etc.)
+        isCommand := ((SubStr(output, 1, 1) = "^" && StrLen(output) > 1)
+                  || (SubStr(output, 1, 1) = "{" && SubStr(output, -1) = "}")
+                  || (SubStr(output, 1, 2) = "+{" && SubStr(output, -1) = "}"))
+                  && !InStr(output, "Space") && !InStr(output, "Enter") 
+                  && !InStr(output, "Backspace") && !InStr(output, "Escape")
+
+        if isCommand {
+            Send(output)
+            LogBuffers("Executed Command: " . output)
+        } else {
+            ; Adiciona ao buffer da palavra
+            if output = "{Space}" || output = " " {
+                wordBuffer .= " "
+                visualBuffer := ""
+                LogBuffers("Added Space")
+            } else if output = "{Backspace}" {
+                if StrLen(wordBuffer) > 0 {
+                    wordBuffer := SubStr(wordBuffer, 1, -1)
+                    UpdateVisualBufferFromWordBuffer()
+                    LogBuffers("Added Morse Backspace")
+                } else {
+                    Send("{Backspace}")
+                    LogBuffers("Sent Backspace directly (empty buffer)")
+                }
+            } else if output = "{Enter}" {
+                wordBuffer .= "`n"
+                visualBuffer := ""
+                LogBuffers("Added Morse Enter")
+            } else if output = "{Escape}" {
+                wordBuffer := ""
+                visualBuffer := ""
+                LogBuffers("Added Morse Escape")
+            } else {
+                wordBuffer .= output
+                visualBuffer .= output
+                LogBuffers("Added Character: " . output)
+            }
+        }
+    } else {
+        ; Sequência inválida — feedback visual
+        SoundBeep(800, 80)
+        LogBuffers("Invalid Sequence: " . seq)
+    }
+
+    UpdateOSD()
+}
+
+AddToSequence(key) {
+    global currentSequence
+    currentSequence .= key
+    LogBuffers("AddToSequence: " . key)
+    UpdateOSD()
+}
+
+CancelSequence() {
+    global currentSequence, wordBuffer, visualBuffer
+    LogBuffers("CancelSequence Start")
+    if currentSequence != "" {
+        currentSequence := ""
+    } else {
+        wordBuffer := ""
+        visualBuffer := ""
+    }
+    LogBuffers("CancelSequence End")
+    UpdateOSD()
+}
+
+
+; ═══════════════════════════════════════════════════════════════════════════════
+; HOTKEYS
+; ═══════════════════════════════════════════════════════════════════════════════
+
+; Toggle Morse Keyboard com CapsLock
+CapsLock:: {
+    global morseActive
+    morseActive := !morseActive
+    LogBuffers("ToggleMorse Keyboard: " . (morseActive ? "ON" : "OFF"))
+    UpdateOSD()
+
+    ; Feedback sonoro
+    if morseActive
+        SoundBeep(600, 100), SoundBeep(900, 100)
+    else
+        SoundBeep(900, 100), SoundBeep(600, 100)
+}
+
+; Cancelar sequência com Escape ou LWin (quando Morse ativo)
