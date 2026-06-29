@@ -21,7 +21,7 @@ global historyBuffer := []
 
 ; ── Inicialização ──
 try {
-    Run('"C:\Program Files\Python313\python.exe" "' . A_ScriptDir . '\websocket_server.py"', A_ScriptDir, "Hide")
+    Run('"' . A_ScriptDir . '\python\python.exe" "' . A_ScriptDir . '\websocket_server.py"', A_ScriptDir, "Hide")
 }
 
 UpdateOSD()
