@@ -5,4 +5,4 @@ echo.
 echo Abra no navegador: http://localhost:8766
 echo.
 start "" http://localhost:8766
-"C:\Program Files\Python313\python.exe" -u "%~dp0websocket_server.py"
+"%~dp0python\python.exe" -u "%~dp0websocket_server.py"

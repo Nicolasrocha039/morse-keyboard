@@ -1,10 +1,7 @@
 import sys
 import os
 
-# Forçar inclusão das dependências instaladas no perfil do usuário (importante se rodar como Admin/AHK)
-user_packages = r"C:\Users\Nicolas\AppData\Roaming\Python\Python313\site-packages"
-if os.path.exists(user_packages) and user_packages not in sys.path:
-    sys.path.insert(0, user_packages)
+# Removido hack de AppData: Agora usando dependências locais do Python embutido.
 
 # Evitar travamento do pythonw.exe por conta de sys.stdout/stderr nulos
 try:
