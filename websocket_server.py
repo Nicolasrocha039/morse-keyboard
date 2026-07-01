@@ -89,6 +89,39 @@ loop = None
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+unigram_dict = []
+bigram_dict = {}
+
+def load_dictionaries():
+    global unigram_dict, bigram_dict
+    dict_path = os.path.join(SCRIPT_DIR, "dict.ini")
+    if os.path.isfile(dict_path):
+        with open(dict_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("["):
+                    parts = line.split("=")
+                    if len(parts) >= 2 and parts[1]:
+                        unigram_dict.append(parts[1])
+                    elif len(parts) >= 1 and parts[0]:
+                        unigram_dict.append(parts[0])
+                        
+    bigrams_path = os.path.join(SCRIPT_DIR, "bigrams.json")
+    if os.path.isfile(bigrams_path):
+        try:
+            with open(bigrams_path, "r", encoding="utf-8") as f:
+                bigram_dict = json.load(f)
+        except Exception:
+            bigram_dict = {}
+
+def save_bigrams():
+    bigrams_path = os.path.join(SCRIPT_DIR, "bigrams.json")
+    try:
+        with open(bigrams_path, "w", encoding="utf-8") as f:
+            json.dump(bigram_dict, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print("Error saving bigrams:", e)
+
 MIME_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".js":   "application/javascript; charset=utf-8",
@@ -154,6 +187,71 @@ class StateHandler(BaseHTTPRequestHandler):
                         simulate_key(key)
                 except Exception as e:
                     print("Error simulating key:", e)
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+
+        elif self.path == "/suggest":
+            content_length = int(self.headers.get('Content-Length', 0))
+            suggestion = ""
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                    word_buffer = data.get("wordBuffer", "").strip()
+                    visual_buffer = data.get("visualBuffer", "").lower()
+                    
+                    words = word_buffer.split()
+                    prev_word = words[-1].lower() if words else ""
+                    
+                    if prev_word in bigram_dict:
+                        next_words = bigram_dict[prev_word]
+                        sorted_next = sorted(next_words.items(), key=lambda item: item[1], reverse=True)
+                        for n_word, freq in sorted_next:
+                            if n_word.startswith(visual_buffer):
+                                suggestion = n_word
+                                break
+                    
+                    if not suggestion and visual_buffer:
+                        for u_word in unigram_dict:
+                            if u_word.lower().startswith(visual_buffer):
+                                suggestion = u_word
+                                break
+                except Exception as e:
+                    print("Error predicting suggestion:", e)
+            
+            resp = json.dumps({"suggestion": suggestion})
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(resp.encode('utf-8'))
+
+        elif self.path == "/learn":
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                    word_buffer = data.get("wordBuffer", "").strip()
+                    
+                    words = word_buffer.split()
+                    if len(words) >= 2:
+                        w1 = words[-2].lower()
+                        w2 = words[-1].lower()
+                        
+                        if w1 not in bigram_dict:
+                            bigram_dict[w1] = {}
+                        if w2 not in bigram_dict[w1]:
+                            bigram_dict[w1][w2] = 0
+                        bigram_dict[w1][w2] += 1
+                        
+                        save_bigrams()
+                except Exception as e:
+                    print("Error learning bigram:", e)
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -256,6 +354,8 @@ async def track_caret_loop():
 async def main():
     global loop
     loop = asyncio.get_running_loop()
+    
+    load_dictionaries()
     
     # Iniciar servidor HTTP em thread separada
     http_thread = threading.Thread(target=run_http_server, daemon=True)

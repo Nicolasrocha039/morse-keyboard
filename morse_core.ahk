@@ -54,26 +54,55 @@ RemoveAccents(str) {
     return str
 }
 
-GetAutocompleteSuggestion(word) {
-    global dictArray
-    if (word = "" || StrLen(word) < 2)
+GetAutocompleteSuggestion(visualWord) {
+    global wordBuffer
+    if (visualWord = "" || StrLen(visualWord) < 2)
         return ""
     
-    isFirstUpper := IsUpper(SubStr(word, 1, 1))
+    isFirstUpper := IsUpper(SubStr(visualWord, 1, 1))
     
-    wordLower := RemoveAccents(StrLower(word))
-    for index, dictEntry in dictArray {
-        if (StrLen(dictEntry.key) >= StrLen(wordLower)) {
-            if (SubStr(dictEntry.key, 1, StrLen(wordLower)) = wordLower) {
-                suggestion := dictEntry.word
-                if (isFirstUpper) {
-                    suggestion := StrUpper(SubStr(suggestion, 1, 1)) . SubStr(suggestion, 2)
-                }
-                return suggestion
+    escapedWordBuffer := StrReplace(wordBuffer, '\', '\\')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
+    
+    escapedVisual := StrReplace(visualWord, '\', '\\')
+    escapedVisual := StrReplace(escapedVisual, '"', '\"')
+    
+    jsonData := '{"wordBuffer": "' . escapedWordBuffer . '", "visualBuffer": "' . escapedVisual . '"}'
+    
+    try {
+        http := ComObject("Msxml2.XMLHTTP")
+        http.open("POST", "http://localhost:8766/suggest", false) ; síncrono
+        http.setRequestHeader("Content-Type", "application/json")
+        http.send(jsonData)
+        
+        response := http.responseText
+        if RegExMatch(response, '"suggestion"\s*:\s*"([^"]*)"', &match) {
+            suggestion := match[1]
+            if (suggestion != "" && isFirstUpper) {
+                suggestion := StrUpper(SubStr(suggestion, 1, 1)) . SubStr(suggestion, 2)
             }
+            return suggestion
         }
     }
     return ""
+}
+
+LearnWordContext() {
+    global wordBuffer
+    escapedWordBuffer := StrReplace(wordBuffer, '\', '\\')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
+    escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
+    
+    jsonData := '{"wordBuffer": "' . escapedWordBuffer . '"}'
+    try {
+        http := ComObject("Msxml2.XMLHTTP")
+        http.open("POST", "http://localhost:8766/learn", true) ; assíncrono
+        http.setRequestHeader("Content-Type", "application/json")
+        http.send(jsonData)
+    }
 }
 
 GetPossibleMatches(seq) {
@@ -156,6 +185,15 @@ SendToSystem(output) {
         return
     }
 
+    if output = "{ToggleLButton}" {
+        global lbuttonLocked
+        lbuttonLocked := !lbuttonLocked
+        ToolTip("Mouse Esq " . (lbuttonLocked ? "BLOQUEADO (Limpa buffers)" : "LIBERADO (Clique normal)"), A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle LButton Locked: " . (lbuttonLocked ? "ON" : "OFF"))
+        return
+    }
+
     if adbMode {
         adbPath := '"' . A_ScriptDir . '\platform-tools\adb.exe"'
         
@@ -186,6 +224,21 @@ SendToSystem(output) {
             RunWait(adbPath . " shell input keyevent 22", , "Hide") ; DPAD RIGHT
         } else if output = "{AndroidPower}" {
             RunWait(adbPath . " shell input keyevent 26", , "Hide") ; POWER/WAKE
+        } else if output = "{ToggleBluetooth}" {
+            RunWait(adbPath . " shell `"if [ \`"$(settings get global bluetooth_on)\`" = \`"1\`" ]; then svc bluetooth disable; cmd bluetooth_manager disable; else svc bluetooth enable; cmd bluetooth_manager enable; fi`"", , "Hide")
+            ToolTip("Comando de Bluetooth enviado via ADB", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            SetTimer(() => ToolTip(), -2500)
+        } else if output = "{ConnectBTDevice}" {
+            RunWait(adbPath . " shell am start -a android.settings.BLUETOOTH_SETTINGS", , "Hide")
+            Sleep(1500)
+            ; Quantidade de setas para baixo depende da posição do dispositivo na lista
+            Loop 2 {
+                RunWait(adbPath . " shell input keyevent 20", , "Hide") ; DOWN
+                Sleep(300)
+            }
+            RunWait(adbPath . " shell input keyevent 66", , "Hide") ; ENTER
+            ToolTip("Automação de conexão Bluetooth executada", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            SetTimer(() => ToolTip(), -2500)
         } else if output = "{WheelUp}" {
             ; Swipe down to scroll up
             RunWait(adbPath . " shell input swipe 500 600 500 1600 150", , "Hide")
@@ -234,6 +287,18 @@ ProcessSequence() {
     if morseMap.Has(seq) {
         output := morseMap[seq]
 
+        if output = "{RepeatLast}" {
+            global lastSentCommand
+            if lastSentCommand != "" {
+                output := lastSentCommand
+            } else {
+                return ; Nada para repetir
+            }
+        } else {
+            global lastSentCommand
+            lastSentCommand := output
+        }
+
         ; Verificar se é um comando de sistema
         isCommand := ((SubStr(output, 1, 1) = "^" && StrLen(output) > 1)
                   || (SubStr(output, 1, 1) = "{" && SubStr(output, -1) = "}")
@@ -250,10 +315,12 @@ ProcessSequence() {
                 wordBuffer .= " "
                 visualBuffer := ""
                 SendToSystem("{Space}")
+                LearnWordContext()
             } else if output = "{Enter}" {
                 wordBuffer .= "`n"
                 visualBuffer := ""
                 SendToSystem("{Enter}")
+                LearnWordContext()
             } else if output = "{Backspace}" {
                 if wordBuffer != "" {
                     wordBuffer := SubStr(wordBuffer, 1, -1)

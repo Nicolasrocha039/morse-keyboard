@@ -14,6 +14,8 @@ global showMaps := true
 global USE_BROWSER_OSD := false
 global historyBuffer := []   
 global adbMode := false
+global lbuttonLocked := false
+global lastSentCommand := ""
 
 ; ── Importação dos Módulos ──
 #Include "%A_ScriptDir%\morse_config.ahk"
@@ -70,6 +72,7 @@ CapsLock:: {
 Escape:: CancelSequence()
 LWin:: CancelSequence()
 
+#HotIf morseActive && lbuttonLocked
 LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
     currentSequence := ""
@@ -79,6 +82,8 @@ LButton:: {
     LogBuffers("Cleared all buffers via LButton")
     UpdateOSD()
 }
+
+#HotIf morseActive
 
 w:: TabGoLeft()
 s:: TabGoRight()
@@ -120,6 +125,7 @@ $Space:: {
     historyBuffer.Push(" ")
     LogBuffers("Physical Space End")
     UpdateOSD()
+    LearnWordContext()
 }
 
 $Enter:: {
@@ -146,6 +152,7 @@ $Enter:: {
             historyBuffer.Push(suggestion . " ")
             LogBuffers("Autocompleted/Corrected: " . suggestion)
             UpdateOSD()
+            LearnWordContext()
         } else {
             wordBuffer := ""
             visualBuffer := ""
@@ -153,6 +160,7 @@ $Enter:: {
             LogBuffers("Cleared Word Buffer")
             SendToSystem("{Enter}")
             UpdateOSD()
+            LearnWordContext()
         }
     }
     LogBuffers("Physical Enter End")

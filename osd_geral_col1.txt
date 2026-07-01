@@ -18,8 +18,11 @@ RQRRA: PgUp       | RQRRR: PgDn
 RQRRRA: Shift+Tab
 Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲]
 
-LÓGICA ÚNICA DE SÍLABAS (Separador R/RR)
-Universais (ba): Consoante + R + Vogal
-Invertidas (ab): Vogal + R + Consoante
-Triplas (bra): Consoante + Mod + RR + Vogal
-(Modificadores: Q=r, A=l, RQ=h, AQ=u)
+LÓGICA ÚNICA DE SÍLABAS (A "Cola" R)
+Normal: C+R+V (ba=b+R+a)
+Inversa: V+R+C (ab=a+R+b)
+Triplas: C+Mod+RR+V (bra=b+r+RR+a)
+2 Vogais: V+RR+V (ai=a+RR+i)
+Finais (m/n/r/s/l/z): Adicione +R+Letra
+(Ex: bam = b+R+a+R+m)
+(Ex: bai = b+R+a+R+i)
