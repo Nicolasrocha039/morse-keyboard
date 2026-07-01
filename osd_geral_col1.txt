@@ -18,7 +18,8 @@ RQRRA: PgUp       | RQRRR: PgDn
 RQRRRA: Shift+Tab
 Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲]
 
-SÍLABAS UNIVERSAIS (Consoante + Vogal + R)
-SÍLABAS INVERTIDAS (Vogal + Cons. + Q)
-SÍLABAS TRIPLAS (C + V + S)
-S= {A, AQ, AR, AA}
+LÓGICA ÚNICA DE SÍLABAS (Separador R/RR)
+Universais (ba): Consoante + R + Vogal
+Invertidas (ab): Vogal + R + Consoante
+Triplas (bra): Consoante + Mod + RR + Vogal
+(Modificadores: Q=r, A=l, RQ=h, AQ=u)

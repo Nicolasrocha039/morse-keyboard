@@ -1,4 +1,4 @@
-﻿#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 
 global MONO_FONT := "Consolas"
 
@@ -163,26 +163,26 @@ CreateKeyCards() {
 CreateKeyCards()
 
 ; Coluna Direita: Tab Control com Mapas de Referência
-global mapTab := osd.Add("Tab3", "x255 y75 w650 h480 cWhite +Background0x12121e", ["Geral", "Sílabas", "Triplas"])
+global mapTab := osd.Add("Tab3", "x255 y75 w650 h580 cWhite +Background0x12121e", ["Geral", "Sílabas", "Triplas"])
 mapTab.SetFont("s9 Bold", "Segoe UI")
 
 mapTab.UseTab(1)
-global t1c1 := osd.AddText("x265 y105 w300 h440 c0xaaaacc", osdGeral1)
+global t1c1 := osd.AddText("x265 y105 w300 h540 c0xaaaacc", osdGeral1)
 t1c1.SetFont("s9", MONO_FONT)
-global t1c2 := osd.AddText("x575 y105 w310 h440 c0xaaaacc", osdGeral2)
+global t1c2 := osd.AddText("x575 y105 w310 h540 c0xaaaacc", osdGeral2)
 t1c2.SetFont("s9", MONO_FONT)
 
 mapTab.UseTab(2)
-global t2c1 := osd.AddText("x265 y105 w600 h440 c0xaaaacc", osdSyllables)
+global t2c1 := osd.AddText("x265 y105 w600 h540 c0xaaaacc", osdSyllables)
 t2c1.SetFont("s9", MONO_FONT)
 
 mapTab.UseTab(3)
-global t3c1 := osd.AddText("x265 y105 w600 h440 c0xaaaacc", osdTriples)
+global t3c1 := osd.AddText("x265 y105 w600 h540 c0xaaaacc", osdTriples)
 t3c1.SetFont("s9", MONO_FONT)
 mapTab.UseTab()
 
 ; Rodapé
-global footerText := osd.AddText("x15 y570 w890 h20 Center c0x444455", "Modo Morse Keyboard - Projetado para digitação simplificada de 4 teclas")
+global footerText := osd.AddText("x15 y670 w890 h20 Center c0x444455", "Modo Morse Keyboard - Projetado para digitação simplificada de 4 teclas")
 footerText.SetFont("s8 Italic", "Segoe UI")
 
 TabGoLeft() {
@@ -329,7 +329,7 @@ UpdateOSD() {
                 seqText.Opt("w500")
                 hintText.Visible := true
                 sepLine.Opt("w820")
-                try osd.Show("x10 y10 w890 h600 NoActivate")
+                try osd.Show("x10 y10 w890 h700 NoActivate")
                 try WinSetTransparent(220, osd)
             } else {
                 statusText.Opt("w220")

@@ -13,6 +13,7 @@ global visualBuffer := ""
 global showMaps := true
 global USE_BROWSER_OSD := false
 global historyBuffer := []   
+global adbMode := false
 
 ; ── Importação dos Módulos ──
 #Include "%A_ScriptDir%\morse_config.ahk"
@@ -54,9 +55,30 @@ CapsLock:: {
         SoundBeep(900, 100), SoundBeep(600, 100)
 }
 
+^!a:: {
+    global adbMode
+    adbMode := !adbMode
+    if adbMode
+        ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+    else
+        ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+    SetTimer(() => ToolTip(), -2500)
+    LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
+}
+
 #HotIf morseActive
 Escape:: CancelSequence()
 LWin:: CancelSequence()
+
+LButton:: {
+    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+    currentSequence := ""
+    wordBuffer := ""
+    visualBuffer := ""
+    historyBuffer := []
+    LogBuffers("Cleared all buffers via LButton")
+    UpdateOSD()
+}
 
 w:: TabGoLeft()
 s:: TabGoRight()
@@ -77,7 +99,7 @@ $Backspace:: {
             wordBuffer := SubStr(wordBuffer, 1, -1)
             UpdateVisualBufferFromWordBuffer()
         }
-        Send("{Backspace}")
+        SendToSystem("{Backspace}")
     }
     LogBuffers("Physical Backspace End")
     UpdateOSD()
@@ -108,12 +130,11 @@ $Enter:: {
     } else {
         suggestion := GetAutocompleteSuggestion(visualBuffer)
         if (suggestion != "") {
-            ; Envia os backspaces e a sugestao em um unico bloco atomico
-            backspaces := ""
+            ; Envia os backspaces e a sugestao
             loop StrLen(visualBuffer) {
-                backspaces .= "{Backspace}"
+                SendToSystem("{Backspace}")
             }
-            Send(backspaces . "{Text}" . suggestion . " ")
+            SendToSystem(suggestion . " ")
             
             ; Adjust wordBuffer
             if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
@@ -130,7 +151,7 @@ $Enter:: {
             visualBuffer := ""
             historyBuffer := []
             LogBuffers("Cleared Word Buffer")
-            Send("{Enter}")
+            SendToSystem("{Enter}")
             UpdateOSD()
         }
     }

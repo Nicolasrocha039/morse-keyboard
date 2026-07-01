@@ -20,3 +20,14 @@ RA + [QA: ^C | QR: ^V | AQ: ^X]
 RA + [AA: ^Z | AR: ^S | RQ: ^A]
 RA + [QQQ:^F | QQA:^N | QRQ:^T]
 RA + [QAQ:^W | QRA:^Y]
+
+MOUSE & SCRIPT
+Mouse: RQQA(Esq) RQQR(Dir) RARA(Meio)
+Rolagem: RARR(Cima) RRRR(Baixo)
+Swipe: QQQQQ(Esq) AAAAA(Dir)
+Script: RQARA(Recarregar)
+
+ANDROID 100% (Apenas no Modo ADB)
+Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲] e RQAA(Enter)
+Menu: RQRR(Home) RQAR(Voltar) RQRQ(Recentes)
+Tela: RQRAR(Ligar/Desligar)

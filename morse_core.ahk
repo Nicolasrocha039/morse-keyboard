@@ -139,8 +139,89 @@ LogBuffers(action) {
     }
 }
 
+SendToSystem(output) {
+    global adbMode
+    if output = "{ToggleADB}" {
+        adbMode := !adbMode
+        if adbMode
+            ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        else
+            ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
+        return
+    }
+    if output = "{Reload}" {
+        Reload()
+        return
+    }
+
+    if adbMode {
+        adbPath := '"' . A_ScriptDir . '\platform-tools\adb.exe"'
+        
+        if output = "{Space}" || output = " " {
+            RunWait(adbPath . " shell input keyevent 62", , "Hide")
+        } else if output = "{Enter}" || output = "`n" {
+            RunWait(adbPath . " shell input keyevent 66", , "Hide")
+        } else if output = "{Backspace}" {
+            RunWait(adbPath . " shell input keyevent 67", , "Hide")
+        } else if output = "^{Backspace}" {
+            ; Enviar vários backspaces para emular deletar palavra
+            Loop 10 {
+                RunWait(adbPath . " shell input keyevent 67", , "Hide")
+            }
+        } else if output = "{Escape}" {
+            RunWait(adbPath . " shell input keyevent 4", , "Hide") ; BACK
+        } else if output = "{Home}" {
+            RunWait(adbPath . " shell input keyevent 3", , "Hide") ; HOME
+        } else if output = "{Tab}" {
+            RunWait(adbPath . " shell input keyevent 187", , "Hide") ; APP SWITCH/RECENTS
+        } else if output = "{Up}" {
+            RunWait(adbPath . " shell input keyevent 19", , "Hide") ; DPAD UP
+        } else if output = "{Down}" {
+            RunWait(adbPath . " shell input keyevent 20", , "Hide") ; DPAD DOWN
+        } else if output = "{Left}" {
+            RunWait(adbPath . " shell input keyevent 21", , "Hide") ; DPAD LEFT
+        } else if output = "{Right}" {
+            RunWait(adbPath . " shell input keyevent 22", , "Hide") ; DPAD RIGHT
+        } else if output = "{AndroidPower}" {
+            RunWait(adbPath . " shell input keyevent 26", , "Hide") ; POWER/WAKE
+        } else if output = "{WheelUp}" {
+            ; Swipe down to scroll up
+            RunWait(adbPath . " shell input swipe 500 600 500 1600 150", , "Hide")
+        } else if output = "{WheelDown}" {
+            ; Swipe up to scroll down
+            RunWait(adbPath . " shell input swipe 500 1600 500 600 150", , "Hide")
+        } else if output = "{WheelLeft}" {
+            ; Swipe right to scroll left (content moves right)
+            RunWait(adbPath . " shell input swipe 800 1400 200 1400 150", , "Hide")
+        } else if output = "{WheelRight}" {
+            ; Swipe left to scroll right (content moves left)
+            RunWait(adbPath . " shell input swipe 200 1400 800 1400 150", , "Hide")
+        } else if output = "{LButton}" || output = "{RButton}" || output = "{MButton}" || output = "{WheelUp}" || output = "{WheelDown}" || output = "{WheelLeft}" || output = "{WheelRight}" {
+            Send(output)
+        } else {
+            ; Usando o ADBKeyBoard para suportar acentos e caracteres especiais nativamente
+            escapedOutput := StrReplace(output, "'", "'\''")
+            
+            ; Envia os caracteres usando o Intent de broadcast do ADBKeyBoard
+            adbCmd := adbPath . ' shell am broadcast -a ADB_INPUT_TEXT --es msg ' . "'" . escapedOutput . "'"
+            RunWait(adbCmd, , "Hide")
+        }
+    } else {
+        if output = " "
+            Send("{Space}")
+        else if output = "{AndroidPower}"
+            return
+        else if SubStr(output, 1, 1) = "{" || SubStr(output, 1, 1) = "^" || SubStr(output, 1, 2) = "+{"
+            Send(output)
+        else
+            SendText(output)
+    }
+}
+
 ProcessSequence() {
-    global currentSequence, morseMap, wordBuffer, visualBuffer
+    global currentSequence, morseMap, wordBuffer, visualBuffer, adbMode
 
     if currentSequence = ""
         return
@@ -161,34 +242,34 @@ ProcessSequence() {
                   && !InStr(output, "Backspace") && !InStr(output, "Escape")
 
         if isCommand {
-            Send(output)
+            SendToSystem(output)
             LogBuffers("Executed Command: " . output)
         } else {
             ; Comandos que alteram o buffer em tempo real
             if output = "{Space}" || output = "" || output = " " {
                 wordBuffer .= " "
                 visualBuffer := ""
-                Send("{Space}")
+                SendToSystem("{Space}")
             } else if output = "{Enter}" {
                 wordBuffer .= "`n"
                 visualBuffer := ""
-                Send("{Enter}")
+                SendToSystem("{Enter}")
             } else if output = "{Backspace}" {
                 if wordBuffer != "" {
                     wordBuffer := SubStr(wordBuffer, 1, -1)
                     UpdateVisualBufferFromWordBuffer()
                 }
-                Send("{Backspace}")
+                SendToSystem("{Backspace}")
             } else if output = "^{Backspace}" {
                 DeleteLastWord()
             } else if output = "{Escape}" {
                 wordBuffer := ""
                 visualBuffer := ""
-                Send("{Escape}")
+                SendToSystem("{Escape}")
             } else {
                 wordBuffer .= output
                 visualBuffer .= output
-                SendText(output)
+                SendToSystem(output)
             }
             LogBuffers("Added Character: " . output)
         }
@@ -230,7 +311,7 @@ DeleteLastWord() {
             wordBuffer := RegExReplace(wordBuffer, "\s*\S+\s*$", "")
             UpdateVisualBufferFromWordBuffer()
         }
-        Send("^{Backspace}")
+        SendToSystem("^{Backspace}")
     }
     LogBuffers("DeleteLastWord End")
     UpdateOSD()

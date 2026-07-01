@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Morse Remote</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Display Section */
+        #display-area {
+            background-color: #1e1e1e;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        #visual-buffer {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00e676; /* Hacker Green */
+            min-height: 40px;
+            word-wrap: break-word;
+        }
+
+        #seq-buffer {
+            font-size: 20px;
+            color: #aaaaaa;
+            margin-top: 5px;
+            letter-spacing: 2px;
+            min-height: 30px;
+        }
+
+        #status {
+            font-size: 14px;
+            color: #ff5252;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .active-status {
+            color: #00e676 !important;
+        }
+
+        /* Keyboard Layout */
+        #keyboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            background-color: #2a2a2a;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.1s, transform 0.05s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            background-color: #4a4a4a;
+            transform: scale(0.95);
+        }
+
+        /* Specific Button Colors */
+        .btn-dit { background-color: #1976d2; } /* Blue */
+        .btn-dah { background-color: #f57c00; } /* Orange */
+        .btn-action { background-color: #388e3c; } /* Green */
+        .btn-danger { background-color: #d32f2f; } /* Red */
+        .btn-sys { background-color: #455a64; font-size: 18px; }
+
+        /* Icon or smaller text handling */
+        .btn span {
+            pointer-events: none;
+        }
+
+        .btn-wide {
+            flex: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="display-area">
+        <div id="visual-buffer"></div>
+        <div id="seq-buffer"></div>
+        <div id="status">DESCONECTADO</div>
+    </div>
+
+    <div id="keyboard">
+        <div class="row">
+            <button class="btn btn-sys" onpointerdown="sendKey('CAPSLOCK')">Ligar/Desligar Morse</button>
+            <button class="btn btn-danger" onpointerdown="sendKey('BACKSPACE')">⌫ Del</button>
+        </div>
+        
+        <div class="row">
+            <button class="btn btn-dit" onpointerdown="sendKey('Q')">DIT ( • )</button>
+            <button class="btn btn-dah" onpointerdown="sendKey('A')">DAH ( - )</button>
+        </div>
+
+        <div class="row">
+            <button class="btn btn-action" onpointerdown="sendKey('RIGHT')">➡ Próxima Letra</button>
+        </div>
+
+        <div class="row">
+            <button class="btn btn-wide" onpointerdown="sendKey('SPACE')">Espaço</button>
+            <button class="btn btn-wide" style="background-color: #673ab7;" onpointerdown="sendKey('ENTER')">Enter</button>
+        </div>
+    </div>
+
+    <script>
+        const visualEl = document.getElementById('visual-buffer');
+        const seqEl = document.getElementById('seq-buffer');
+        const statusEl = document.getElementById('status');
+        
+        let ws;
+        let isConnected = false;
+
+        function formatSequence(seq) {
+            if (!seq) return "";
+            // Substitui 'Q' por '•' e 'A' por '-' (ou mantém os caracteres se quiser).
+            // AHK usa 'Q' e 'A' como base? Não, a exibição de seq já vem formatada do AHK?
+            // No python, `state.seq` é a string literal como "QAAQ" etc.
+            let displaySeq = seq.replace(/Q/gi, "•").replace(/A/gi, "-");
+            return displaySeq.split("").join(" ");
+        }
+
+        function connectWebSocket() {
+            const host = window.location.hostname || "localhost";
+            ws = new WebSocket(`ws://${host}:8765`);
+
+            ws.onopen = () => {
+                isConnected = true;
+                updateStatus(true, false); // initial connected state
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === "state") {
+                        const data = msg.data;
+                        
+                        // Formatar visual
+                        let displayVisual = data.visual || "";
+                        if (data.suggestion && data.suggestion !== "") {
+                            // Sublinhar o restante da sugestão
+                            let remaining = data.suggestion.substring(displayVisual.length);
+                            displayVisual += `<span style="color:#555;">${remaining}</span>`;
+                        }
+                        visualEl.innerHTML = displayVisual;
+                        
+                        // Formatar sequência
+                        seqEl.textContent = formatSequence(data.seq);
+
+                        // Atualizar status
+                        updateStatus(true, data.active);
+                    }
+                } catch (e) {
+                    console.error("Erro parsing WS:", e);
+                }
+            };
+
+            ws.onclose = () => {
+                isConnected = false;
+                updateStatus(false, false);
+                setTimeout(connectWebSocket, 2000); // Tentar reconectar
+            };
+        }
+
+        function updateStatus(connected, active) {
+            if (!connected) {
+                statusEl.textContent = "DESCONECTADO";
+                statusEl.className = "";
+            } else if (active) {
+                statusEl.textContent = "MORSE: ATIVO";
+                statusEl.className = "active-status";
+            } else {
+                statusEl.textContent = "MORSE: INATIVO";
+                statusEl.className = "";
+            }
+        }
+
+        function sendKey(key) {
+            // Vibração para feedback tátil (se suportado pelo celular)
+            if (navigator.vibrate) {
+                navigator.vibrate(20);
+            }
+
+            fetch('/input', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: key })
+            }).catch(err => console.error("Error sending key:", err));
+        }
+
+        // Prevenir scroll e zoom no iOS
+        document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+        // Iniciar
+        connectWebSocket();
+    </script>
+</body>
+</html>

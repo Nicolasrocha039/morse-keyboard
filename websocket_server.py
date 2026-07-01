@@ -61,6 +61,22 @@ def get_caret_pos():
             return point.x, point.y
     return None
 
+def simulate_key(key):
+    VK_CODES = {
+        'Q': 0x51,
+        'A': 0x41,
+        'RIGHT': 0x27,
+        'SPACE': 0x20,
+        'ENTER': 0x0D,
+        'BACKSPACE': 0x08,
+        'CAPSLOCK': 0x14
+    }
+    vk = VK_CODES.get(key.upper())
+    if vk:
+        # 0 = key down, 2 = key up (KEYEVENTF_KEYUP)
+        ctypes.windll.user32.keybd_event(vk, 0, 0, 0)
+        ctypes.windll.user32.keybd_event(vk, 0, 2, 0)
+
 # Estado global compartilhado
 state = {
     "word": "",
@@ -126,6 +142,24 @@ class StateHandler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(b'{"status": "ok"}')
+
+        elif self.path == "/input":
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                    key = data.get("key")
+                    if key:
+                        simulate_key(key)
+                except Exception as e:
+                    print("Error simulating key:", e)
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
             
     def do_OPTIONS(self):
         self.send_response(200)
@@ -146,7 +180,11 @@ def run_http_server():
         local_ip = 'SEU-IP'
     print(f"Servidor HTTP rodando em:")
     print(f"  http://localhost:8766  (este PC)")
-    print(f"  http://{local_ip}:8766  (rede local / celular)")
+    print(f"  http://{local_ip}:8766  (rede local)")
+    print(f"\n==============================================")
+    print(f"📱 CONTROLE REMOTO PELO CELULAR:")
+    print(f"  Abra no seu celular: http://{local_ip}:8766/remote.html")
+    print(f"==============================================\n")
     server.serve_forever()
 
 async def ws_handler(websocket):
