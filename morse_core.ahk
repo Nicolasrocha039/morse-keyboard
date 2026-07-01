@@ -14,7 +14,11 @@ SendStateToPython() {
     escapedVisual := StrReplace(escapedVisual, '`n', '\n')
     escapedVisual := StrReplace(escapedVisual, '`r', '\r')
 
-    jsonData := '{"word": "' . escapedWord . '", "visual": "' . escapedVisual . '", "seq": "' . currentSequence . '", "active": ' . (morseActive ? "true" : "false") . '}'
+    suggestion := GetAutocompleteSuggestion(visualBuffer)
+    escapedSuggestion := StrReplace(suggestion, '\', '\\')
+    escapedSuggestion := StrReplace(escapedSuggestion, '"', '\"')
+
+    jsonData := '{"word": "' . escapedWord . '", "visual": "' . escapedVisual . '", "seq": "' . currentSequence . '", "suggestion": "' . escapedSuggestion . '", "active": ' . (morseActive ? "true" : "false") . '}'
     
     try {
         http := ComObject("Msxml2.XMLHTTP")
@@ -32,6 +36,44 @@ FormatSequence(seq) {
         result .= A_LoopField
     }
     return result
+}
+
+RemoveAccents(str) {
+    str := StrReplace(str, "á", "a")
+    str := StrReplace(str, "à", "a")
+    str := StrReplace(str, "ã", "a")
+    str := StrReplace(str, "â", "a")
+    str := StrReplace(str, "é", "e")
+    str := StrReplace(str, "ê", "e")
+    str := StrReplace(str, "í", "i")
+    str := StrReplace(str, "ó", "o")
+    str := StrReplace(str, "õ", "o")
+    str := StrReplace(str, "ô", "o")
+    str := StrReplace(str, "ú", "u")
+    str := StrReplace(str, "ç", "c")
+    return str
+}
+
+GetAutocompleteSuggestion(word) {
+    global dictArray
+    if (word = "" || StrLen(word) < 2)
+        return ""
+    
+    isFirstUpper := IsUpper(SubStr(word, 1, 1))
+    
+    wordLower := RemoveAccents(StrLower(word))
+    for index, dictEntry in dictArray {
+        if (StrLen(dictEntry.key) >= StrLen(wordLower)) {
+            if (SubStr(dictEntry.key, 1, StrLen(wordLower)) = wordLower) {
+                suggestion := dictEntry.word
+                if (isFirstUpper) {
+                    suggestion := StrUpper(SubStr(suggestion, 1, 1)) . SubStr(suggestion, 2)
+                }
+                return suggestion
+            }
+        }
+    }
+    return ""
 }
 
 GetPossibleMatches(seq) {
@@ -137,6 +179,8 @@ ProcessSequence() {
                     UpdateVisualBufferFromWordBuffer()
                 }
                 Send("{Backspace}")
+            } else if output = "^{Backspace}" {
+                DeleteLastWord()
             } else if output = "{Escape}" {
                 wordBuffer := ""
                 visualBuffer := ""
@@ -175,3 +219,20 @@ CancelSequence() {
     LogBuffers("CancelSequence End")
     UpdateOSD()
 }
+
+DeleteLastWord() {
+    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+    LogBuffers("DeleteLastWord Start")
+    if currentSequence != "" {
+        currentSequence := ""
+    } else {
+        if wordBuffer != "" {
+            wordBuffer := RegExReplace(wordBuffer, "\s*\S+\s*$", "")
+            UpdateVisualBufferFromWordBuffer()
+        }
+        Send("^{Backspace}")
+    }
+    LogBuffers("DeleteLastWord End")
+    UpdateOSD()
+}
+

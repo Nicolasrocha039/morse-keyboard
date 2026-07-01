@@ -1,4 +1,4 @@
-﻿NÚMEROS (Prefixo R)
+NÚMEROS (Prefixo R)
 R + [QQ:1 QA:2 QR:3] | R + [AQ:4 AA:5 AR:6]
 R + [RQ:7 RA:8 RR:9] | RRRRR -> 0
 
@@ -14,13 +14,9 @@ RARR + [AQ:_ AA:+ AR:=]
 RARA + [QQQ:< QQA:> QQR:^ QAQ:~]
 RARR + [RQ:`" RA:' RR:{ RAR:}]
 RARR + [RQQ:[ RQA:]]
-SÍLABAS INVERTIDAS (ab, ec, id...)
-Regra: [Vogal] + [Consoante] + Q
-Ex: QQ(a) + QA(b) + Q = QQQAQ (ab)
-Maiús: RR + Invertida (ex: RRQQQAQ = Ab)
 
-SÍLABAS TRIPLAS (C+V+Sufixo)
-+ r (bra, cra...) = Sufixo A (ex: bra=QAQQA)
-+ l (bla, cla...) = Sufixo AQ
-+ h (cha, lha...) = Sufixo AR
-q/g + u (qua...)  = Sufixo AA
+ATALHOS Ctrl+ (Prefixo RA)
+RA + [QA: ^C | QR: ^V | AQ: ^X]
+RA + [AA: ^Z | AR: ^S | RQ: ^A]
+RA + [QQQ:^F | QQA:^N | QRQ:^T]
+RA + [QAQ:^W | QRA:^Y]

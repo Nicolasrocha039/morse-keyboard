@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 
 ; Variáveis globais de interface
 global osdGeral1 := ""
@@ -6,11 +6,12 @@ global osdGeral2 := ""
 global osdSyllables := ""
 global osdTriples := ""
 
-; Dicionário de atalhos
+; Dicionário de atalhos e dicionário de palavras
 global morseMap := Map()
+global dictArray := []
 
 LoadConfig() {
-    global osdGeral1, osdGeral2, osdSyllables, osdTriples, morseMap
+    global osdGeral1, osdGeral2, osdSyllables, osdTriples, morseMap, dictArray
 
     ; Carregar os textos da interface
     try osdGeral1 := FileRead(A_ScriptDir . "\osd_geral_col1.txt", "UTF-8")
@@ -39,7 +40,26 @@ LoadConfig() {
     } catch as err {
         MsgBox("Erro ao carregar morse_map.ini: " . err.Message)
     }
+
+    ; Carregar dicionário de palavras na memória RAM
+    try {
+        dictContent := FileRead(A_ScriptDir . "\dict.ini", "UTF-8")
+        Loop Parse, dictContent, "`n", "`r"
+        {
+            if (A_LoopField != "" && SubStr(A_LoopField, 1, 1) != "[") {
+                parts := StrSplit(A_LoopField, "=")
+                if (parts.Length >= 2 && parts[2] != "") {
+                    dictArray.Push({key: parts[1], word: parts[2]})
+                } else if (parts.Length >= 1 && parts[1] != "") {
+                    dictArray.Push({key: parts[1], word: parts[1]})
+                }
+            }
+        }
+    } catch as err {
+        MsgBox("Erro ao carregar dict.ini: " . err.Message)
+    }
 }
 
 ; Executar no momento da inclusão
 LoadConfig()
+

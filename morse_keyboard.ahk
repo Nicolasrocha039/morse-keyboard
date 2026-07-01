@@ -83,6 +83,10 @@ $Backspace:: {
     UpdateOSD()
 }
 
+$^Backspace:: {
+    DeleteLastWord()
+}
+
 $Space:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
     LogBuffers("Physical Space Start")
@@ -102,13 +106,35 @@ $Enter:: {
     if currentSequence != "" {
         ProcessSequence()
     } else {
-        wordBuffer := ""
-        visualBuffer := ""
-        historyBuffer := []
-        LogBuffers("Cleared Word Buffer")
-        Send("{Enter}")
-        UpdateOSD()
+        suggestion := GetAutocompleteSuggestion(visualBuffer)
+        if (suggestion != "") {
+            ; Envia os backspaces e a sugestao em um unico bloco atomico
+            backspaces := ""
+            loop StrLen(visualBuffer) {
+                backspaces .= "{Backspace}"
+            }
+            Send(backspaces . "{Text}" . suggestion . " ")
+            
+            ; Adjust wordBuffer
+            if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
+                wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
+            }
+            wordBuffer .= suggestion . " "
+            
+            visualBuffer := ""
+            historyBuffer.Push(suggestion . " ")
+            LogBuffers("Autocompleted/Corrected: " . suggestion)
+            UpdateOSD()
+        } else {
+            wordBuffer := ""
+            visualBuffer := ""
+            historyBuffer := []
+            LogBuffers("Cleared Word Buffer")
+            Send("{Enter}")
+            UpdateOSD()
+        }
     }
     LogBuffers("Physical Enter End")
 }
 #HotIf
+

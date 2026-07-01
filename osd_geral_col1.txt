@@ -1,4 +1,4 @@
-﻿MINÚSCULAS (Q, A, R)
+MINÚSCULAS (Q, A, R)
 Q + [Q:a A:b R:c]  QQ + [Q:d A:e R:f]
 QA+ [Q:g A:h R:i]  QR + [Q:j A:k R:l]
 A + [Q:m A:n R:o]  AQ + [Q:p A:q R:r]
@@ -11,9 +11,14 @@ Circ.:  QAR+[Q:â A:ê R:ô]
 Til:    QAQ+[Q:ã A:õ R:ões] AQRR:ão
 Crase/Cedilha: RQQQ:à | RAQQ:ç
 
-SÍLABAS UNIVERSAIS (ba, ce, di...)
-Regra: [Consoante] + [Vogal] + R
-Vogais: QQ:a | QA:e | QR:i | AQ:o | AA:u
-Ex: QA(b) + QQ(a) + R = QAQQR (ba)
-Maiús: RR + Sílaba (ex: RRQAQQR = Ba)
+CONTROLES E NAVEGAÇÃO (Prefixo RQR)
+RQRQ: Tab         | RQRA: Delete
+RQRR: Home        | RQRRRQ: End
+RQRRA: PgUp       | RQRRR: PgDn
+RQRRRA: Shift+Tab
+Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲]
 
+SÍLABAS UNIVERSAIS (Consoante + Vogal + R)
+SÍLABAS INVERTIDAS (Vogal + Cons. + Q)
+SÍLABAS TRIPLAS (C + V + S)
+S= {A, AQ, AR, AA}

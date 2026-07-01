@@ -1,25 +1,16 @@
 Traceback (most recent call last):
-  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 243, in <module>
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 240, in <module>
     asyncio.run(main())
-    ~~~~~~~~~~~^^^^^^^^
-  File "C:\Program Files\Python313\Lib\asyncio\runners.py", line 195, in run
-    return runner.run(main)
-           ~~~~~~~~~~^^^^^^
-  File "C:\Program Files\Python313\Lib\asyncio\runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-  File "C:\Program Files\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
-    return future.result()
-           ~~~~~~~~~~~~~^^
-  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 236, in main
+  File "asyncio\runners.py", line 190, in run
+  File "asyncio\runners.py", line 118, in run
+  File "asyncio\base_events.py", line 654, in run_until_complete
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 233, in main
     async with websockets.serve(ws_handler, "0.0.0.0", 8765):
-               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Nicolas\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\server.py", line 813, in __aenter__
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\python\Lib\site-packages\websockets\asyncio\server.py", line 829, in __aenter__
     return await self
            ^^^^^^^^^^
-  File "C:\Users\Nicolas\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\server.py", line 831, in __await_impl__
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\python\Lib\site-packages\websockets\asyncio\server.py", line 847, in __await_impl__
     server = await self.create_server
              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Program Files\Python313\Lib\asyncio\base_events.py", line 1622, in create_server
-    raise OSError(err.errno, msg) from None
-OSError: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8765): [winerror 10048] normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta)
+  File "asyncio\base_events.py", line 1536, in create_server
+OSError: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8765): normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta)

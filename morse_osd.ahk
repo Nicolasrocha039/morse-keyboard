@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 
 global MONO_FONT := "Consolas"
 
@@ -290,7 +290,12 @@ UpdateOSD() {
             }
         } else {
             if visualBuffer != "" {
-                displayText := "Acumulado: " . visualBuffer
+                suggestion := GetAutocompleteSuggestion(visualBuffer)
+                if (suggestion != "") {
+                    displayText := "Acumulado: " . visualBuffer . " -> [Enter: " . suggestion . "]"
+                } else {
+                    displayText := "Acumulado: " . visualBuffer
+                }
             } else {
                 displayText := "aguardando..."
             }
@@ -349,3 +354,4 @@ UpdateOSD() {
     ; Sempre sincronizar com o servidor Python (alimenta o navegador)
     SendStateToPython()
 }
+
