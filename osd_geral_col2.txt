@@ -1,34 +1,31 @@
-NÚMEROS (Prefixo R)
-R + [QQ:1 QA:2 QR:3] | R + [AQ:4 AA:5 AR:6]
-R + [RQ:7 RA:8 RR:9] | RRRRR -> 0
+SÍMBOLOS (RARR)
+RARR + [Q:/ A:; R:-]
+RARR + [QQ:= QA:[ QR:]]
+RARR + [AQ:' AA:\]
 
-PONTUAÇÃO
-RRRRQ -> .   |   RRRRA -> ,
+ATALHOS (Ctrl, Shift, Alt)
+RA(Ctrl) | RAAQ(Shift) | RAQA(Alt)
+Ex: RA + QR(c) = Ctrl+C
+Ex: RAAQ + RQQ(1) = !
 
-SÍMBOLOS COMUNS (RARA ou RARR)
-RARA + [Q:? A:! R:;] | RARR + [Q:: A:/ R:\]
-RARA + [QQ:@ QA:# QR:$] 
-RARA + [AQ:% AA:& AR:*]
-RARR + [QQ:( QA:) QR:-]
-RARR + [AQ:_ AA:+ AR:=]
-RARA + [QQQ:< QQA:> QQR:^ QAQ:~]
-RARR + [RQ:`" RA:' RR:{ RAR:}]
-RARR + [RQQ:[ RQA:]]
-
-ATALHOS Ctrl+ (Prefixo RA)
-RA + [QA: ^C | QR: ^V | AQ: ^X]
-RA + [AA: ^Z | AR: ^S | RQ: ^A]
-RA + [QQQ:^F | QQA:^N | QRQ:^T]
-RA + [QAQ:^W | QRA:^Y]
+ATALHOS (Modificador F-Key)
+Digite RAAR (FKey) + Número
+Ex: RAAR + RQQ(1) = F1
+Ex: RAAR + RRRRR(0) = F10
+Letras a=F11, b=F12
+CONTROLES DE TECLADO
+RQRQ: Tab      | RQRA: Delete
+RQRR: Home     | RQRRRQ: End
+RQRRA: PgUp    | RQRRR: PgDn
+RQRRRA: Shift+Tab
 
 MOUSE & SCRIPT
 Mouse: RQQA(Esq) RQQR(Dir) RARA(Meio)
-Botão Físico: RQQQ(Travar/Liberar Esq)
+Travar Esq: RQQQ
 Rolagem: RARR(Cima) RRRR(Baixo)
 Swipe: QQQQQ(Esq) AAAAA(Dir)
-Script: RQARA(Recarregar) RQARR(Repetir)
+Recarregar: RQARA
 
-ANDROID 100% (Apenas no Modo ADB)
-Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲] e RQAA(Enter)
-Menu: RQRR(Home) RQAR(Voltar) RQRQ(Recentes)
-Tela/BT: RQRAR(Ligar/Desligar) RQRQA(Bluetooth) RQRQQA(Conectar Disp)
+ANDROID 100% (Modo ADB)
+Menu: RQRR(Home) RQAR(Voltar) RQRQ(Rec)
+Power: RQRAR | BT: RQRQA | Parear: RQRQQA

@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 
 SendStateToPython() {
     global wordBuffer, visualBuffer, currentSequence, morseActive
@@ -22,7 +22,7 @@ SendStateToPython() {
     
     try {
         http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://localhost:8766/state", true)
+        http.open("POST", "http://127.0.0.1:8766/state", true)
         http.setRequestHeader("Content-Type", "application/json")
         http.send(jsonData)
     }
@@ -73,7 +73,7 @@ GetAutocompleteSuggestion(visualWord) {
     
     try {
         http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://localhost:8766/suggest", false) ; síncrono
+        http.open("POST", "http://127.0.0.1:8766/suggest", false) ; síncrono
         http.setRequestHeader("Content-Type", "application/json")
         http.send(jsonData)
         
@@ -99,7 +99,7 @@ LearnWordContext() {
     jsonData := '{"wordBuffer": "' . escapedWordBuffer . '"}'
     try {
         http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://localhost:8766/learn", true) ; assíncrono
+        http.open("POST", "http://127.0.0.1:8766/learn", true) ; assíncrono
         http.setRequestHeader("Content-Type", "application/json")
         http.send(jsonData)
     }

@@ -1,10 +1,10 @@
 Traceback (most recent call last):
-  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 278, in <module>
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 489, in <module>
     asyncio.run(main())
   File "asyncio\runners.py", line 190, in run
   File "asyncio\runners.py", line 118, in run
   File "asyncio\base_events.py", line 654, in run_until_complete
-  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 271, in main
+  File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\websocket_server.py", line 482, in main
     async with websockets.serve(ws_handler, "0.0.0.0", 8765):
   File "C:\Users\Nicolas\.gemini\antigravity-ide\scratch\morse_keyboard\python\Lib\site-packages\websockets\asyncio\server.py", line 829, in __aenter__
     return await self

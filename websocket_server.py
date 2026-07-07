@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 
 # Removido hack de AppData: Agora usando dependências locais do Python embutido.
@@ -90,21 +90,30 @@ loop = None
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 unigram_dict = []
+unigram_set = set()
 bigram_dict = {}
 
 def load_dictionaries():
-    global unigram_dict, bigram_dict
+    global unigram_dict, unigram_set, bigram_dict
     dict_path = os.path.join(SCRIPT_DIR, "dict.ini")
     if os.path.isfile(dict_path):
-        with open(dict_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("["):
-                    parts = line.split("=")
-                    if len(parts) >= 2 and parts[1]:
-                        unigram_dict.append(parts[1])
-                    elif len(parts) >= 1 and parts[0]:
-                        unigram_dict.append(parts[0])
+        try:
+            with open(dict_path, "r", encoding="utf-8-sig") as f:
+                lines = f.readlines()
+        except UnicodeDecodeError:
+            with open(dict_path, "r", encoding="cp1252") as f:
+                lines = f.readlines()
+        
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith("["):
+                parts = line.split("=")
+                if len(parts) >= 2 and parts[1]:
+                    unigram_dict.append(parts[1])
+                    unigram_set.add(parts[1].lower())
+                elif len(parts) >= 1 and parts[0]:
+                    unigram_dict.append(parts[0])
+                    unigram_set.add(parts[0].lower())
                         
     bigrams_path = os.path.join(SCRIPT_DIR, "bigrams.json")
     if os.path.isfile(bigrams_path):
@@ -113,6 +122,18 @@ def load_dictionaries():
                 bigram_dict = json.load(f)
         except Exception:
             bigram_dict = {}
+            
+    if not bigram_dict:
+        common_bigrams = [
+            ("com", "certeza"), ("bom", "dia"), ("boa", "tarde"), 
+            ("boa", "noite"), ("por", "favor"), ("tudo", "bem"), 
+            ("muito", "obrigado"), ("um", "pouco"), ("mais", "ou"), ("ou", "menos")
+        ]
+        for w1, w2 in common_bigrams:
+            if w1 not in bigram_dict:
+                bigram_dict[w1] = {}
+            bigram_dict[w1][w2] = 1
+        save_bigrams()
 
 def save_bigrams():
     bigrams_path = os.path.join(SCRIPT_DIR, "bigrams.json")
@@ -205,9 +226,19 @@ class StateHandler(BaseHTTPRequestHandler):
                     visual_buffer = data.get("visualBuffer", "").lower()
                     
                     words = word_buffer.split()
-                    prev_word = words[-1].lower() if words else ""
+                    prev_word = words[-1].lower() if len(words) >= 1 else ""
+                    prev_word2 = words[-2].lower() if len(words) >= 2 else ""
                     
-                    if prev_word in bigram_dict:
+                    trigram_key = f"{prev_word2} {prev_word}"
+                    if prev_word2 and trigram_key in bigram_dict:
+                        next_words = bigram_dict[trigram_key]
+                        sorted_next = sorted(next_words.items(), key=lambda item: item[1], reverse=True)
+                        for n_word, freq in sorted_next:
+                            if n_word.startswith(visual_buffer):
+                                suggestion = n_word
+                                break
+                    
+                    if not suggestion and prev_word in bigram_dict:
                         next_words = bigram_dict[prev_word]
                         sorted_next = sorted(next_words.items(), key=lambda item: item[1], reverse=True)
                         for n_word, freq in sorted_next:
@@ -223,9 +254,9 @@ class StateHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     print("Error predicting suggestion:", e)
             
-            resp = json.dumps({"suggestion": suggestion})
+            resp = json.dumps({"suggestion": suggestion}, ensure_ascii=False)
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(resp.encode('utf-8'))
@@ -240,18 +271,69 @@ class StateHandler(BaseHTTPRequestHandler):
                     
                     words = word_buffer.split()
                     if len(words) >= 2:
-                        w1 = words[-2].lower()
-                        w2 = words[-1].lower()
+                        w3 = words[-1].lower()
+                        w2 = words[-2].lower()
+                        w1 = words[-3].lower() if len(words) >= 3 else ""
                         
-                        if w1 not in bigram_dict:
-                            bigram_dict[w1] = {}
-                        if w2 not in bigram_dict[w1]:
-                            bigram_dict[w1][w2] = 0
-                        bigram_dict[w1][w2] += 1
-                        
-                        save_bigrams()
+                        if w3 in unigram_set and w2 in unigram_set:
+                            if w2 not in bigram_dict:
+                                bigram_dict[w2] = {}
+                            if w3 not in bigram_dict[w2]:
+                                bigram_dict[w2][w3] = 0
+                            bigram_dict[w2][w3] = min(50, bigram_dict[w2][w3] + 1)
+                            
+                            if w1 and w1 in unigram_set:
+                                tri_key = f"{w1} {w2}"
+                                if tri_key not in bigram_dict:
+                                    bigram_dict[tri_key] = {}
+                                if w3 not in bigram_dict[tri_key]:
+                                    bigram_dict[tri_key][w3] = 0
+                                bigram_dict[tri_key][w3] = min(50, bigram_dict[tri_key][w3] + 1)
+                            
+                            save_bigrams()
                 except Exception as e:
-                    print("Error learning bigram:", e)
+                    print("Error learning:", e)
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+
+        elif self.path == "/unlearn":
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                    word_buffer = data.get("wordBuffer", "").strip()
+                    
+                    words = word_buffer.split()
+                    if len(words) >= 2:
+                        w3 = words[-1].lower()
+                        w2 = words[-2].lower()
+                        w1 = words[-3].lower() if len(words) >= 3 else ""
+                        
+                        modified = False
+                        if w2 in bigram_dict and w3 in bigram_dict[w2]:
+                            bigram_dict[w2][w3] -= 1
+                            if bigram_dict[w2][w3] <= 0:
+                                del bigram_dict[w2][w3]
+                            modified = True
+                            
+                        tri_key = f"{w1} {w2}"
+                        if tri_key in bigram_dict and w3 in bigram_dict[tri_key]:
+                            bigram_dict[tri_key][w3] -= 1
+                            if bigram_dict[tri_key][w3] <= 0:
+                                del bigram_dict[tri_key][w3]
+                                if not bigram_dict[tri_key]:
+                                    del bigram_dict[tri_key]
+                            modified = True
+                            
+                        if modified:
+                            save_bigrams()
+                except Exception as e:
+                    print("Error unlearning:", e)
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -277,7 +359,7 @@ def run_http_server():
     except Exception:
         local_ip = 'SEU-IP'
     print(f"Servidor HTTP rodando em:")
-    print(f"  http://localhost:8766  (este PC)")
+    print(f"  http://127.0.0.1:8766  (este PC)")
     print(f"  http://{local_ip}:8766  (rede local)")
     print(f"\n==============================================")
     print(f"📱 CONTROLE REMOTO PELO CELULAR:")
@@ -288,16 +370,45 @@ def run_http_server():
 async def ws_handler(websocket):
     clients.add(websocket)
     # Envia o estado inicial
-    await websocket.send(json.dumps({"type": "state", "data": state}))
+    await websocket.send(json.dumps({"type": "state", "data": state}, ensure_ascii=False))
     try:
         async for message in websocket:
-            pass
+            try:
+                data = json.loads(message)
+                if data.get("type") == "semanticron_command":
+                    command = data.get("command", "")
+                    if command:
+                        # Executar o SemantiCron.py de forma assíncrona
+                        script_path = os.path.join(SCRIPT_DIR, "SemantiCron.py")
+                        process = await asyncio.create_subprocess_exec(
+                            sys.executable, script_path, command,
+                            stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.PIPE
+                        )
+                        
+                        stdout, stderr = await process.communicate()
+                        
+                        # Enviar o resultado de volta para o terminal
+                        output = ""
+                        if stdout:
+                            output += stdout.decode('utf-8', errors='replace')
+                        if stderr:
+                            output += "\n" + stderr.decode('utf-8', errors='replace')
+                            
+                        response = {
+                            "type": "semanticron_response",
+                            "output": output,
+                            "command": command
+                        }
+                        await websocket.send(json.dumps(response, ensure_ascii=False))
+            except Exception as e:
+                print("Error handling ws message:", e)
     finally:
         clients.remove(websocket)
 
 async def broadcast_state():
     if clients:
-        message = json.dumps({"type": "state", "data": state})
+        message = json.dumps({"type": "state", "data": state}, ensure_ascii=False)
         dead = set()
         for client in list(clients):
             try:
