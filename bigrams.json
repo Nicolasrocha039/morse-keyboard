@@ -72,7 +72,10 @@
     "posso": 3,
     "de": 1,
     "des": 1,
-    "descubro": 3
+    "descubro": 3,
+    "tentou": 1,
+    "tento": 1,
+    "nao": 1
   },
   "espero": {},
   "tu": {
@@ -258,7 +261,8 @@
     "ao": 1
   },
   "ao": {
-    "contexto": 1
+    "contexto": 1,
+    "clicar": 1
   },
   "alinhada ao": {
     "contexto": 1
@@ -501,7 +505,8 @@
     "age": 1,
     "agenda": 1,
     "at": 1,
-    "ata": 1
+    "ata": 1,
+    "acentos": 2
   },
   "líderes": {
     "da": 1
@@ -595,7 +600,8 @@
     "colunas": 1,
     "pá": 1,
     "página": 2,
-    "páginas": 2
+    "páginas": 2,
+    "teclas": 2
   },
   "delegar as": {
     "compras": 1
@@ -853,7 +859,7 @@
     "minhas": 1
   },
   "quando": {
-    "eu": 1
+    "eu": 2
   },
   "preciso": {
     "de": 1,
@@ -913,7 +919,8 @@
     "ca": 1,
     "cap": 1,
     "capa": 1,
-    "capaz": 4
+    "capaz": 4,
+    "feito": 1
   },
   "podem ser": {
     "removido": 1
@@ -931,7 +938,9 @@
     "para": 1
   },
   "mas": {
-    "agora": 1
+    "agora": 1,
+    "nao": 1,
+    "as": 1
   },
   "mas agora": {
     "eu": 1
@@ -1020,7 +1029,8 @@
     "funcionam": 1
   },
   "funcionam": {
-    "como": 1
+    "como": 1,
+    "as": 1
   },
   "que funcionam": {
     "como": 1
@@ -1297,7 +1307,8 @@
     "projeto": 1
   },
   "projeto": {
-    "na": 3
+    "na": 3,
+    "atual": 1
   },
   "do projeto": {
     "na": 3
@@ -1693,5 +1704,83 @@
   },
   "beber beber": {
     "água": 4
+  },
+  "clicar": {
+    "com": 1
+  },
+  "ao clicar": {
+    "com": 1
+  },
+  "ele": {
+    "confirma": 1
+  },
+  "nao": {
+    "limpa": 1,
+    "consigo": 1,
+    "funcionam": 1
+  },
+  "mas nao": {
+    "limpa": 1
+  },
+  "quando eu": {
+    "tentou": 1,
+    "tento": 1
+  },
+  "tento": {
+    "arrastar": 1
+  },
+  "eu tento": {
+    "arrastar": 1
+  },
+  "arrastar": {
+    "as": 1
+  },
+  "tento arrastar": {
+    "as": 1
+  },
+  "mouse": {
+    "trava": 1
+  },
+  "eu nao": {
+    "consigo": 1
+  },
+  "consigo": {
+    "soltar": 1
+  },
+  "nao consigo": {
+    "soltar": 1
+  },
+  "mas as": {
+    "teclas": 1
+  },
+  "nao funcionam": {
+    "as": 1
+  },
+  "funcionam as": {
+    "teclas": 1
+  },
+  "mesmo": {
+    "deve": 1
+  },
+  "deve": {
+    "ser": 1
+  },
+  "mesmo deve": {
+    "ser": 1
+  },
+  "deve ser": {
+    "feito": 1
+  },
+  "feito": {
+    "com": 1
+  },
+  "ser feito": {
+    "com": 1
+  },
+  "atual": {
+    "para": 1
+  },
+  "projeto atual": {
+    "para": 1
   }
 }

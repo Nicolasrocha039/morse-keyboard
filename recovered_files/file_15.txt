@@ -1,0 +1,292 @@
+Created At: 2026-07-07T08:12:52Z
+Completed At: 2026-07-07T08:12:52Z
+File Path: `file:///c:/Users/Nicolas/.gemini/antigravity-ide/scratch/morse_keyboard/morse_osd.ahk`
+Total Lines: 284
+Total Bytes: 8998
+Showing lines 1 to 284
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: #Requires AutoHotkey v2.0
+2: 
+3: global MONO_FONT := "Consolas"
+4: 
+5: FormatForCard(val) {
+6:     if val = "{Space}"
+7:         return "Espaço"
+8:     if val = "{Enter}"
+9:         return "Enter"
+10:     if val = "{Backspace}"
+11:         return "Bksp"
+12:     if val = "{Delete}"
+13:         return "Del"
+14:     if val = "{Tab}"
+15:         return "Tab"
+16:     if val = "{Escape}"
+17:         return "Esc"
+18:     if val = "{Up}"
+19:         return "▲"
+20:     if val = "{Down}"
+21:         return "▼"
+22:     if val = "{Left}"
+23:         return "◀"
+24:     if val = "{Right}"
+25:         return "▶"
+26:     if val = "{Home}"
+27:         return "Home"
+28:     if val = "{End}"
+29:         return "End"
+30:     if val = "{PgUp}"
+31:         return "PgUp"
+32:     if val = "{PgDn}"
+33:         return "PgDn"
+34:     if val = "{Insert}"
+35:         return "Ins"
+36:     if SubStr(val, 1, 1) = "^"
+37:         return "Ctrl+" . Format("{:U}", SubStr(val, 2))
+38:     if SubStr(val, 1, 1) = "{" && SubStr(val, -1) = "}" {
+39:         return SubStr(val, 2, -1)
+40:     }
+41:     return val
+42: }
+43: 
+44: CreateKeyCard(guiObj, keyName, x, y) {
+45:     card := guiObj.AddText("x" . x . " y" . y . " w50 h50 +Background0x1c1c2e +Border", "")
+46:     label := guiObj.AddText("x" . (x+2) . " y" . (y+2) . " w46 h15 Center +BackgroundTrans c0x9999bb", keyName)
+47:     label.SetFont("s8 Bold", "Segoe UI")
+48:     val := guiObj.AddText("x" . (x+2) . " y" . (y+18) . " w46 h30 Center +BackgroundTrans cWhite", "")
+49:     val.SetFont("s10 Bold", "Consolas")
+50:     return {card: card, label: label, val: val}
+51: }
+52: 
+53: UpdateCard(key, valText, isActive) {
+54:     global cards
+55:     cardObj := cards[key]
+56:     
+57:     if isActive {
+58:         cardObj.card.Opt("+Background0x1c1c2e")
+59:         cardObj.label.Opt("c0x9999bb")
+60:         cardObj.val.Opt("c0x00FFCC")
+61:         cardObj.val.Text := valText
+62:     } else {
+63:         cardObj.card.Opt("+Background0x0b0b14")
+64:         cardObj.label.Opt("c0x222233")
+65:         cardObj.val.Opt("c0x222233")
+66:         cardObj.val.Text := "-"
+67:     }
+68:     cardObj.card.Redraw()
+69:     cardObj.label.Redraw()
+70:     cardObj.val.Redraw()
+71: }
+72: 
+73: UpdateKeyGuide(seq) {
+74:     global traditionalMode
+75:     keyMapping := Map("Q", "Q", "A", "A", "R", "R")
+76:     iniPath := GetActiveIniPath()
+77:     
+78:     if (traditionalMode) {
+79:         cards["A"].label.Text := "."
+80:         cards["R"].label.Text := "-"
+81:     } else {
+82:         cards["A"].label.Text := "A"
+83:         cards["R"].label.Text := "R"
+84:     }
+85:     
+86:     for k, cardKey in keyMapping {
+87:         nextSeq := seq . k
+88:         global morseMap
+89:         val := morseMap.Has(nextSeq) ? morseMap[nextSeq] : "NOT_FOUND"
+90:         
+91:         if (val != "NOT_FOUND" && val != "") {
+92:             formattedVal := FormatForCard(val)
+93:             UpdateCard(cardKey, formattedVal, true)
+94:         } else {
+95:             ; Como o mapa de atalhos não fica mais na memória para consultar os prefixos,
+96:             ; exibimos "-" (inativo) sempre que não for o atalho exato.
+97:             UpdateCard(cardKey, "-", false)
+98:         }
+99:     }
+100:     UpdateCard("Ent", "Conf", true)
+101: }
+102: 
+103: ; ── GUI pequena (OFF) ──
+104: global osdMini := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize")
+105: osdMini.Show("Hide x10 y10")
+106: osdMini.BackColor := "0x12121e"
+107: osdMini.MarginX := 10
+108: osdMini.MarginY := 6
+109: 
+110: global miniStatus := osdMini.AddText("cWhite w200 Center", "⌨ MORSE KB: OFF")
+111: miniStatus.SetFont("s10 Bold", "Segoe UI")
+112: 
+113: global miniHint := osdMini.AddText("c0x555577 w200 Center", "CapsLock para ativar")
+114: miniHint.SetFont("s8", "Segoe UI")
+115: 
+116: osdMini.Show("NoActivate")
+117: WinSetTransparent(220, osdMini)
+118: 
+119: ; ── GUI completa (ON) ──
+120: global osd := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize", "MorseGuideOSD")
+121: osd.Show("Hide x10 y10")
+122: osd.BackColor := "0x0b0b14"
+123: osd.MarginX := 10
+124: osd.MarginY := 10
+125: 
+126: ; Status e Informações da Sequência
+127: global statusText := osd.AddText("x15 y10 w1260 h28 c0x00FFCC", "⌨ MORSE KEYBOARD: ATIVO")
+128: statusText.SetFont("s14 Bold", "Segoe UI")
+129: 
+130: global seqLabel := osd.AddText("x15 y38 w80 h24 c0x8888aa", "Sequência:")
+131: seqLabel.SetFont("s11", "Segoe UI")
+132: 
+133: global seqText := osd.AddText("x100 y34 w800 h36 c0x00d4ff", "aguardando...")
+134: seqText.SetFont("s20 Bold", MONO_FONT)
+135: 
+136: global hintText := osd.AddText("x1000 y38 w260 h24 Right c0x666688", "1 / Enter para confirmar")
+137: hintText.SetFont("s11 Italic", "Segoe UI")
+138: 
+139: global sepLine := osd.AddText("x15 y75 w1260 h1 +Background0x222233", "")
+140: 
+141: global cards := Map()
+142: CreateKeyCards() {
+143:     global osd, cards
+144:     cards["Q"] := CreateKeyCard(osd, "Q", 15, 85)
+145:     cards["A"] := CreateKeyCard(osd, "A", 70, 85)
+146:     cards["R"] := CreateKeyCard(osd, "R", 15, 140)
+147:     cards["Ent"] := CreateKeyCard(osd, "Enter", 70, 140)
+148: }
+149: CreateKeyCards()
+150: 
+151: ; Colunas dinâmicas (4 colunas lado a lado)
+152: LoadColumns() {
+153:     global osdGeral1, osdGeral2
+154:     
+155:     col1 := "", col2 := "", col3 := "", col4 := ""
+156:     
+157:     lines1 := StrSplit(osdGeral1, "`n", "`r")
+158:     for index, line in lines1 {
+159:         if index <= 17
+160:             col1 .= line . "`n"
+161:         else if index >= 19 && index <= 36
+162:             col2 .= line . "`n"
+163:     }
+164:     
+165:     lines2 := StrSplit(osdGeral2, "`n", "`r")
+166:     for index, line in lines2 {
+167:         if index <= 15
+168:             col3 .= line . "`n"
+169:         else if index >= 16 && index <= 31
+170:             col4 .= line . "`n"
+171:     }
+172:     
+173:     global t1c1 := osd.AddText("x140 y85 w190 h300 c0xaaaacc", col1)
+174:     t1c1.SetFont("s11 Bold", MONO_FONT)
+175:     global t1c2 := osd.AddText("x350 y85 w290 h300 c0xaaaacc", col2)
+176:     t1c2.SetFont("s11 Bold", MONO_FONT)
+177:     global t1c3 := osd.AddText("x660 y85 w285 h300 c0xaaaacc", col3)
+178:     t1c3.SetFont("s11 Bold", MONO_FONT)
+179:     global t1c4 := osd.AddText("x965 y85 w340 h300 c0xaaaacc", col4)
+180:     t1c4.SetFont("s11 Bold", MONO_FONT)
+181: }
+182: LoadColumns()
+183: 
+184: ToggleMaps() {
+185:     global showMaps, osd, t1c1, t1c2, t1c3, t1c4
+186:     showMaps := !showMaps
+187:     
+188:     if showMaps {
+189:         t1c1.Visible := true
+190:         t1c2.Visible := true
+191:         t1c3.Visible := true
+192:         t1c4.Visible := true
+193:     } else {
+194:         t1c1.Visible := false
+195:         t1c2.Visible := false
+196:         t1c3.Visible := false
+197:         t1c4.Visible := false
+198:     }
+199:     UpdateOSD()
+200: }
+201: 
+202: ToggleBrowserMode() {
+203:     global USE_BROWSER_OSD, osd, osdMini
+204:     USE_BROWSER_OSD := !USE_BROWSER_OSD
+205:     if USE_BROWSER_OSD {
+206:         osd.Hide()
+207:         osdMini.Hide()
+208:         ToolTip("Modo Navegador ATIVO ─ http://localhost:8766", A_ScreenWidth/2 - 200, A_ScreenHeight/2 - 30)
+209:     } else {
+210:         ToolTip("Modo OSD ATIVO", A_ScreenWidth/2 - 100, A_ScreenHeight/2 - 30)
+211:     }
+212:     SetTimer(() => ToolTip(), -1800)
+213:     UpdateOSD()
+214: }
+215: 
+216: UpdateOSD() {
+217:     global morseActive, currentSequence, statusText, seqText, hintText, showMaps, visualBuffer
+218:     global osd, osdMini, miniStatus, sepLine, USE_BROWSER_OSD
+219: 
+220:     displayText := ""
+221:     if morseActive {
+222:         if currentSequence != "" {
+223:             if visualBuffer != "" {
+224:                 displayText := visualBuffer . " + [ " . FormatSequence(currentSequence) . " ]"
+225:             } else {
+226:                 displayText := "[ " . FormatSequence(currentSequence) . " ]"
+227:             }
+228:         } else {
+229:             if visualBuffer != "" {
+230:                 suggestion := GetAutocompleteSuggestion(visualBuffer)
+231:                 if (suggestion != "") {
+232:                     displayText := "Acumulado: " . visualBuffer . " -> [Enter: " . suggestion . "]"
+233:                 } else {
+234:                     displayText := "Acumulado: " . visualBuffer
+235:                 }
+236:             } else {
+237:                 displayText := "aguardando..."
+238:             }
+239:         }
+240:     }
+241: 
+242:     if USE_BROWSER_OSD {
+243:         osd.Hide()
+244:         osdMini.Hide()
+245:     } else {
+246:         if morseActive {
+247:             osdMini.Hide()
+248:             seqText.Text := displayText
+249:             if currentSequence != "" {
+250:                 hintText.Text := GetPossibleMatches(currentSequence)
+251:             } else {
+252:                 hintText.Text := "Confirmar: Enter | Mapas: d"
+253:             }
+254:             UpdateKeyGuide(currentSequence)
+255: 
+256:             if showMaps {
+257:                 statusText.Opt("w1260")
+258:                 statusText.Text := "⌨ MORSE KEYBOARD: ATIVO"
+259:                 seqText.Opt("w800")
+260:                 hintText.Visible := true
+261:                 sepLine.Opt("w1260")
+262:                 try osd.Show("w1300 h390 NoActivate")
+263:                 try WinSetTransparent(220, osd)
+264:             } else {
+265:                 statusText.Opt("w220")
+266:                 statusText.Text := "⌨ MORSE KB: ATIVO"
+267:                 seqText.Opt("w140")
+268:                 hintText.Visible := false
+269:                 sepLine.Opt("w220")
+270:                 try osd.Show("w250 h195 NoActivate")
+271:                 try WinSetTransparent(220, osd)
+272:             }
+273:             statusText.Redraw()
+274:             seqText.Redraw()
+275:             sepLine.Redraw()
+276:         } else {
+277:             osd.Hide()
+278:             miniStatus.Text := "⌨ MORSE KB: OFF"
+279:             try osdMini.Show("NoActivate")
+280:         }
+281:     }
+282:     SendStateToPython()
+283: }
+284: 
+The above content shows the entire, complete file contents of the requested file.

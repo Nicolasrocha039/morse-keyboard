@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda SemantiCron</title>
+    <style>
+        :root {
+            --bg-color: #282a36;
+            --fg-color: #f8f8f2;
+            --prompt-color: #50fa7b;
+            --error-color: #ff5555;
+            --input-color: #8be9fd;
+            --comment-color: #6272a4;
+            --card-bg: #44475a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--fg-color);
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Nav Bar Styles */
+        nav {
+            background-color: #1e1f29;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--comment-color);
+            margin: -20px -20px 20px -20px; /* pull up to edge */
+        }
+        
+        nav h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--prompt-color);
+        }
+
+        nav a.btn {
+            background-color: var(--comment-color);
+            color: var(--fg-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        nav a.btn:hover {
+            background-color: var(--input-color);
+            color: var(--bg-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Agenda Grid */
+        h2 {
+            color: var(--input-color);
+            border-bottom: 1px solid var(--comment-color);
+            padding-bottom: 10px;
+        }
+
+        #agenda-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--prompt-color);
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .task-action {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--fg-color);
+            margin-bottom: 8px;
+        }
+
+        .task-intent {
+            color: var(--comment-color);
+            font-style: italic;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .task-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--input-color);
+        }
+
+        .empty-state {
+            color: var(--comment-color);
+            font-style: italic;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            color: var(--prompt-color);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>>_ SemantiCron Agenda</h1>
+        <div class="nav-links">
+            <a href="terminal.html" class="btn">Terminal</a>
+            <a href="agenda.html" class="btn">Agenda</a>
+            <a href="mapa_visual.html" class="btn">Mapa Visual</a>
+            <a href="osd.html" class="btn">OSD</a>
+            <a href="remote.html" class="btn">Controle Remoto</a>
+        </div>
+    </nav>
+    
+    <h2>Agendamentos (Próximas 24 horas)</h2>
+    
+    <div id="status" class="loading">Carregando tarefas...</div>
+    <div id="agenda-container"></div>
+
+    <script>
+        const container = document.getElementById('agenda-container');
+        const statusEl = document.getElementById('status');
+
+        async function loadAgenda() {
+            try {
+                // Adiciona timestamp para evitar cache do json
+                const response = await fetch('/agenda.json?t=' + new Date().getTime());
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        statusEl.textContent = 'Nenhum agendamento encontrado (agenda vazia).';
+                        statusEl.className = 'empty-state';
+                        container.innerHTML = '';
+                        return;
+                    }
+                    throw new Error('Erro na requisição: ' + response.statusText);
+                }
+                
+                const tasks = await response.json();
+                
+                if (tasks.length === 0) {
+                    statusEl.textContent = 'Não há tarefas agendadas no momento.';
+                    statusEl.className = 'empty-state';
+                    container.innerHTML = '';
+                    return;
+                }
+
+                statusEl.style.display = 'none';
+                container.innerHTML = '';
+
+                // Filtrar apenas as ultimas 24h a partir de agora
+                const now = Date.now() / 1000;
+                const next24h = now + (24 * 60 * 60);
+
+                const validTasks = tasks.filter(t => t.trigger_time >= now && t.trigger_time <= next24h);
+                
+                // Ordenar pela hora que vai triggar
+                validTasks.sort((a, b) => a.trigger_time - b.trigger_time);
+
+                if (validTasks.length === 0) {
+                    statusEl.textContent = 'Não há tarefas agendadas para as próximas 24 horas.';
+                    statusEl.className = 'empty-state';
+                    statusEl.style.display = 'block';
+                    return;
+                }
+
+                validTasks.forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    
+                    const action = document.createElement('div');
+                    action.className = 'task-action';
+                    action.textContent = task.action;
+                    
+                    const intent = document.createElement('div');
+                    intent.className = 'task-intent';
+                    intent.textContent = `"${task.intent}"`;
+                    
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'task-time';
+                    
+                    const triggerSpan = document.createElement('span');
+                    // Formatando a hora de execução
+                    const d = new Date(task.trigger_time * 1000);
+                    triggerSpan.textContent = 'Executa às: ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    
+                    timeDiv.appendChild(triggerSpan);
+
+                    card.appendChild(action);
+                    card.appendChild(intent);
+                    card.appendChild(timeDiv);
+                    
+                    container.appendChild(card);
+                });
+                
+            } catch (error) {
+                console.error("Erro ao carregar agenda:", error);
+                statusEl.textContent = 'Não foi possível carregar a agenda. Verifique se o servidor está rodando.';
+                statusEl.className = 'error';
+                statusEl.style.display = 'block';
+            }
+        }
+
+        // Carrega inicialmente
+        loadAgenda();
+
+        // Recarrega a cada 5 segundos
+        setInterval(loadAgenda, 5000);
+    </script>
+</body>
+</html>
+
