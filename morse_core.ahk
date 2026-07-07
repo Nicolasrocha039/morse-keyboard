@@ -383,7 +383,7 @@ ProcessSequence() {
         }
         if output = "{MKey}" {
             pendingPrefix .= "M:"
-            ToolTip("Prefixo Media: 1=Play 2=Stop 3=Prev 4=Next 5=Vol+ 6=Vol- 7=Mute", A_ScreenWidth/2 - 220, A_ScreenHeight/2)
+            ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth/2 - 300, A_ScreenHeight/2)
             SetTimer(() => ToolTip(), -3000)
             LogBuffers("MKey Prefix: " . pendingPrefix)
             UpdateOSD()
@@ -402,8 +402,8 @@ ProcessSequence() {
 
         ; Resolver FKey / MKey se estão no pendingPrefix
         if InStr(pendingPrefix, "F:") {
-            ; Mapear o output (número/letra) para a tecla F correspondente
-            fkeyMap := Map("1", "{F1}", "2", "{F2}", "3", "{F3}", "4", "{F4}", "5", "{F5}", "6", "{F6}", "7", "{F7}", "8", "{F8}", "9", "{F9}", "0", "{F10}", "a", "{F11}", "b", "{F12}")
+            ; Mapear: 1-9→F1-F9, 0→F10, a→F11, b→F12
+            fkeyMap := Map("1", "{F1}", "2", "{F2}", "3", "{F3}", "4", "{F4}", "5", "{F5}", "6", "{F6}", "7", "{F7}", "8", "{F8}", "9", "{F9}", "0", "{F10}", "a", "{F11}", "b", "{F12}", "A", "{F11}", "B", "{F12}")
             fTarget := output
             if fkeyMap.Has(fTarget) {
                 ; Extrair modificadores remanescentes (^, !, +, #)
@@ -422,8 +422,9 @@ ProcessSequence() {
         }
 
         if InStr(pendingPrefix, "M:") {
-            ; Mapear o output para a tecla de mídia correspondente
-            mkeyMap := Map("1", "{Media_Play_Pause}", "2", "{Media_Stop}", "3", "{Media_Prev}", "4", "{Media_Next}", "5", "{Volume_Up}", "6", "{Volume_Down}", "7", "{Volume_Mute}")
+            ; Layout Kumara Elite K552 (Fn+F1 a Fn+F12)
+            ; 1=MyPC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play/Pause 8=Stop 9=Mute 0=Vol- a=Vol+ b=Lock
+            mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}")
             mTarget := output
             if mkeyMap.Has(mTarget) {
                 modOnly := StrReplace(pendingPrefix, "M:", "")
@@ -440,19 +441,20 @@ ProcessSequence() {
         }
 
         if InStr(pendingPrefix, "X:") {
-            ; Mapear o output para a macro correspondente
+            ; O output aqui é o caractere decodificado pelo morseMap
+            ; Aceita tanto letras (a,b,c,d) quanto números (1,2,3,4)
             pyPath := '"' . A_ScriptDir . '\python\python.exe"'
-            macroMap := Map("1", "3dPrecifier.py", "2", "SemantiCron.py", "3", "dork.py", "4", "websocket_server.py")
+            macroMap := Map("a", "3dPrecifier.py", "1", "3dPrecifier.py", "b", "SemantiCron.py", "2", "SemantiCron.py", "c", "dork.py", "3", "dork.py", "d", "websocket_server.py", "4", "websocket_server.py")
             mTarget := output
             if macroMap.Has(mTarget) {
                 scriptPath := '"' . A_ScriptDir . '\' . macroMap[mTarget] . '"'
-                Run(pyPath . ' ' . scriptPath, A_ScriptDir, "Hide")
-                LogBuffers("MacroKey Resolved: " . macroMap[mTarget])
+                Run(pyPath . ' ' . scriptPath, A_ScriptDir)
+                LogBuffers("MacroKey Resolved: " . macroMap[mTarget] . " (input: " . output . ")")
                 ToolTip("Macro: " . macroMap[mTarget], A_ScreenWidth/2 - 80, A_ScreenHeight/2)
                 SetTimer(() => ToolTip(), -2000)
             } else {
                 LogBuffers("MacroKey Fallback: tecla não mapeada (" . output . ")")
-                ToolTip("Macro não encontrada para: " . output, A_ScreenWidth/2 - 100, A_ScreenHeight/2)
+                ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth/2 - 100, A_ScreenHeight/2)
                 SetTimer(() => ToolTip(), -2000)
             }
             pendingPrefix := ""

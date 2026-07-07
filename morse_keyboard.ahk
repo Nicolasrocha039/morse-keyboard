@@ -158,24 +158,44 @@ $Enter:: {
 #HotIf morseActive && lbuttonLocked
 $LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
-    LogBuffers("Physical LButton Start")
+    LogBuffers("Physical LButton Down")
+
+    ; Captura posição e tempo ao pressionar
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&lbDownX, &lbDownY)
+    lbDownTime := A_TickCount
+
+    ; Aguarda o botão ser solto (com timeout de 2s)
+    KeyWait("LButton", "T2")
+
+    ; Verifica se foi arraste (moveu > 5px ou ficou > 200ms)
+    MouseGetPos(&lbUpX, &lbUpY)
+    moved := Abs(lbUpX - lbDownX) + Abs(lbUpY - lbDownY)
+    held := A_TickCount - lbDownTime
+
+    if (moved > 5 || held > 200) {
+        ; Foi um arraste ou clique longo — passa diretamente para o sistema
+        Send("{Blind}{LButton Down}")
+        Sleep(10)
+        Send("{Blind}{LButton Up}")
+        LogBuffers("LButton: drag/long-press passado ao sistema")
+        return
+    }
+
+    ; Clique rápido — aplicar lógica morse/autocomplete
     if currentSequence != "" {
         ProcessSequence()
     } else {
         suggestion := GetAutocompleteSuggestion(visualBuffer)
         if (suggestion != "") {
-            ; Envia os backspaces e a sugestao
             loop StrLen(visualBuffer) {
                 SendToSystem("{Backspace}")
             }
             SendToSystem(suggestion . " ")
-            
-            ; Adjust wordBuffer
             if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
                 wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
             }
             wordBuffer .= suggestion . " "
-            
             visualBuffer := ""
             historyBuffer.Push(suggestion . " ")
             LogBuffers("Autocompleted/Corrected: " . suggestion)
@@ -193,6 +213,5 @@ $LButton:: {
     }
     LogBuffers("Physical LButton End")
 }
-~LButton Up:: return
 #HotIf
 
