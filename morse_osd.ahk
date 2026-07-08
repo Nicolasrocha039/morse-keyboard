@@ -98,9 +98,36 @@ UpdateKeyGuide(seq) {
     UpdateCard("Ent", "Conf", true)
 }
 
+global osdPosX := IniRead(A_ScriptDir . "\osd_pos.ini", "Position", "X", 10)
+global osdPosY := IniRead(A_ScriptDir . "\osd_pos.ini", "Position", "Y", 10)
+
+OnMessage(0x0201, WM_LBUTTONDOWN)
+WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
+    global osd, osdMini, osdPosX, osdPosY
+    if (hwnd == osd.Hwnd || hwnd == osdMini.Hwnd) {
+        SendMessage(0xA1, 2, , , "ahk_id " hwnd)
+        
+        ; Save the new position
+        if (hwnd == osd.Hwnd) {
+            osd.GetPos(&X, &Y)
+            try osdMini.Move(X, Y)
+        } else {
+            osdMini.GetPos(&X, &Y)
+            try osd.Move(X, Y)
+        }
+        
+        IniWrite(X, A_ScriptDir . "\osd_pos.ini", "Position", "X")
+        IniWrite(Y, A_ScriptDir . "\osd_pos.ini", "Position", "Y")
+        
+        ; Keep them synced
+        osdPosX := X
+        osdPosY := Y
+    }
+}
+
 ; ── GUI pequena (OFF) ──
 global osdMini := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize")
-osdMini.Show("Hide x10 y10")
+osdMini.Show("Hide x" . osdPosX . " y" . osdPosY)
 osdMini.BackColor := "0x12121e"
 osdMini.MarginX := 10
 osdMini.MarginY := 6
@@ -116,7 +143,7 @@ WinSetTransparent(220, osdMini)
 
 ; ── GUI completa (ON) ──
 global osd := Gui("+AlwaysOnTop -Caption +ToolWindow +Resize", "MorseGuideOSD")
-osd.Show("Hide x10 y10")
+osd.Show("Hide x" . osdPosX . " y" . osdPosY)
 osd.BackColor := "0x0b0b14"
 osd.MarginX := 10
 osd.MarginY := 10

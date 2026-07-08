@@ -35,13 +35,7 @@ UpdateOSD()
 ToolTip("Morse Keyboard carregado!`nCapsLock para ativar/desativar", A_ScreenWidth/2 - 150, A_ScreenHeight/2 - 50)
 SetTimer(() => ToolTip(), -2500)
 
-; ═══════════════════════════════════════════════════════════════════════════════
-; MOVIMENTAÇÃO DO OSD (Arrastar e Soltar)
-; ═══════════════════════════════════════════════════════════════════════════════
-WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
-    PostMessage(0xA1, 2, , , "ahk_id " hwnd)
-}
-OnMessage(0x0201, WM_LBUTTONDOWN)
+
 
 
 ; ═══════════════════════════════════════════════════════════════════════════════
@@ -157,7 +151,13 @@ $Enter:: {
     }
     LogBuffers("Physical Enter End")
 }
-#HotIf morseActive && lbuttonLocked
+MouseIsOverOSD() {
+    MouseGetPos(, , &hwnd)
+    global osd, osdMini
+    return (hwnd == osd.Hwnd || hwnd == osdMini.Hwnd)
+}
+
+#HotIf morseActive && lbuttonLocked && !MouseIsOverOSD()
 $LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
     LogBuffers("Physical LButton Down")
