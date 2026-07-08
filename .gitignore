@@ -11,3 +11,18 @@ debug_buffer.txt
 # Artifacts
 .tempmediaStorage/
 *.md
+
+# Auto-generated and temporary files
+__pycache__/
+*.log
+*.zip
+osd_pos.ini
+dump*.txt
+dump*.json
+test_*.ahk
+test*.txt
+error*.txt
+err.txt
+out.txt
+recovered*/
+recovered*.txt

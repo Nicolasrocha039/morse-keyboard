@@ -1,1 +1,0 @@
-﻿try { iniPath := A_ScriptDir . "\morse_map.ini"; mapStr := IniRead(iniPath, "MorseMap"); count := 0; Loop Parse, mapStr, "`n", "`r" { count++ }; FileAppend("count:" . count, "count.txt") } catch as e { FileAppend("error", "count.txt") }
