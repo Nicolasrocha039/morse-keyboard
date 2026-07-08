@@ -2,13 +2,13 @@
 
 SendStateToPython() {
     global wordBuffer, visualBuffer, currentSequence, morseActive
-    
+
     ; Tratar escapes JSON simples
     escapedWord := StrReplace(wordBuffer, '\', '\\')
     escapedWord := StrReplace(escapedWord, '"', '\"')
     escapedWord := StrReplace(escapedWord, '`n', '\n')
     escapedWord := StrReplace(escapedWord, '`r', '\r')
-    
+
     escapedVisual := StrReplace(visualBuffer, '\', '\\')
     escapedVisual := StrReplace(escapedVisual, '"', '\"')
     escapedVisual := StrReplace(escapedVisual, '`n', '\n')
@@ -19,7 +19,7 @@ SendStateToPython() {
     escapedSuggestion := StrReplace(escapedSuggestion, '"', '\"')
 
     jsonData := '{"word": "' . escapedWord . '", "visual": "' . escapedVisual . '", "seq": "' . currentSequence . '", "suggestion": "' . escapedSuggestion . '", "active": ' . (morseActive ? "true" : "false") . '}'
-    
+
     try {
         http := ComObject("Msxml2.XMLHTTP")
         http.open("POST", "http://127.0.0.1:8766/state", true)
@@ -58,25 +58,25 @@ GetAutocompleteSuggestion(visualWord) {
     global wordBuffer
     if (visualWord = "" || StrLen(visualWord) < 2)
         return ""
-    
+
     isFirstUpper := IsUpper(SubStr(visualWord, 1, 1))
-    
+
     escapedWordBuffer := StrReplace(wordBuffer, '\', '\\')
     escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
     escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
     escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
-    
+
     escapedVisual := StrReplace(visualWord, '\', '\\')
     escapedVisual := StrReplace(escapedVisual, '"', '\"')
-    
+
     jsonData := '{"wordBuffer": "' . escapedWordBuffer . '", "visualBuffer": "' . escapedVisual . '"}'
-    
+
     try {
         http := ComObject("Msxml2.XMLHTTP")
         http.open("POST", "http://127.0.0.1:8766/suggest", false) ; síncrono
         http.setRequestHeader("Content-Type", "application/json")
         http.send(jsonData)
-        
+
         response := http.responseText
         if RegExMatch(response, '"suggestion"\s*:\s*"([^"]*)"', &match) {
             suggestion := match[1]
@@ -95,7 +95,7 @@ LearnWordContext() {
     escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
     escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
     escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
-    
+
     jsonData := '{"wordBuffer": "' . escapedWordBuffer . '"}'
     try {
         http := ComObject("Msxml2.XMLHTTP")
@@ -173,9 +173,9 @@ SendToSystem(output) {
     if output = "{ToggleADB}" {
         adbMode := !adbMode
         if adbMode
-            ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         else
-            ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
         return
@@ -188,7 +188,7 @@ SendToSystem(output) {
     if output = "{ToggleLButton}" {
         global lbuttonLocked
         lbuttonLocked := !lbuttonLocked
-        ToolTip("Mouse Esq " . (lbuttonLocked ? "BLOQUEADO (Limpa buffers)" : "LIBERADO (Clique normal)"), A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        ToolTip("Mouse Esq " . (lbuttonLocked ? "BLOQUEADO (Limpa buffers)" : "LIBERADO (Clique normal)"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle LButton Locked: " . (lbuttonLocked ? "ON" : "OFF"))
         return
@@ -197,7 +197,7 @@ SendToSystem(output) {
     if output = "{ToggleTraditionalMode}" {
         global traditionalMode
         LoadConfig(!traditionalMode)
-        ToolTip("Layout Tradicional " . (traditionalMode ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        ToolTip("Layout Tradicional " . (traditionalMode ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle Traditional Mode: " . (traditionalMode ? "ON" : "OFF"))
         UpdateOSD()
@@ -206,7 +206,7 @@ SendToSystem(output) {
 
     if adbMode {
         adbPath := '"' . A_ScriptDir . '\platform-tools\adb.exe"'
-        
+
         if output = "{Space}" || output = " " {
             RunWait(adbPath . " shell input keyevent 62", , "Hide")
         } else if output = "{Enter}" || output = "`n" {
@@ -236,7 +236,7 @@ SendToSystem(output) {
             RunWait(adbPath . " shell input keyevent 26", , "Hide") ; POWER/WAKE
         } else if output = "{ToggleBluetooth}" {
             RunWait(adbPath . " shell `"if [ \`"$(settings get global bluetooth_on)\`" = \`"1\`" ]; then svc bluetooth disable; cmd bluetooth_manager disable; else svc bluetooth enable; cmd bluetooth_manager enable; fi`"", , "Hide")
-            ToolTip("Comando de Bluetooth enviado via ADB", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            ToolTip("Comando de Bluetooth enviado via ADB", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -2500)
         } else if output = "{ConnectBTDevice}" {
             RunWait(adbPath . " shell am start -a android.settings.BLUETOOTH_SETTINGS", , "Hide")
@@ -247,7 +247,7 @@ SendToSystem(output) {
                 Sleep(300)
             }
             RunWait(adbPath . " shell input keyevent 66", , "Hide") ; ENTER
-            ToolTip("Automação de conexão Bluetooth executada", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+            ToolTip("Automação de conexão Bluetooth executada", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -2500)
         } else if output = "{WheelUp}" {
             ; Swipe down to scroll up
@@ -263,10 +263,28 @@ SendToSystem(output) {
             RunWait(adbPath . " shell input swipe 200 1400 800 1400 150", , "Hide")
         } else if output = "{LButton}" || output = "{RButton}" || output = "{MButton}" || output = "{WheelUp}" || output = "{WheelDown}" || output = "{WheelLeft}" || output = "{WheelRight}" {
             Send(output)
+        } else if RegExMatch(output, "i)^\^([a-z])$", &match) {
+            ; Atalhos de texto: Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+Z, Ctrl+A
+            char := StrLower(match[1])
+            if char == "c"
+                RunWait(adbPath . " shell input keyevent 278", , "Hide") ; COPY
+            else if char == "x"
+                RunWait(adbPath . " shell input keyevent 277", , "Hide") ; CUT
+            else if char == "v"
+                RunWait(adbPath . " shell input keyevent 279", , "Hide") ; PASTE
+            else if char == "z"
+                RunWait(adbPath . " shell input keyevent 281", , "Hide") ; UNDO
+            else if char == "a"
+                RunWait(adbPath . " shell input keyevent 286", , "Hide") ; SELECT ALL
+            else {
+                escapedOutput := StrReplace(output, "'", "'\''")
+                adbCmd := adbPath . ' shell am broadcast -a ADB_INPUT_TEXT --es msg ' . "'" . escapedOutput . "'"
+                RunWait(adbCmd, , "Hide")
+            }
         } else {
             ; Usando o ADBKeyBoard para suportar acentos e caracteres especiais nativamente
             escapedOutput := StrReplace(output, "'", "'\''")
-            
+
             ; Envia os caracteres usando o Intent de broadcast do ADBKeyBoard
             adbCmd := adbPath . ' shell am broadcast -a ADB_INPUT_TEXT --es msg ' . "'" . escapedOutput . "'"
             RunWait(adbCmd, , "Hide")
@@ -293,7 +311,7 @@ ProcessSequence() {
 
     seq := currentSequence
     currentSequence := ""
-    
+
     LogBuffers("ProcessSequence Start (seq: " . seq . ")")
 
     if morseMap.Has(seq) {
@@ -322,7 +340,7 @@ ProcessSequence() {
                 pendingPrefix := StrReplace(pendingPrefix, "^", "")
             else
                 pendingPrefix .= "^"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Modifier Prefix Toggle Ctrl → pendingPrefix: " . pendingPrefix)
             UpdateOSD()
@@ -333,7 +351,7 @@ ProcessSequence() {
                 pendingPrefix := StrReplace(pendingPrefix, "+", "")
             else
                 pendingPrefix .= "+"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Modifier Prefix Toggle Shift → pendingPrefix: " . pendingPrefix)
             UpdateOSD()
@@ -344,7 +362,7 @@ ProcessSequence() {
                 pendingPrefix := StrReplace(pendingPrefix, "!", "")
             else
                 pendingPrefix .= "!"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Modifier Prefix Toggle Alt → pendingPrefix: " . pendingPrefix)
             UpdateOSD()
@@ -355,7 +373,7 @@ ProcessSequence() {
                 pendingPrefix := StrReplace(pendingPrefix, "#", "")
             else
                 pendingPrefix .= "#"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Modifier Prefix Toggle Win → pendingPrefix: " . pendingPrefix)
             UpdateOSD()
@@ -365,7 +383,7 @@ ProcessSequence() {
         ; Acentos (dead keys) → acumulam no prefixo como caractere literal
         if output = "^" || output = "~" || output = "´" || output = "``" {
             pendingPrefix .= output
-            ToolTip("Acento pendente: " . pendingPrefix, A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+            ToolTip("Acento pendente: " . pendingPrefix, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Accent Prefix: " . pendingPrefix)
             UpdateOSD()
@@ -375,7 +393,7 @@ ProcessSequence() {
         ; FKey / MKey → acumulam marcador especial no prefixo
         if output = "{FKey}" {
             pendingPrefix .= "F:"
-            ToolTip("Prefixo F-Key: aguardando número (1-9, 0=F10, a=F11, b=F12)", A_ScreenWidth/2 - 180, A_ScreenHeight/2)
+            ToolTip("Prefixo F-Key: aguardando número (1-9, 0=F10, a=F11, b=F12)", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
             LogBuffers("FKey Prefix: " . pendingPrefix)
             UpdateOSD()
@@ -383,7 +401,7 @@ ProcessSequence() {
         }
         if output = "{MKey}" {
             pendingPrefix .= "M:"
-            ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth/2 - 300, A_ScreenHeight/2)
+            ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth / 2 - 300, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
             LogBuffers("MKey Prefix: " . pendingPrefix)
             UpdateOSD()
@@ -391,7 +409,7 @@ ProcessSequence() {
         }
         if output = "{MacroKey}" {
             pendingPrefix .= "X:"
-            ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth/2 - 180, A_ScreenHeight/2)
+            ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
             LogBuffers("MacroKey Prefix: " . pendingPrefix)
             UpdateOSD()
@@ -450,11 +468,11 @@ ProcessSequence() {
                 scriptPath := '"' . A_ScriptDir . '\' . macroMap[mTarget] . '"'
                 Run(pyPath . ' ' . scriptPath, A_ScriptDir)
                 LogBuffers("MacroKey Resolved: " . macroMap[mTarget] . " (input: " . output . ")")
-                ToolTip("Macro: " . macroMap[mTarget], A_ScreenWidth/2 - 80, A_ScreenHeight/2)
+                ToolTip("Macro: " . macroMap[mTarget], A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
             } else {
                 LogBuffers("MacroKey Fallback: tecla não mapeada (" . output . ")")
-                ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth/2 - 100, A_ScreenHeight/2)
+                ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
             }
             pendingPrefix := ""
@@ -464,13 +482,13 @@ ProcessSequence() {
 
         ; Verificar se é um comando de sistema (teclas especiais, atalhos)
         isCommand := ((SubStr(output, 1, 1) = "^" && StrLen(output) > 1)
-                  || (SubStr(output, 1, 1) = "!" && StrLen(output) > 1)
-                  || (SubStr(output, 1, 1) = "#" && StrLen(output) > 1)
-                  || (SubStr(output, 1, 1) = "+" && StrLen(output) > 1)
-                  || (SubStr(output, 1, 1) = "{" && SubStr(output, -1) = "}")
-                  || (SubStr(output, 1, 2) = "+{" && SubStr(output, -1) = "}"))
-                  && !InStr(output, "Space") && !InStr(output, "Enter") 
-                  && !InStr(output, "Backspace") && !InStr(output, "Escape")
+            || (SubStr(output, 1, 1) = "!" && StrLen(output) > 1)
+            || (SubStr(output, 1, 1) = "#" && StrLen(output) > 1)
+            || (SubStr(output, 1, 1) = "+" && StrLen(output) > 1)
+            || (SubStr(output, 1, 1) = "{" && SubStr(output, -1) = "}")
+            || (SubStr(output, 1, 2) = "+{" && SubStr(output, -1) = "}"))
+            && !InStr(output, "Space") && !InStr(output, "Enter")
+            && !InStr(output, "Backspace") && !InStr(output, "Escape")
 
         ; Separar acentos e modificadores do pendingPrefix
         accentChars := ""
@@ -530,21 +548,34 @@ ProcessSequence() {
                 pendingPrefix := ""
             } else {
                 ; Caractere normal — montar envio com acentos e modificadores
+                CombineAccent := ""
+                finalChar := output
                 if accentChars != "" {
-                    ; Enviar cada acento como dead key seguido da letra
-                    ; Ex: ´ + a → á (o Windows combina automaticamente)
-                    Loop Parse, accentChars {
-                        Send("{Blind}{" . A_LoopField . "}")
+                    finalChar := CombineAccent(SubStr(accentChars, -1), output)
+                    if !adbMode {
+                        ; No Windows, enviamos os acentos separados como dead keys para o SO processar (ex: ´ + a)
+                        Loop Parse, accentChars {
+                            Send("{Blind}{" . A_LoopField . "}")
+                        }
                     }
                 }
+
                 if modifierChars != "" {
-                    ; Atalho com modificador: ^c, !{F4}, etc.
-                    SendToSystem(modifierChars . output)
+                    if adbMode && accentChars != "" {
+                        SendToSystem(modifierChars . finalChar)
+                    } else {
+                        SendToSystem(modifierChars . output)
+                    }
                 } else {
-                    ; Letra normal (possivelmente precedida de acento dead key)
-                    wordBuffer .= output
-                    visualBuffer .= output
-                    SendToSystem(output)
+                    if adbMode && accentChars != "" {
+                        SendToSystem(finalChar)
+                    } else {
+                        SendToSystem(output)
+                    }
+                    if modifierChars == "" {
+                        wordBuffer .= finalChar
+                        visualBuffer .= finalChar
+                    }
                 }
                 pendingPrefix := ""
             }
@@ -593,4 +624,3 @@ DeleteLastWord() {
     LogBuffers("DeleteLastWord End")
     UpdateOSD()
 }
-
