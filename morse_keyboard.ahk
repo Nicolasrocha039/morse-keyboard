@@ -16,7 +16,9 @@ global historyBuffer := []
 global adbMode := false
 global lbuttonLocked := true
 global lastSentCommand := ""
-global pendingPrefix := ""
+global pendingModifiers := ""
+global pendingAccent := ""
+global pendingSpecial := ""
 
 ; ── Importação dos Módulos ──
 #Include "%A_ScriptDir%\morse_config.ahk"

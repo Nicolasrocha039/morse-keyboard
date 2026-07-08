@@ -329,89 +329,93 @@ ProcessSequence() {
             lastSentCommand := output
         }
 
-        ; === DEAD KEYS: Modificadores e Acentos acumulam no pendingPrefix ===
-        global pendingPrefix
-        if !IsSet(pendingPrefix)
-            pendingPrefix := ""
+        ; === DEAD KEYS: Modificadores e Acentos acumulam separadamente ===
+        global pendingModifiers, pendingAccent, pendingSpecial
+        if !IsSet(pendingModifiers)
+            pendingModifiers := ""
+        if !IsSet(pendingAccent)
+            pendingAccent := ""
+        if !IsSet(pendingSpecial)
+            pendingSpecial := ""
 
         ; Modificadores sticky → acumulam prefixo AHK (^, !, +, #)
         if output = "{Ctrl}" {
-            if InStr(pendingPrefix, "^")
-                pendingPrefix := StrReplace(pendingPrefix, "^", "")
+            if InStr(pendingModifiers, "^")
+                pendingModifiers := StrReplace(pendingModifiers, "^", "")
             else
-                pendingPrefix .= "^"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                pendingModifiers .= "^"
+            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Prefix Toggle Ctrl → pendingPrefix: " . pendingPrefix)
+            LogBuffers("Modifier Toggle Ctrl → pendingModifiers: " . pendingModifiers)
             UpdateOSD()
             return
         }
         if output = "{Shift}" {
-            if InStr(pendingPrefix, "+")
-                pendingPrefix := StrReplace(pendingPrefix, "+", "")
+            if InStr(pendingModifiers, "+")
+                pendingModifiers := StrReplace(pendingModifiers, "+", "")
             else
-                pendingPrefix .= "+"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                pendingModifiers .= "+"
+            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Prefix Toggle Shift → pendingPrefix: " . pendingPrefix)
+            LogBuffers("Modifier Toggle Shift → pendingModifiers: " . pendingModifiers)
             UpdateOSD()
             return
         }
         if output = "{Alt}" {
-            if InStr(pendingPrefix, "!")
-                pendingPrefix := StrReplace(pendingPrefix, "!", "")
+            if InStr(pendingModifiers, "!")
+                pendingModifiers := StrReplace(pendingModifiers, "!", "")
             else
-                pendingPrefix .= "!"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                pendingModifiers .= "!"
+            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Prefix Toggle Alt → pendingPrefix: " . pendingPrefix)
+            LogBuffers("Modifier Toggle Alt → pendingModifiers: " . pendingModifiers)
             UpdateOSD()
             return
         }
         if output = "{LWin}" || output = "{RWin}" {
-            if InStr(pendingPrefix, "#")
-                pendingPrefix := StrReplace(pendingPrefix, "#", "")
+            if InStr(pendingModifiers, "#")
+                pendingModifiers := StrReplace(pendingModifiers, "#", "")
             else
-                pendingPrefix .= "#"
-            ToolTip("Prefixo: " . (pendingPrefix != "" ? pendingPrefix : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                pendingModifiers .= "#"
+            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Prefix Toggle Win → pendingPrefix: " . pendingPrefix)
+            LogBuffers("Modifier Toggle Win → pendingModifiers: " . pendingModifiers)
             UpdateOSD()
             return
         }
 
         ; Acentos (dead keys) → acumulam no prefixo como caractere literal
         if output = "^" || output = "~" || output = "´" || output = "``" {
-            pendingPrefix .= output
-            ToolTip("Acento pendente: " . pendingPrefix, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+            pendingAccent := output
+            ToolTip("Acento pendente: " . pendingAccent, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Accent Prefix: " . pendingPrefix)
+            LogBuffers("Accent: " . pendingAccent)
             UpdateOSD()
             return
         }
 
         ; FKey / MKey → acumulam marcador especial no prefixo
         if output = "{FKey}" {
-            pendingPrefix .= "F:"
+            pendingSpecial := "F:"
             ToolTip("Prefixo F-Key: aguardando número (1-9, 0=F10, a=F11, b=F12)", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
-            LogBuffers("FKey Prefix: " . pendingPrefix)
+            LogBuffers("FKey Prefix: " . pendingSpecial)
             UpdateOSD()
             return
         }
         if output = "{MKey}" {
-            pendingPrefix .= "M:"
+            pendingSpecial := "M:"
             ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth / 2 - 300, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
-            LogBuffers("MKey Prefix: " . pendingPrefix)
+            LogBuffers("MKey Prefix: " . pendingSpecial)
             UpdateOSD()
             return
         }
         if output = "{MacroKey}" {
-            pendingPrefix .= "X:"
+            pendingSpecial := "X:"
             ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -3000)
-            LogBuffers("MacroKey Prefix: " . pendingPrefix)
+            LogBuffers("MacroKey Prefix: " . pendingSpecial)
             UpdateOSD()
             return
         }
@@ -419,46 +423,48 @@ ProcessSequence() {
         ; === A partir daqui, é uma tecla final — montar o envio completo ===
 
         ; Resolver FKey / MKey se estão no pendingPrefix
-        if InStr(pendingPrefix, "F:") {
+        if pendingSpecial == "F:" {
             ; Mapear: 1-9→F1-F9, 0→F10, a→F11, b→F12
             fkeyMap := Map("1", "{F1}", "2", "{F2}", "3", "{F3}", "4", "{F4}", "5", "{F5}", "6", "{F6}", "7", "{F7}", "8", "{F8}", "9", "{F9}", "0", "{F10}", "a", "{F11}", "b", "{F12}", "A", "{F11}", "B", "{F12}")
             fTarget := output
             if fkeyMap.Has(fTarget) {
                 ; Extrair modificadores remanescentes (^, !, +, #)
-                modOnly := StrReplace(pendingPrefix, "F:", "")
+                modOnly := pendingModifiers
                 SendToSystem(modOnly . fkeyMap[fTarget])
                 LogBuffers("FKey Resolved: " . modOnly . fkeyMap[fTarget])
             } else {
                 ; Tecla não reconhecida para FKey, enviar como comando direto
-                modOnly := StrReplace(pendingPrefix, "F:", "")
+                modOnly := pendingModifiers
                 SendToSystem(modOnly . output)
                 LogBuffers("FKey Fallback: " . modOnly . output)
             }
-            pendingPrefix := ""
+            pendingModifiers := ""
+            pendingAccent := ""
             UpdateOSD()
             return
         }
 
-        if InStr(pendingPrefix, "M:") {
+        if pendingSpecial == "M:" {
             ; Layout Kumara Elite K552 (Fn+F1 a Fn+F12)
             ; 1=MyPC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play/Pause 8=Stop 9=Mute 0=Vol- a=Vol+ b=Lock
             mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}")
             mTarget := output
             if mkeyMap.Has(mTarget) {
-                modOnly := StrReplace(pendingPrefix, "M:", "")
+                modOnly := pendingModifiers
                 SendToSystem(modOnly . mkeyMap[mTarget])
                 LogBuffers("MKey Resolved: " . modOnly . mkeyMap[mTarget])
             } else {
-                modOnly := StrReplace(pendingPrefix, "M:", "")
+                modOnly := pendingModifiers
                 SendToSystem(modOnly . output)
                 LogBuffers("MKey Fallback: " . modOnly . output)
             }
-            pendingPrefix := ""
+            pendingModifiers := ""
+            pendingAccent := ""
             UpdateOSD()
             return
         }
 
-        if InStr(pendingPrefix, "X:") {
+        if pendingSpecial == "X:" {
             ; O output aqui é o caractere decodificado pelo morseMap
             ; Aceita tanto letras (a,b,c,d) quanto números (1,2,3,4)
             pyPath := '"' . A_ScriptDir . '\python\python.exe"'
@@ -475,7 +481,8 @@ ProcessSequence() {
                 ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
             }
-            pendingPrefix := ""
+            pendingModifiers := ""
+            pendingAccent := ""
             UpdateOSD()
             return
         }
@@ -490,18 +497,8 @@ ProcessSequence() {
             && !InStr(output, "Space") && !InStr(output, "Enter")
             && !InStr(output, "Backspace") && !InStr(output, "Escape")
 
-        ; Separar acentos e modificadores do pendingPrefix
-        accentChars := ""
-        modifierChars := ""
-        if pendingPrefix != "" {
-            Loop Parse, pendingPrefix {
-                ch := A_LoopField
-                if ch = "^" || ch = "!" || ch = "+" || ch = "#"
-                    modifierChars .= ch
-                else
-                    accentChars .= ch ; ´, ~, `, ^(acento)
-            }
-        }
+        accentChars := pendingAccent
+        modifierChars := pendingModifiers
 
         if isCommand {
             ; Comando de sistema → enviar com modificadores prepend
@@ -510,7 +507,8 @@ ProcessSequence() {
             else
                 SendToSystem(output)
             LogBuffers("Executed Command: " . modifierChars . output)
-            pendingPrefix := ""
+            pendingModifiers := ""
+            pendingAccent := ""
         } else {
             ; Comandos que alteram o buffer em tempo real
             if output = "{Space}" || output = "" || output = " " {
@@ -521,7 +519,8 @@ ProcessSequence() {
                 else
                     SendToSystem("{Space}")
                 LearnWordContext()
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             } else if output = "{Enter}" {
                 wordBuffer .= "`n"
                 visualBuffer := ""
@@ -530,25 +529,28 @@ ProcessSequence() {
                 else
                     SendToSystem("{Enter}")
                 LearnWordContext()
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             } else if output = "{Backspace}" {
                 if wordBuffer != "" {
                     wordBuffer := SubStr(wordBuffer, 1, -1)
                     UpdateVisualBufferFromWordBuffer()
                 }
                 SendToSystem("{Backspace}")
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             } else if output = "^{Backspace}" {
                 DeleteLastWord()
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             } else if output = "{Escape}" {
                 wordBuffer := ""
                 visualBuffer := ""
                 SendToSystem("{Escape}")
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             } else {
                 ; Caractere normal — montar envio com acentos e modificadores
-                CombineAccent := ""
                 finalChar := output
                 if accentChars != "" {
                     finalChar := CombineAccent(SubStr(accentChars, -1), output)
@@ -577,7 +579,8 @@ ProcessSequence() {
                         visualBuffer .= finalChar
                     }
                 }
-                pendingPrefix := ""
+                pendingModifiers := ""
+            pendingAccent := ""
             }
             LogBuffers("Added Character: " . output)
         }
@@ -623,4 +626,23 @@ DeleteLastWord() {
     }
     LogBuffers("DeleteLastWord End")
     UpdateOSD()
+}
+CombineAccent(accent, char) {
+    if accent = "´" {
+        MapA := Map("a", "á", "e", "é", "i", "í", "o", "ó", "u", "ú", "A", "Á", "E", "É", "I", "Í", "O", "Ó", "U", "Ú", "c", "ç", "C", "Ç")
+        return MapA.Has(char) ? MapA[char] : char
+    }
+    if accent = "~" {
+        MapT := Map("a", "ã", "o", "õ", "n", "ñ", "A", "Ã", "O", "Õ", "N", "Ñ")
+        return MapT.Has(char) ? MapT[char] : char
+    }
+    if accent = "^" {
+        MapC := Map("a", "â", "e", "ê", "i", "î", "o", "ô", "u", "û", "A", "Â", "E", "Ê", "I", "Î", "O", "Ô", "U", "Û")
+        return MapC.Has(char) ? MapC[char] : char
+    }
+    if accent = "``" {
+        MapG := Map("a", "à", "e", "è", "i", "ì", "o", "ò", "u", "ù", "A", "À", "E", "È", "I", "Ì", "O", "Ò", "U", "Ù")
+        return MapG.Has(char) ? MapG[char] : char
+    }
+    return char
 }

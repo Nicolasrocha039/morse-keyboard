@@ -155,7 +155,8 @@
     "seja": 4,
     "vou": 2,
     "no": 1,
-    "os": 1
+    "os": 1,
+    "as": 1
   },
   "possamos": {
     "pedir": 1
@@ -289,7 +290,8 @@
     "pe": 1,
     "peça": 1,
     "médica": 3,
-    "ferramenta": 1
+    "ferramenta": 1,
+    "rede": 1
   },
   "contexto da": {
     "noite": 1
@@ -399,7 +401,8 @@
     "ti": 1,
     "tira": 1,
     "tirar": 1,
-    "almoçar": 1
+    "almoçar": 1,
+    "acionar": 1
   },
   "projetos de": {
     "qualidade": 1
@@ -889,10 +892,10 @@
   "preciso": {
     "de": 1,
     "se": 1,
-    "ser": 4,
+    "ser": 5,
     "ver": 1,
     "verificar": 1,
-    "que": 1
+    "que": 2
   },
   "eu preciso": {
     "de": 1
@@ -947,7 +950,7 @@
     "ca": 1,
     "cap": 1,
     "capa": 1,
-    "capaz": 4,
+    "capaz": 5,
     "feito": 1
   },
   "podem ser": {
@@ -1458,13 +1461,13 @@
     "ca": 1,
     "cap": 1,
     "capa": 1,
-    "capaz": 4
+    "capaz": 5
   },
   "capaz": {
-    "de": 5
+    "de": 6
   },
   "ser capaz": {
-    "de": 5
+    "de": 6
   },
   "vise": {
     "pa": 1,
@@ -1953,7 +1956,8 @@
     "no": 1
   },
   "preciso que": {
-    "os": 1
+    "os": 1,
+    "as": 1
   },
   "que os": {
     "acentos": 1
@@ -2014,5 +2018,23 @@
   },
   "posso tomar": {
     "um": 1
+  },
+  "capaz de": {
+    "acionar": 1
+  },
+  "através": {
+    "da": 1
+  },
+  "através da": {
+    "rede": 1
+  },
+  "rede": {
+    "local": 1
+  },
+  "da rede": {
+    "local": 1
+  },
+  "faça": {
+    "isso": 1
   }
 }
