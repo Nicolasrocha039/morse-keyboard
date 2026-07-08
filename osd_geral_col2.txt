@@ -1,0 +1,31 @@
+SÍMBOLOS (RARR)
+RARR + [Q:/ A:; R:-]
+RARR + [QQ:= QA:[ QR:]]
+RARR + [AQ:' AA:\]
+
+ATALHOS (Ctrl, Shift, Alt)
+RA(Ctrl) | RAAQ(Shift) | RAQA(Alt)
+Ex: RA + QR(c) = Ctrl+C
+Ex: RAAQ + RQQ(1) = !
+
+ATALHOS (Modificador F-Key)
+Digite RAAR (FKey) + Número
+Ex: RAAR + RQQ(1) = F1
+Ex: RAAR + RRRRR(0) = F10
+Letras a=F11, b=F12
+CONTROLES DE TECLADO
+RQRQ: Tab      | RQRA: Delete
+RQRR: Home     | RQRRRQ: End
+RQRRA: PgUp    | RQRRR: PgDn
+RQRRRA: Shift+Tab
+
+MOUSE & SCRIPT
+Mouse: RQQA(Esq) RQQR(Dir) RARA(Meio)
+Travar Esq: RQQQ
+Rolagem: RARR(Cima) RRRR(Baixo)
+Swipe: QQQQQ(Esq) AAAAA(Dir)
+Recarregar: RQARA
+
+ANDROID 100% (Modo ADB)
+Menu: RQRR(Home) RQAR(Voltar) RQRQ(Rec)
+Power: RQRAR | BT: RQRQA | Parear: RQRQQA

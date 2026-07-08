@@ -58,7 +58,7 @@
   },
   "eu": {
     "espero": 1,
-    "quero": 1,
+    "quero": 2,
     "acho": 1,
     "estou": 3,
     "vou": 2,
@@ -123,10 +123,12 @@
   },
   "quero": {
     "sugestões": 1,
-    "apresentar": 1
+    "apresentar": 1,
+    "que": 1
   },
   "eu quero": {
-    "sugestões": 1
+    "sugestões": 1,
+    "que": 1
   },
   "sugestões": {
     "de": 2
@@ -2039,5 +2041,8 @@
   },
   "le": {
     "está": 1
+  },
+  "versão": {
+    "atual": 1
   }
 }

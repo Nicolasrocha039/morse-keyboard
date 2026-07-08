@@ -160,6 +160,13 @@ MouseIsOverOSD() {
 #HotIf morseActive && lbuttonLocked && !MouseIsOverOSD()
 $LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
+    
+    ; Se houver sequência pendente, o LButton funciona apenas como botão de confirmação imediato
+    if currentSequence != "" {
+        ProcessSequence()
+        return
+    }
+
     LogBuffers("Physical LButton Down")
 
     ; Captura posição e tempo ao pressionar
@@ -185,33 +192,29 @@ $LButton:: {
     }
 
     ; Clique rápido — aplicar lógica morse/autocomplete
-    if currentSequence != "" {
-        ProcessSequence()
-    } else {
-        suggestion := GetAutocompleteSuggestion(visualBuffer)
-        if (suggestion != "") {
-            loop StrLen(visualBuffer) {
-                SendToSystem("{Backspace}")
-            }
-            SendToSystem(suggestion . " ")
-            if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
-                wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
-            }
-            wordBuffer .= suggestion . " "
-            visualBuffer := ""
-            historyBuffer.Push(suggestion . " ")
-            LogBuffers("Autocompleted/Corrected: " . suggestion)
-            UpdateOSD()
-            LearnWordContext()
-        } else {
-            wordBuffer := ""
-            visualBuffer := ""
-            historyBuffer := []
-            LogBuffers("Cleared Word Buffer")
-            Send("{Blind}{LButton}")
-            UpdateOSD()
-            LearnWordContext()
+    suggestion := GetAutocompleteSuggestion(visualBuffer)
+    if (suggestion != "") {
+        loop StrLen(visualBuffer) {
+            SendToSystem("{Backspace}")
         }
+        SendToSystem(suggestion . " ")
+        if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
+            wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
+        }
+        wordBuffer .= suggestion . " "
+        visualBuffer := ""
+        historyBuffer.Push(suggestion . " ")
+        LogBuffers("Autocompleted/Corrected: " . suggestion)
+        UpdateOSD()
+        LearnWordContext()
+    } else {
+        wordBuffer := ""
+        visualBuffer := ""
+        historyBuffer := []
+        LogBuffers("Cleared Word Buffer")
+        Send("{Blind}{LButton}")
+        UpdateOSD()
+        LearnWordContext()
     }
     LogBuffers("Physical LButton End")
 }
