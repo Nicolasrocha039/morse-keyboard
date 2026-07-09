@@ -387,44 +387,45 @@ ProcessSequence() {
 
         ; Acentos (dead keys) → acumulam no prefixo como caractere literal
         if output = "^" || output = "~" || output = "´" || output = "``" {
-            pendingAccent := output
-            ToolTip("Acento pendente: " . pendingAccent, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+            if (pendingAccent == output) {
+                pendingAccent := ""
+                ToolTip("Acento pendente: Desativado", A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+            } else {
+                pendingAccent := output
+                ToolTip("Acento pendente: " . pendingAccent, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+            }
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Accent: " . pendingAccent)
             UpdateOSD()
             return
         }
 
-        ; FKey / MKey → acumulam marcador especial no prefixo
-        if output = "{FKey}" {
-            pendingSpecial := "F:"
-            ToolTip("Prefixo F-Key: aguardando número (1-9, 0=F10, a=F11, b=F12)", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+        ; FKey, MKey, MacroKey e teclas personalizadas genéricas (*Key) → toggle no prefixo
+        if RegExMatch(output, "^\{[a-zA-Z0-9]+Key\}$") {
+            if (pendingSpecial == output) {
+                pendingSpecial := ""
+                ToolTip("Prefixo " . output . ": Desativado", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+            } else {
+                pendingSpecial := output
+                if (output == "{FKey}")
+                    ToolTip("Prefixo F-Key: aguardando número (1-9, 0=F10, a=F11, b=F12)", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+                else if (output == "{MKey}")
+                    ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth / 2 - 300, A_ScreenHeight / 2)
+                else if (output == "{MacroKey}")
+                    ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+                else
+                    ToolTip("Prefixo Customizado: " . output, A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+            }
             SetTimer(() => ToolTip(), -3000)
-            LogBuffers("FKey Prefix: " . pendingSpecial)
-            UpdateOSD()
-            return
-        }
-        if output = "{MKey}" {
-            pendingSpecial := "M:"
-            ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth / 2 - 300, A_ScreenHeight / 2)
-            SetTimer(() => ToolTip(), -3000)
-            LogBuffers("MKey Prefix: " . pendingSpecial)
-            UpdateOSD()
-            return
-        }
-        if output = "{MacroKey}" {
-            pendingSpecial := "X:"
-            ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
-            SetTimer(() => ToolTip(), -3000)
-            LogBuffers("MacroKey Prefix: " . pendingSpecial)
+            LogBuffers("Special Prefix: " . pendingSpecial)
             UpdateOSD()
             return
         }
 
         ; === A partir daqui, é uma tecla final — montar o envio completo ===
 
-        ; Resolver FKey / MKey se estão no pendingPrefix
-        if pendingSpecial == "F:" {
+        ; Resolver FKey, MKey, MacroKey ou custom se estão no pendingSpecial
+        if pendingSpecial == "{FKey}" {
             ; Mapear: 1-9→F1-F9, 0→F10, a→F11, b→F12
             fkeyMap := Map("1", "{F1}", "2", "{F2}", "3", "{F3}", "4", "{F4}", "5", "{F5}", "6", "{F6}", "7", "{F7}", "8", "{F8}", "9", "{F9}", "0", "{F10}", "a", "{F11}", "b", "{F12}", "A", "{F11}", "B", "{F12}")
             fTarget := output
@@ -439,13 +440,14 @@ ProcessSequence() {
                 SendToSystem(modOnly . output)
                 LogBuffers("FKey Fallback: " . modOnly . output)
             }
+            pendingSpecial := ""
             pendingModifiers := ""
             pendingAccent := ""
             UpdateOSD()
             return
         }
 
-        if pendingSpecial == "M:" {
+        if pendingSpecial == "{MKey}" {
             ; Layout Kumara Elite K552 (Fn+F1 a Fn+F12)
             ; 1=MyPC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play/Pause 8=Stop 9=Mute 0=Vol- a=Vol+ b=Lock
             mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}")
@@ -459,13 +461,14 @@ ProcessSequence() {
                 SendToSystem(modOnly . output)
                 LogBuffers("MKey Fallback: " . modOnly . output)
             }
+            pendingSpecial := ""
             pendingModifiers := ""
             pendingAccent := ""
             UpdateOSD()
             return
         }
 
-        if pendingSpecial == "X:" {
+        if pendingSpecial == "{MacroKey}" {
             ; O output aqui é o caractere decodificado pelo morseMap
             ; Aceita tanto letras (a,b,c,d) quanto números (1,2,3,4)
             pyPath := '"' . A_ScriptDir . '\python\python.exe"'
@@ -482,6 +485,19 @@ ProcessSequence() {
                 ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
             }
+            pendingSpecial := ""
+            pendingModifiers := ""
+            pendingAccent := ""
+            UpdateOSD()
+            return
+        }
+
+        if pendingSpecial != "" {
+            ; Se for alguma outra tecla {CustomKey} genérica, apenas repassamos
+            modOnly := pendingModifiers
+            SendToSystem(modOnly . output)
+            LogBuffers("CustomKey (" . pendingSpecial . ") Resolved: " . modOnly . output)
+            pendingSpecial := ""
             pendingModifiers := ""
             pendingAccent := ""
             UpdateOSD()
