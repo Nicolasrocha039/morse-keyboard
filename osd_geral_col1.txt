@@ -1,4 +1,3 @@
-MINÚSCULAS
 Q  + [Q:a A:b R:c]
 QQ + [Q:d A:e R:f]
 QA + [Q:g A:h R:i]
@@ -7,25 +6,15 @@ A  + [Q:m A:n R:o]
 AQ + [Q:p A:q R:r]
 AA + [Q:s A:t R:u]
 AR + [Q:v A:w R:x]
-R  + [Q:y A:z]
+R  + [Q:y A:z AQQ:ç]
+RARR + [RQ:´ QAQ:``]
+RARA + [QQR:^ QAQ:~]
 
-LÓGICA DE SÍLABAS (R)
-Normal: C+R+V (bRa)
-Inversa: V+R+C (aRb)
-Triplas: C+Mod+RR+V
-Finais (m/n/r/s/l/z)
+RR  : Espaço   | RQAQ : Apagar
+RQAA: Enter    | RQAQA: Ctrl+Apag
+RQAR: Escape   | RQARR: Repetir
 
-ACENTOS (Mortos) E CEDILHA
-Agudo e Crase: RARR + [RQ:´ QAQ:``]
-Circ. e Til: RARA + [QQR:^ QAQ:~]
-Cedilha: RAQQ:ç | RRRAQQ:Ç
-
-NÚMEROS E PONTUAÇÃO
-R + [QQ:1 QA:2 QR:3]
-R + [AQ:4 AA:5 AR:6]
-R + [RQ:7 RA:8 RR:9]
-Zero: RRRRR
-Ponto: RRRRQ | Vírgula: RRRRA
-
-NAVEGAÇÃO
-Setas: RQR+[QQ:◀ QA:▼ QR:▶ RQ:▲]
+R + [QQ:1   QA:2    QR:3]
+R + [AQ:4   AA:5    AR:6]
+R + [RQ:7   RA:8    RR:9]
+R + [RRRR:0 RRRRQ:. RRRA:,]

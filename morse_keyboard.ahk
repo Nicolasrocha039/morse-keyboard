@@ -63,6 +63,7 @@ CapsLock:: {
         ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
     SetTimer(() => ToolTip(), -2500)
     LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
+    UpdateOSD()
 }
 
 #HotIf morseActive
@@ -169,23 +170,34 @@ $LButton:: {
 
     LogBuffers("Physical LButton Down")
 
-    ; Captura posição e tempo ao pressionar
+    ; Captura posição inicial e tempo ao pressionar
     CoordMode("Mouse", "Screen")
     MouseGetPos(&lbDownX, &lbDownY)
     lbDownTime := A_TickCount
 
-    ; Aguarda o botão ser solto (com timeout de 2s)
-    KeyWait("LButton", "T2")
-
-    ; Verifica se foi arraste (moveu > 5px ou ficou > 200ms)
-    MouseGetPos(&lbUpX, &lbUpY)
-    moved := Abs(lbUpX - lbDownX) + Abs(lbUpY - lbDownY)
-    held := A_TickCount - lbDownTime
-
-    if (moved > 5 || held > 200) {
-        ; Foi um arraste ou clique longo — passa diretamente para o sistema
-        Send("{Blind}{LButton Down}")
+    isDrag := false
+    ; Fica monitorando enquanto o botão estiver pressionado fisicamente
+    Loop {
+        if !GetKeyState("LButton", "P")
+            break
+            
+        MouseGetPos(&curX, &curY)
+        moved := Abs(curX - lbDownX) + Abs(curY - lbDownY)
+        held := A_TickCount - lbDownTime
+        
+        if (moved > 5 || held > 200) {
+            isDrag := true
+            break
+        }
         Sleep(10)
+    }
+
+    if (isDrag) {
+        ; Envia o Down imediatamente para o sistema começar a arrastar/clique longo
+        Send("{Blind}{LButton Down}")
+        ; Aguarda o usuário soltar fisicamente o botão
+        KeyWait("LButton")
+        ; Envia o Up para soltar
         Send("{Blind}{LButton Up}")
         LogBuffers("LButton: drag/long-press passado ao sistema")
         return

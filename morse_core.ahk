@@ -178,6 +178,7 @@ SendToSystem(output) {
             ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
+        UpdateOSD()
         return
     }
     if output = "{Reload}" {

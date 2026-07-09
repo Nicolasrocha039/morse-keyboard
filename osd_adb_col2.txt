@@ -1,0 +1,10 @@
+ATALHOS ANDROID
+---------------
+RQAR (Esc)  : Voltar (Back)
+RQRR (Home) : Início (Home)
+RQRQ (Tab)  : Apps Recentes
+
+Outros nativos: Enter, Backspace, 
+Space, Setas, Copiar/Colar.
+
+QAQAQA: Voltar para WINDOWS

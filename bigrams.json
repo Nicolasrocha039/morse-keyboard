@@ -24,7 +24,7 @@
     "útil": 1
   },
   "um": {
-    "pouco": 1,
+    "pouco": 2,
     "artigo": 1,
     "delay": 1,
     "at": 1,
@@ -58,7 +58,7 @@
   },
   "eu": {
     "espero": 1,
-    "quero": 2,
+    "quero": 3,
     "acho": 1,
     "estou": 3,
     "vou": 2,
@@ -124,11 +124,12 @@
   "quero": {
     "sugestões": 1,
     "apresentar": 1,
-    "que": 1
+    "que": 2,
+    "salvar": 1
   },
   "eu quero": {
     "sugestões": 1,
-    "que": 1
+    "que": 2
   },
   "sugestões": {
     "de": 2
@@ -158,7 +159,8 @@
     "vou": 2,
     "no": 1,
     "os": 1,
-    "as": 1
+    "as": 1,
+    "queda": 1
   },
   "possamos": {
     "pedir": 1
@@ -240,7 +242,8 @@
     "au": 1,
     "aus": 1,
     "possibilidade": 1,
-    "massa": 1
+    "massa": 1,
+    "quebra": 1
   },
   "são uma": {
     "ótima": 1
@@ -315,7 +318,8 @@
     "mel": 1,
     "melhor": 2,
     "voltando": 1,
-    "com": 1
+    "com": 1,
+    "viciado": 1
   },
   "eu estou": {
     "pensando": 1,
@@ -337,7 +341,8 @@
     "to": 1,
     "toda": 1,
     "todas": 1,
-    "segundo": 1
+    "segundo": 1,
+    "lo": 1
   },
   "pensando em": {
     "escrever": 1
@@ -404,7 +409,9 @@
     "tira": 1,
     "tirar": 1,
     "almoçar": 1,
-    "acionar": 1
+    "acionar": 1,
+    "linha": 1,
+    "cada": 1
   },
   "projetos de": {
     "qualidade": 1
@@ -880,7 +887,8 @@
   "não": {
     "funciona": 4,
     "es": 1,
-    "está": 1
+    "está": 1,
+    "aparece": 1
   },
   "nas": {
     "minhas": 1
@@ -889,7 +897,8 @@
     "minhas": 1
   },
   "quando": {
-    "eu": 2
+    "eu": 2,
+    "ativo": 1
   },
   "preciso": {
     "de": 1,
@@ -1028,7 +1037,8 @@
     "úteis": 1
   },
   "possível": {
-    "quais": 1
+    "quais": 1,
+    "tornar": 1
   },
   "possível quais": {
     "são": 1
@@ -2044,5 +2054,53 @@
   },
   "versão": {
     "atual": 1
+  },
+  "além": {
+    "do": 1
+  },
+  "linha": {
+    "no": 1
+  },
+  "de linha": {
+    "no": 1
+  },
+  "texto": {
+    "não": 1
+  },
+  "texto não": {
+    "aparece": 1
+  },
+  "viciado": {
+    "em": 1
+  },
+  "estou viciado": {
+    "em": 1
+  },
+  "viciado em": {
+    "lo": 1
+  },
+  "lo": {
+    "que": 1
+  },
+  "em lo": {
+    "que": 1
+  },
+  "lo que": {
+    "queda": 1
+  },
+  "queda": {
+    "de": 1
+  },
+  "que queda": {
+    "de": 1
+  },
+  "pouco": {
+    "de": 1
+  },
+  "um pouco": {
+    "de": 1
+  },
+  "pouco de": {
+    "cada": 1
   }
 }

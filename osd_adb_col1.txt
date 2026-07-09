@@ -1,0 +1,9 @@
+COMANDOS ADB (MODO ANDROID)
+---------------------------
+
+Quando ativo, suas teclas vão
+direto para o Android (WIFI/USB).
+(Substitui o teclado do Windows)
+
+SISTEMA ANDROID
+RQRAR : Power/Wake Screen

@@ -3,6 +3,8 @@
 ; Variáveis globais de interface
 global osdGeral1 := ""
 global osdGeral2 := ""
+global osdAdb1 := ""
+global osdAdb2 := ""
 global osdSyllables := ""
 global osdTriples := ""
 
@@ -13,12 +15,14 @@ global dictArray := []
 global traditionalMode := false
 
 LoadConfig(useTraditionalMap := false) {
-    global osdGeral1, osdGeral2, osdSyllables, osdTriples, morseMap, dictArray, traditionalMode
+    global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdSyllables, osdTriples, morseMap, dictArray, traditionalMode
     traditionalMode := useTraditionalMap
 
     ; Carregar os textos da interface
     try osdGeral1 := FileRead(A_ScriptDir . "\osd_geral_col1.txt", "UTF-8")
     try osdGeral2 := FileRead(A_ScriptDir . "\osd_geral_col2.txt", "UTF-8")
+    try osdAdb1 := FileRead(A_ScriptDir . "\osd_adb_col1.txt", "UTF-8")
+    try osdAdb2 := FileRead(A_ScriptDir . "\osd_adb_col2.txt", "UTF-8")
     try osdSyllables := FileRead(A_ScriptDir . "\osd_syllables.txt", "UTF-8")
     try osdTriples := FileRead(A_ScriptDir . "\osd_triples.txt", "UTF-8")
 
