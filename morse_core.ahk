@@ -642,15 +642,15 @@ ProcessSequence() {
 
                 if modifierChars != "" {
                     if adbMode && accentChars != "" {
-                        SendToSystem(modifierChars . finalChar)
+                        SendToSystem(modifierChars . EscapeAHK(finalChar))
                     } else {
-                        SendToSystem(modifierChars . output)
+                        SendToSystem(modifierChars . EscapeAHK(output))
                     }
                 } else {
                     if adbMode && accentChars != "" {
-                        SendToSystem(finalChar)
+                        SendToSystem(EscapeAHK(finalChar))
                     } else {
-                        SendToSystem(output)
+                        SendToSystem(EscapeAHK(output))
                     }
                     if modifierChars == "" {
                         wordBuffer .= finalChar
@@ -756,3 +756,10 @@ ResolveShift(char) {
         return MapShift[char]
     return char
 }
+
+EscapeAHK(char) {
+    if (StrLen(char) == 1 && InStr("!#^+{}", char))
+        return "{" . char . "}"
+    return char
+}
+
