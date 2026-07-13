@@ -316,9 +316,21 @@ UpdateOSD() {
             UpdateKeyGuide(currentSequence)
 
             if showMaps {
-                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, adbMode
+                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, adbMode, pendingSpecial
 
-                if adbMode {
+                if (IsSet(pendingSpecial) && pendingSpecial == "{MKey}") {
+                    t1c1.Text := osdMKey1
+                    t1c2.Text := osdMKey2
+                    statusText.Text := "⌨ MORSE KEYBOARD: FUNÇÕES MKEY ATIVAS"
+                } else if (IsSet(pendingSpecial) && pendingSpecial == "{MacroKey}") {
+                    t1c1.Text := osdMacro1
+                    t1c2.Text := osdMacro2
+                    statusText.Text := "⌨ MORSE KEYBOARD: MACROS ATIVAS"
+                } else if (IsSet(pendingSpecial) && pendingSpecial == "{FKey}") {
+                    t1c1.Text := osdFKey1
+                    t1c2.Text := osdFKey2
+                    statusText.Text := "⌨ MORSE KEYBOARD: TECLAS F1-F12 ATIVAS"
+                } else if adbMode {
                     t1c1.Text := osdAdb1
                     t1c2.Text := osdAdb2
                     statusText.Text := "⌨ MORSE KEYBOARD: ANDROID (ADB) ATIVO"

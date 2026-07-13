@@ -1,0 +1,8 @@
+﻿MKEY - CONTROLES (1)
+-----------------------------
+RQQ: Meu Computador
+RQA: Pesquisar
+RQR: Calculadora
+RAQ: Media Player
+RAA: Faixa Anterior
+RAR: Proxima Faixa

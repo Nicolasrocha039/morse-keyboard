@@ -63,7 +63,7 @@ def analyze_slicer_window():
         # Captura toda a altura, mas apenas os primeiros 35% da largura da janela
         crop_x = win.left
         crop_y = win.top
-        crop_width = int(win.width * 0.35) 
+        crop_width = int(win.width * 0.5) 
         crop_height = win.height
         
         nome_arquivo = f'slicer_temp_{i}.png'
@@ -79,7 +79,8 @@ def analyze_slicer_window():
     
     for img in imagens_capturadas:
         try:
-            response = ollama.chat(
+            client = ollama.Client(host='http://127.0.0.1:11434')
+            response = client.chat(
                 model='granite3.2-vision:2b',
                 messages=[{
                     'role': 'user',
@@ -116,8 +117,13 @@ def analyze_slicer_window():
                     
                     tempo_str = data.get('time', '0h0m')
                     peso_str = str(data.get('weight', '0')).replace(',', '.')
+                    peso_clean = re.sub(r'[^\d.]', '', peso_str)
                     
-                    peso_float = float(re.sub(r'[^\d.]', '', peso_str))
+                    if not peso_clean or peso_clean == '.':
+                        peso_float = 0.0
+                    else:
+                        peso_float = float(peso_clean)
+                        
                     horas_float = parse_time_to_hours(tempo_str)
                     
                     total_weight += peso_float

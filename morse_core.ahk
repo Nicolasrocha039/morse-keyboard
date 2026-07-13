@@ -205,6 +205,17 @@ SendToSystem(output) {
         return
     }
 
+    if output = "{ToggleCapsLock}" {
+        global morseCapsLock
+        if !IsSet(morseCapsLock)
+            morseCapsLock := false
+        morseCapsLock := !morseCapsLock
+        ToolTip("Caps Lock Automático " . (morseCapsLock ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle CapsLock: " . (morseCapsLock ? "ON" : "OFF"))
+        return
+    }
+
     if adbMode {
         adbPath := '"' . A_ScriptDir . '\platform-tools\adb.exe"'
 
@@ -224,6 +235,11 @@ SendToSystem(output) {
         } else if output = "{Home}" {
             RunWait(adbPath . " shell input keyevent 3", , "Hide") ; HOME
         } else if output = "{Tab}" {
+            RunWait(adbPath . " shell input keyevent 61", , "Hide") ; TAB (Navegação)
+        } else if output = "+{Tab}" {
+            ; Enviar Shift + Tab para voltar foco (requer keycombination em Androids recentes)
+            RunWait(adbPath . " shell input keycombination 59 61", , "Hide")
+        } else if output = "{AppSwitch}" || output = "{LWin}" {
             RunWait(adbPath . " shell input keyevent 187", , "Hide") ; APP SWITCH/RECENTS
         } else if output = "{Up}" {
             RunWait(adbPath . " shell input keyevent 19", , "Hide") ; DPAD UP
@@ -280,6 +296,9 @@ SendToSystem(output) {
             else {
                 escapedOutput := StrReplace(output, "'", "'\''")
                 adbCmd := adbPath . ' shell am broadcast -a ADB_INPUT_TEXT --es msg ' . "'" . escapedOutput . "'"
+                LogBuffers("ADB Cmd: " . adbCmd)
+                ToolTip("ADB: " . adbCmd, A_ScreenWidth / 2 - 200, A_ScreenHeight / 2)
+                SetTimer(() => ToolTip(), -2500)
                 RunWait(adbCmd, , "Hide")
             }
         } else {
@@ -288,6 +307,9 @@ SendToSystem(output) {
 
             ; Envia os caracteres usando o Intent de broadcast do ADBKeyBoard
             adbCmd := adbPath . ' shell am broadcast -a ADB_INPUT_TEXT --es msg ' . "'" . escapedOutput . "'"
+            LogBuffers("ADB Cmd: " . adbCmd)
+            ToolTip("ADB: " . adbCmd, A_ScreenWidth / 2 - 200, A_ScreenHeight / 2)
+            SetTimer(() => ToolTip(), -2500)
             RunWait(adbCmd, , "Hide")
         }
     } else {
@@ -450,7 +472,7 @@ ProcessSequence() {
         if pendingSpecial == "{MKey}" {
             ; Layout Kumara Elite K552 (Fn+F1 a Fn+F12)
             ; 1=MyPC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play/Pause 8=Stop 9=Mute 0=Vol- a=Vol+ b=Lock
-            mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}")
+            mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}", "b", "#l", "B", "#l")
             mTarget := output
             if mkeyMap.Has(mTarget) {
                 modOnly := pendingModifiers
@@ -471,17 +493,35 @@ ProcessSequence() {
         if pendingSpecial == "{MacroKey}" {
             ; O output aqui é o caractere decodificado pelo morseMap
             ; Aceita tanto letras (a,b,c,d) quanto números (1,2,3,4)
-            pyPath := '"' . A_ScriptDir . '\python\python.exe"'
-            macroMap := Map("a", "3dPrecifier.py", "1", "3dPrecifier.py", "b", "SemantiCron.py", "2", "SemantiCron.py", "c", "dork.py", "3", "dork.py", "d", "websocket_server.py", "4", "websocket_server.py")
-            mTarget := output
-            if macroMap.Has(mTarget) {
-                scriptPath := '"' . A_ScriptDir . '\' . macroMap[mTarget] . '"'
-                Run(pyPath . ' ' . scriptPath, A_ScriptDir)
-                LogBuffers("MacroKey Resolved: " . macroMap[mTarget] . " (input: " . output . ")")
-                ToolTip("Macro: " . macroMap[mTarget], A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
-                SetTimer(() => ToolTip(), -2000)
+            ; Disparo HTTP para a nova API Spring Boot
+            endpoint := ""
+            if (output == "a" || output == "1")
+                endpoint := "3d-precifier"
+            else if (output == "b" || output == "2")
+                endpoint := "semanticron"
+            else if (output == "c" || output == "3")
+                endpoint := "dork"
+            
+            if (endpoint != "") {
+                try {
+                    req := ComObject("WinHttp.WinHttpRequest.5.1")
+                    req.Open("POST", "http://127.0.0.1:8080/api/macros/" . endpoint, true) ; assíncrono
+                    req.SetRequestHeader("Content-Type", "application/json")
+                    
+                    ; Payload genérico para Dork/Semanticron
+                    payload := '{"target":"sicredi.com.br", "intent":"avise em 10 minutos"}'
+                    req.Send(payload)
+                    
+                    LogBuffers("MacroKey HTTP Sent: " . endpoint . " (input: " . output . ")")
+                    ToolTip("API Macro: " . endpoint, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                    SetTimer(() => ToolTip(), -2000)
+                } catch as e {
+                    LogBuffers("MacroKey Erro de Conexão: " . e.Message)
+                    ToolTip("Erro API: " . endpoint, A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
+                    SetTimer(() => ToolTip(), -2000)
+                }
             } else {
-                LogBuffers("MacroKey Fallback: tecla não mapeada (" . output . ")")
+                LogBuffers("MacroKey Fallback: tecla não mapeada para API (" . output . ")")
                 ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
             }
@@ -569,6 +609,27 @@ ProcessSequence() {
             } else {
                 ; Caractere normal — montar envio com acentos e modificadores
                 finalChar := output
+
+                global morseCapsLock
+                isCaps := IsSet(morseCapsLock) && morseCapsLock
+                hasShift := InStr(modifierChars, "+")
+
+                if isCaps && IsLower(output) {
+                    if hasShift {
+                        modifierChars := StrReplace(modifierChars, "+", "")
+                    } else {
+                        output := StrUpper(output)
+                        finalChar := output
+                    }
+                } else if hasShift {
+                    shiftedChar := ResolveShift(output)
+                    if shiftedChar != output {
+                        output := shiftedChar
+                        finalChar := output
+                        modifierChars := StrReplace(modifierChars, "+", "")
+                    }
+                }
+
                 if accentChars != "" {
                     finalChar := CombineAccent(SubStr(accentChars, -1), output)
                     if !adbMode {
@@ -661,5 +722,37 @@ CombineAccent(accent, char) {
         MapG := Map("a", "à", "e", "è", "i", "ì", "o", "ò", "u", "ù", "A", "À", "E", "È", "I", "Ì", "O", "Ò", "U", "Ù")
         return MapG.Has(char) ? MapG[char] : char
     }
+    return char
+}
+
+ResolveShift(char) {
+    if (StrLen(char) != 1)
+        return char
+    if IsLower(char)
+        return StrUpper(char)
+    MapShift := Map(
+        "/", "?",
+        "1", "!",
+        "2", "@",
+        "3", "#",
+        "4", "$",
+        "5", "%",
+        "6", "¨",
+        "7", "&",
+        "8", "*",
+        "9", "(",
+        "0", ")",
+        "-", "_",
+        "=", "+",
+        "[", "{",
+        "]", "}",
+        ";", ":",
+        "'", "`"",
+        ",", "<",
+        ".", ">",
+        "\", "|"
+    )
+    if MapShift.Has(char)
+        return MapShift[char]
     return char
 }

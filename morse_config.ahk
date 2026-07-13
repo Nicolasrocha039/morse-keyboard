@@ -5,6 +5,12 @@ global osdGeral1 := ""
 global osdGeral2 := ""
 global osdAdb1 := ""
 global osdAdb2 := ""
+global osdMKey1 := ""
+global osdMKey2 := ""
+global osdMacro1 := ""
+global osdMacro2 := ""
+global osdFKey1 := ""
+global osdFKey2 := ""
 global osdSyllables := ""
 global osdTriples := ""
 
@@ -15,7 +21,7 @@ global dictArray := []
 global traditionalMode := false
 
 LoadConfig(useTraditionalMap := false) {
-    global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdSyllables, osdTriples, morseMap, dictArray, traditionalMode
+    global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSyllables, osdTriples, morseMap, dictArray, traditionalMode
     traditionalMode := useTraditionalMap
 
     ; Carregar os textos da interface
@@ -23,6 +29,12 @@ LoadConfig(useTraditionalMap := false) {
     try osdGeral2 := FileRead(A_ScriptDir . "\osd_geral_col2.txt", "UTF-8")
     try osdAdb1 := FileRead(A_ScriptDir . "\osd_adb_col1.txt", "UTF-8")
     try osdAdb2 := FileRead(A_ScriptDir . "\osd_adb_col2.txt", "UTF-8")
+    try osdMKey1 := FileRead(A_ScriptDir . "\osd_mkey_col1.txt", "UTF-8")
+    try osdMKey2 := FileRead(A_ScriptDir . "\osd_mkey_col2.txt", "UTF-8")
+    try osdMacro1 := FileRead(A_ScriptDir . "\osd_macro_col1.txt", "UTF-8")
+    try osdMacro2 := FileRead(A_ScriptDir . "\osd_macro_col2.txt", "UTF-8")
+    try osdFKey1 := FileRead(A_ScriptDir . "\osd_fkey_col1.txt", "UTF-8")
+    try osdFKey2 := FileRead(A_ScriptDir . "\osd_fkey_col2.txt", "UTF-8")
     try osdSyllables := FileRead(A_ScriptDir . "\osd_syllables.txt", "UTF-8")
     try osdTriples := FileRead(A_ScriptDir . "\osd_triples.txt", "UTF-8")
 

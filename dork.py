@@ -12,8 +12,9 @@ def generate_dorks(target):
     RETURN STRICTLY AND ONLY THE 5 DORKS, one per line. Do not add conversational text, numbering, or formatting blocks."""
     
     try:
-        response = ollama.chat(
-            model='granite3.2:8b', # Ajuste para a tag do seu modelo local de texto
+        client = ollama.Client(host='http://127.0.0.1:11434')
+        response = client.chat(
+            model='granite3.2:2b', # Ajuste para a tag do seu modelo local de texto
             messages=[{'role': 'user', 'content': prompt}],
             options={
                 'temperature': 0.0, # Lógica fria e determinística

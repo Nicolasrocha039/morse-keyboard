@@ -1,10 +1,19 @@
-ATALHOS ANDROID
----------------
-RQAR (Esc)  : Voltar (Back)
-RQRR (Home) : Início (Home)
-RQRQ (Tab)  : Apps Recentes
+ATALHOS E NAVEGAÇÃO ADB
+-----------------------
+RQRQQ/RQRQA/RQRQR/RQRRQ : Setas (L/D/R/U)
+RQRQ     : Tab (Próximo)
+RQRRRA   : Shift+Tab (Anterior)
+RQAA     : Enter (Selecionar)
+RQAR     : Esc (Voltar/Back)
+RQRR     : Home (Tela Inicial)
+RQQRQ    : Apps Recentes
 
-Outros nativos: Enter, Backspace, 
-Space, Setas, Copiar/Colar.
+Outras Ferramentas:
+RQAQA    : Apagar palavra (^Bksp)
+RAAA QR  : Copiar (^c)
+RAAA ARQ : Colar (^v)
+RQRAR    : Ligar/Desligar Tela
+RRRRAA   : Scroll para Cima
+RRRR     : Scroll para Baixo
 
 QAQAQA: Voltar para WINDOWS

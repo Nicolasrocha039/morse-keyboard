@@ -1,0 +1,8 @@
+﻿MKEY - CONTROLES (2)
+-----------------------------
+RRQ  : Play / Pause
+RRA  : Parar
+RRR  : Mudo (Mute)
+RRRRR: Volume -
+QQ   : Volume +
+QA   : Bloquear (Win+L)

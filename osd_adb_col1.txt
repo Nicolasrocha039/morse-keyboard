@@ -1,9 +1,18 @@
-COMANDOS ADB (MODO ANDROID)
----------------------------
+LETRAS E NÚMEROS (ADB)
+----------------------
+Q  + [Q:a A:b R:c]
+QQ + [Q:d A:e R:f]
+QA + [Q:g A:h R:i]
+QR + [Q:j A:k R:l]
+A  + [Q:m A:n R:o]
+AQ + [Q:p A:q R:r]
+AA + [Q:s A:t R:u]
+AR + [Q:v A:w R:x]
+R  + [Q:y A:z AQQ:ç]
 
-Quando ativo, suas teclas vão
-direto para o Android (WIFI/USB).
-(Substitui o teclado do Windows)
+R + [QQ:1  QA:2  QR:3]
+R + [AQ:4  AA:5  AR:6]
+R + [RQ:7  RA:8  RR:9]
+R + [RRRR:0 RRRRQ:. RRRA:,]
 
-SISTEMA ANDROID
-RQRAR : Power/Wake Screen
+RR: Espaço | RQAQ: Apagar

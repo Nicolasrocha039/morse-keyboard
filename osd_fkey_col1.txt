@@ -1,0 +1,8 @@
+﻿TECLAS DE FUNCAO (F1 - F6)
+-----------------------------
+RQQ: F1
+RQA: F2
+RQR: F3
+RAQ: F4
+RAA: F5
+RAR: F6

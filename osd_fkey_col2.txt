@@ -1,0 +1,8 @@
+﻿TECLAS DE FUNCAO (F7 - F12)
+-----------------------------
+RRQ  : F7
+RRA  : F8
+RRR  : F9
+RRRRR: F10
+QQ   : F11
+QA   : F12

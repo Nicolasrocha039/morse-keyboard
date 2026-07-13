@@ -56,8 +56,9 @@ def parse_time_intent(natural_text):
     Do not add conversational text or formatting blocks."""
     
     try:
-        response = ollama.chat(
-            model='granite3.2:8b', # Atualizado para a tag correta
+        client = ollama.Client(host='http://127.0.0.1:11434')
+        response = client.chat(
+            model='granite3.2:2b', # Atualizado para a tag correta
             messages=[{'role': 'user', 'content': prompt}],
             options={'temperature': 0.0, 'seed': 42}
         )

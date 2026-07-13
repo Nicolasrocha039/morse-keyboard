@@ -1,4 +1,4 @@
-Q  + [Q:a A:b R:c]
+﻿Q  + [Q:a A:b R:c]
 QQ + [Q:d A:e R:f]
 QA + [Q:g A:h R:i]
 QR + [Q:j A:k R:l]
@@ -7,7 +7,7 @@ AQ + [Q:p A:q R:r]
 AA + [Q:s A:t R:u]
 AR + [Q:v A:w R:x]
 R  + [Q:y A:z AQQ:ç]
-RARR + [RQ:´ QAQ:``]
+RARR + [RQ:´ QAQ:`]
 RARA + [QQR:^ QAQ:~]
 
 RR  : Espaço   | RQAQ : Apagar
@@ -18,3 +18,6 @@ R + [QQ:1   QA:2    QR:3]
 R + [AQ:4   AA:5    AR:6]
 R + [RQ:7   RA:8    RR:9]
 R + [RRRR:0 RRRRQ:. RRRA:,]
+RAAA(Ctrl) | RAAQ(Shift)
+RAQA(Alt)  | FKey: RAAR
+MKey: RRQQQ | Macro: RRQQQQA
