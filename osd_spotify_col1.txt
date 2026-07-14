@@ -1,0 +1,5 @@
+SPOTIFY - CONTROLES (1)
+-----------------------------
+RQQ: Shuffle
+RQA: Repeat
+RQR: Like / Salvar

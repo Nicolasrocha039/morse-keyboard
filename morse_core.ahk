@@ -435,6 +435,8 @@ ProcessSequence() {
                     ToolTip("Media (Kumara): 1=PC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play 8=Stop 9=Mute 0=Vol- a=Vol+", A_ScreenWidth / 2 - 300, A_ScreenHeight / 2)
                 else if (output == "{MacroKey}")
                     ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
+                else if (output == "{SpotifyKey}")
+                    ToolTip("Spotify: 1=Shuf 2=Rep 3=Like 4=Seek- 5=Seek+ 6=Srch", A_ScreenWidth / 2 - 250, A_ScreenHeight / 2)
                 else
                     ToolTip("Prefixo Customizado: " . output, A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             }
@@ -524,6 +526,38 @@ ProcessSequence() {
                 LogBuffers("MacroKey Fallback: tecla não mapeada para API (" . output . ")")
                 ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                 SetTimer(() => ToolTip(), -2000)
+            }
+            pendingSpecial := ""
+            pendingModifiers := ""
+            pendingAccent := ""
+            UpdateOSD()
+            return
+        }
+
+        if pendingSpecial == "{SpotifyKey}" {
+            ; Como o Spotify ignora o ControlSend, chamamos o script em Python 
+            ; que foca o app, despacha a tecla via PyAutoGUI e retorna o foco.
+            spotifyMap := Map("1", "1", "2", "2", "3", "3", "4", "4", "5", "5", "6", "6")
+            sTarget := output
+            if spotifyMap.Has(sTarget) {
+                if WinExist("ahk_exe Spotify.exe") {
+                    pythonExec := "python"
+                    if FileExist(A_ScriptDir . "\python\python.exe")
+                        pythonExec := '"' . A_ScriptDir . '\python\python.exe"'
+                    else if FileExist(A_ScriptDir . "\python-embed\python.exe")
+                        pythonExec := '"' . A_ScriptDir . '\python-embed\python.exe"'
+                    
+                    RunWait(pythonExec . ' "' . A_ScriptDir . '\spotify_macro.py" ' . sTarget, , "Hide")
+                    LogBuffers("SpotifyKey Python Macro Executed: " . sTarget)
+                } else {
+                    LogBuffers("SpotifyKey Falha: Spotify não encontrado")
+                    ToolTip("Spotify não está aberto!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
+                    SetTimer(() => ToolTip(), -2000)
+                }
+            } else {
+                modOnly := pendingModifiers
+                SendToSystem(modOnly . output)
+                LogBuffers("SpotifyKey Fallback: " . modOnly . output)
             }
             pendingSpecial := ""
             pendingModifiers := ""

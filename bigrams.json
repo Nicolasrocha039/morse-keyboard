@@ -24,7 +24,8 @@
   },
   "muito": {
     "obrigado": 1,
-    "útil": 1
+    "útil": 1,
+    "bem": 2
   },
   "um": {
     "pouco": 5,
@@ -51,10 +52,13 @@
     "ou": 1,
     "símbolo": 1,
     "símbolos": 1,
-    "cedo": 5
+    "cedo": 5,
+    "chance": 1,
+    "um": 1
   },
   "ou": {
-    "menos": 1
+    "menos": 1,
+    "fazer": 1
   },
   "agora": {
     "mesmo": 1,
@@ -69,10 +73,10 @@
     "espero": 1,
     "quero": 3,
     "acho": 1,
-    "estou": 4,
+    "estou": 5,
     "vou": 3,
     "ainda": 1,
-    "preciso": 4,
+    "preciso": 5,
     "peguei": 1,
     "gostaria": 1,
     "possa": 1,
@@ -89,7 +93,10 @@
     "tento": 1,
     "nao": 1,
     "me": 1,
-    "já": 1
+    "já": 1,
+    "teria": 1,
+    "estava": 1,
+    "não": 1
   },
   "espero": {},
   "tu": {
@@ -123,7 +130,8 @@
     "deu": 10,
     "le": 1,
     "lembre": 3,
-    "refiro": 1
+    "refiro": 1,
+    "dei": 1
   },
   "como me": {
     "ensinar": 1
@@ -155,7 +163,7 @@
   "que": {
     "possamos": 1,
     "não": 1,
-    "eu": 2,
+    "eu": 4,
     "ia": 1,
     "seria": 1,
     "podem": 1,
@@ -195,13 +203,14 @@
   },
   "vai": {
     "fazer": 1,
-    "sentar": 1
+    "sentar": 1,
+    "trabalhar": 1
   },
   "vai fazer": {
     "frio": 1
   },
   "acho": {
-    "que": 6,
+    "que": 8,
     "qu": 1
   },
   "eu acho": {
@@ -213,7 +222,8 @@
     "es": 1,
     "estou": 3,
     "vou": 2,
-    "vai": 1
+    "vai": 1,
+    "eu": 1
   },
   "mari": {
     "pegar": 1,
@@ -221,7 +231,9 @@
     "vamos": 1,
     "foi": 3,
     "vai": 1,
-    "estamos": 1
+    "estamos": 1,
+    "me": 1,
+    "ainda": 1
   },
   "pegar": {
     "uma": 1
@@ -267,7 +279,8 @@
     "possibilidade": 1,
     "massa": 1,
     "quebra": 1,
-    "arquitetura": 1
+    "arquitetura": 1,
+    "camada": 1
   },
   "são uma": {
     "ótima": 1
@@ -302,7 +315,8 @@
   "ao": {
     "contexto": 1,
     "clicar": 1,
-    "foi": 1
+    "foi": 1,
+    "meio": 2
   },
   "alinhada ao": {
     "contexto": 1
@@ -343,11 +357,15 @@
     "melhor": 2,
     "voltando": 1,
     "com": 1,
-    "viciado": 1
+    "viciado": 1,
+    "aposentado": 1,
+    "conseguindo": 1,
+    "usando": 1
   },
   "eu estou": {
     "pensando": 1,
-    "percebendo": 1
+    "percebendo": 1,
+    "aposentado": 1
   },
   "pensando": {
     "em": 1,
@@ -422,7 +440,7 @@
     "digitar": 1,
     "sugestões": 1,
     "coisas": 1,
-    "teclado": 1,
+    "teclado": 2,
     "interrogação": 1,
     "vender": 3,
     "na": 2,
@@ -439,7 +457,11 @@
     "pastas": 1,
     "ia": 1,
     "plano": 1,
-    "perfil": 1
+    "perfil": 1,
+    "trabalhar": 1,
+    "cabeça": 1,
+    "sangue": 1,
+    "macro": 1
   },
   "projetos de": {
     "qualidade": 1
@@ -525,7 +547,8 @@
     "ho": 1,
     "hora": 1,
     "minha": 1,
-    "implementação": 1
+    "implementação": 1,
+    "verdade": 1
   },
   "encaixa na": {
     "engenharia": 1
@@ -559,7 +582,7 @@
   },
   "os": {
     "líderes": 1,
-    "atalhos": 4,
+    "atalhos": 5,
     "ag": 1,
     "age": 1,
     "agenda": 1,
@@ -625,16 +648,17 @@
     "às": 1
   },
   "trabalhar": {
-    "no": 2,
+    "no": 3,
     "nas": 1,
-    "na": 1
+    "na": 1,
+    "umas": 1
   },
   "vou trabalhar": {
     "no": 1,
     "nas": 1
   },
   "no": {
-    "meu": 2,
+    "meu": 3,
     "cr": 1,
     "crea": 1,
     "ba": 1,
@@ -649,20 +673,22 @@
     "prejuízo": 1
   },
   "trabalhar no": {
-    "meu": 2
+    "meu": 3
   },
   "meu": {
-    "teclado": 1,
+    "teclado": 2,
     "projeto": 1,
-    "lado": 1
+    "lado": 1,
+    "mouse": 1
   },
   "no meu": {
-    "teclado": 1,
+    "teclado": 2,
     "projeto": 1
   },
   "teclado": {
     "de": 1,
-    "que": 1
+    "que": 1,
+    "do": 1
   },
   "meu teclado": {
     "de": 1
@@ -678,7 +704,8 @@
     "página": 2,
     "páginas": 2,
     "teclas": 2,
-    "letras": 1
+    "letras": 1,
+    "tabelas": 1
   },
   "delegar as": {
     "compras": 1
@@ -846,7 +873,8 @@
     "fun": 1,
     "funciona": 1,
     "funcionando": 1,
-    "dando": 1
+    "dando": 1,
+    "difícil": 2
   },
   "sobrando": {
     "espaço": 1
@@ -884,7 +912,8 @@
   "ainda": {
     "estou": 1,
     "nada": 1,
-    "não": 1
+    "não": 1,
+    "vai": 1
   },
   "eu ainda": {
     "estou": 1
@@ -946,7 +975,9 @@
     "consigo": 1,
     "tem": 1,
     "roda": 2,
-    "deu": 1
+    "deu": 1,
+    "estou": 1,
+    "funcionou": 1
   },
   "nas": {
     "minhas": 1
@@ -956,7 +987,8 @@
   },
   "quando": {
     "eu": 2,
-    "ativo": 1
+    "ativo": 1,
+    "me": 1
   },
   "preciso": {
     "de": 1,
@@ -964,7 +996,7 @@
     "ser": 5,
     "ver": 1,
     "verificar": 1,
-    "que": 3,
+    "que": 4,
     "simplificar": 1,
     "fazer": 1
   },
@@ -1047,7 +1079,8 @@
     "nao": 1,
     "as": 1,
     "não": 1,
-    "eu": 1
+    "eu": 2,
+    "acho": 1
   },
   "mas agora": {
     "eu": 1
@@ -1083,7 +1116,9 @@
     "funciona": 1
   },
   "que eu": {
-    "possa": 1
+    "possa": 1,
+    "teria": 1,
+    "estava": 1
   },
   "possa": {
     "imprimir": 1
@@ -1115,7 +1150,7 @@
     "atalhos": 1
   },
   "atalhos": {
-    "de": 1,
+    "de": 2,
     "cr": 1,
     "crie": 2,
     "va": 1,
@@ -1126,17 +1161,18 @@
     "no": 1
   },
   "os atalhos": {
-    "de": 1,
+    "de": 2,
     "va": 1,
     "vago": 1,
     "vagos": 3,
     "no": 1
   },
   "atalhos de": {
-    "teclado": 1
+    "teclado": 2
   },
   "de teclado": {
-    "que": 1
+    "que": 1,
+    "do": 1
   },
   "teclado que": {
     "funcionam": 1
@@ -1200,7 +1236,7 @@
     "mexer": 3
   },
   "camada": {
-    "de": 1
+    "de": 2
   },
   "pela": {
     "ca": 1,
@@ -1241,7 +1277,8 @@
     "de": 3
   },
   "melhor": {
-    "do": 3
+    "do": 3,
+    "conversar": 1
   },
   "do": {
     "que": 2,
@@ -1255,7 +1292,7 @@
     "parafuso": 1,
     "pricing": 1,
     "meu": 1,
-    "lado": 1
+    "lado": 2
   },
   "melhor do": {
     "que": 2
@@ -1283,7 +1320,7 @@
   },
   "crie": {
     "um": 5,
-    "uma": 5
+    "uma": 6
   },
   "atalhos crie": {
     "um": 1,
@@ -1293,7 +1330,8 @@
     "ba": 1,
     "bar": 1,
     "barra": 3,
-    "arquitetura": 1
+    "arquitetura": 1,
+    "camada": 1
   },
   "barra": {
     "de": 9
@@ -1662,7 +1700,8 @@
     "peça": 1
   },
   "foi": {
-    "no": 3
+    "no": 3,
+    "ao": 2
   },
   "mari foi": {
     "no": 3
@@ -1718,7 +1757,8 @@
   "médica": {
     "ag": 1,
     "agora": 1,
-    "me": 6
+    "me": 6,
+    "pediu": 1
   },
   "da médica": {
     "ag": 1,
@@ -1796,7 +1836,7 @@
     "um": 2
   },
   "hora": {
-    "de": 3
+    "de": 4
   },
   "na hora": {
     "de": 3
@@ -1804,7 +1844,8 @@
   "hora de": {
     "ti": 1,
     "tira": 1,
-    "tirar": 1
+    "tirar": 1,
+    "trabalhar": 1
   },
   "atalho": {
     "pa": 1,
@@ -1868,7 +1909,8 @@
     "as": 1
   },
   "mouse": {
-    "trava": 1
+    "trava": 1,
+    "de": 1
   },
   "eu nao": {
     "consigo": 1
@@ -2226,7 +2268,8 @@
     "um": 1
   },
   "ela": {
-    "já": 1
+    "já": 1,
+    "apareceu": 1
   },
   "já": {
     "escolheu": 1,
@@ -2546,10 +2589,12 @@
     "certo": 1
   },
   "lado": {
-    "errado": 1
+    "errado": 1,
+    "direito": 2
   },
   "do lado": {
-    "errado": 1
+    "errado": 1,
+    "direito": 2
   },
   "diminuir": {
     "para": 1
@@ -2585,6 +2630,182 @@
     "já": 1
   },
   "só": {
-    "falta": 1
+    "falta": 1,
+    "preciso": 1
+  },
+  "mandou": {
+    "bem": 1
+  },
+  "bem": {
+    "muito": 1,
+    "mas": 1
+  },
+  "mandou bem": {
+    "muito": 1
+  },
+  "bem muito": {
+    "bem": 2
+  },
+  "muito bem": {
+    "mas": 1
+  },
+  "bem mas": {
+    "acho": 1
+  },
+  "mas acho": {
+    "que": 1
+  },
+  "teria": {
+    "mais": 1
+  },
+  "eu teria": {
+    "mais": 1
+  },
+  "teria mais": {
+    "chance": 1
+  },
+  "chance": {
+    "mas": 1
+  },
+  "mais chance": {
+    "mas": 1
+  },
+  "chance mas": {
+    "eu": 1
+  },
+  "mas eu": {
+    "estou": 1
+  },
+  "percebeu": {
+    "que": 1
+  },
+  "percebeu que": {
+    "eu": 1
+  },
+  "quando me": {
+    "dei": 1
+  },
+  "dei": {
+    "por": 1
+  },
+  "me dei": {
+    "por": 1
+  },
+  "apareceu": {
+    "com": 1
+  },
+  "ela apareceu": {
+    "com": 1
+  },
+  "peças": {
+    "de": 1
+  },
+  "isso": {
+    "foi": 1
+  },
+  "isso foi": {
+    "ao": 1
+  },
+  "foi ao": {
+    "meio": 2
+  },
+  "de trabalhar": {
+    "no": 1
+  },
+  "tiara": {
+    "nova": 1
+  },
+  "nova": {
+    "para": 1
+  },
+  "tiara nova": {
+    "para": 1
+  },
+  "meu mouse": {
+    "de": 1
+  },
+  "mouse de": {
+    "cabeça": 1
+  },
+  "difícil": {
+    "de": 1
+  },
+  "está difícil": {
+    "de": 1
+  },
+  "eu não": {
+    "estou": 1
+  },
+  "não estou": {
+    "conseguindo": 1
+  },
+  "bateria": {
+    "esgotou": 1
+  },
+  "mari ainda": {
+    "vai": 1
+  },
+  "ainda vai": {
+    "trabalhar": 1
+  },
+  "vai trabalhar": {
+    "umas": 1
+  },
+  "teve": {
+    "mais": 1
+  },
+  "teve mais": {
+    "um": 1
+  },
+  "exame": {
+    "de": 1
+  },
+  "exame de": {
+    "sangue": 1
+  },
+  "sangue": {
+    "hoje": 1
+  },
+  "de sangue": {
+    "hoje": 1
+  },
+  "hoje": {
+    "que": 1
+  },
+  "sangue hoje": {
+    "que": 1
+  },
+  "pediu": {
+    "para": 1
+  },
+  "médica pediu": {
+    "para": 1
+  },
+  "conversar": {
+    "antes": 1
+  },
+  "melhor conversar": {
+    "antes": 1
+  },
+  "saber": {
+    "os": 1
+  },
+  "saber os": {
+    "atalhos": 1
+  },
+  "uma camada": {
+    "de": 1
+  },
+  "camada de": {
+    "macro": 1
+  },
+  "macro": {
+    "para": 1
+  },
+  "de macro": {
+    "para": 1
+  },
+  "só preciso": {
+    "que": 1
   }
 }

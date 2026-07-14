@@ -316,7 +316,7 @@ UpdateOSD() {
             UpdateKeyGuide(currentSequence)
 
             if showMaps {
-                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, adbMode, pendingSpecial
+                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, adbMode, pendingSpecial
 
                 if (IsSet(pendingSpecial) && pendingSpecial == "{MKey}") {
                     t1c1.Text := osdMKey1
@@ -330,6 +330,10 @@ UpdateOSD() {
                     t1c1.Text := osdFKey1
                     t1c2.Text := osdFKey2
                     statusText.Text := "⌨ MORSE KEYBOARD: TECLAS F1-F12 ATIVAS"
+                } else if (IsSet(pendingSpecial) && pendingSpecial == "{SpotifyKey}") {
+                    t1c1.Text := osdSpotify1
+                    t1c2.Text := osdSpotify2
+                    statusText.Text := "⌨ MORSE KEYBOARD: SPOTIFY ATIVO"
                 } else if adbMode {
                     t1c1.Text := osdAdb1
                     t1c2.Text := osdAdb2

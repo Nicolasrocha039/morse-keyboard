@@ -1,4 +1,4 @@
-﻿Q  + [Q:a A:b R:c]
+Q  + [Q:a A:b R:c]
 QQ + [Q:d A:e R:f]
 QA + [Q:g A:h R:i]
 QR + [Q:j A:k R:l]
@@ -21,3 +21,4 @@ R + [RRRR:0 RRRRQ:. RRRA:,]
 RAAA(Ctrl) | RAAQ(Shift)
 RAQA(Alt)  | FKey: RAAR
 MKey: RRQQQ | Macro: RRQQQQA
+Spotify: RRQQQQ
