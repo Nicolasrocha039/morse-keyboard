@@ -316,7 +316,7 @@ UpdateOSD() {
             UpdateKeyGuide(currentSequence)
 
             if showMaps {
-                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, adbMode, pendingSpecial
+                global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, osdTeams1, osdTeams2, adbMode, pendingSpecial
 
                 if (IsSet(pendingSpecial) && pendingSpecial == "{MKey}") {
                     t1c1.Text := osdMKey1
@@ -333,7 +333,11 @@ UpdateOSD() {
                 } else if (IsSet(pendingSpecial) && pendingSpecial == "{SpotifyKey}") {
                     t1c1.Text := osdSpotify1
                     t1c2.Text := osdSpotify2
-                    statusText.Text := "⌨ MORSE KEYBOARD: SPOTIFY ATIVO"
+                    statusText.Text := "🤖 MORSE KEYBOARD: SPOTIFY ATIVO"
+                } else if (IsSet(pendingSpecial) && pendingSpecial == "{TeamsKey}") {
+                    t1c1.Text := osdTeams1
+                    t1c2.Text := osdTeams2
+                    statusText.Text := "🤖 MORSE KEYBOARD: TEAMS ATIVO"
                 } else if adbMode {
                     t1c1.Text := osdAdb1
                     t1c2.Text := osdAdb2

@@ -1,0 +1,5 @@
+MICROSOFT TEAMS - (1)
+-----------------------------
+RQQ: Mic (Mute/Unmute)
+RQA: Cam (Video On/Off)
+RQR: Share (Compartilhar)

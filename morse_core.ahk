@@ -407,6 +407,25 @@ ProcessSequence() {
             return
         }
 
+        if output = "{QuotesLeft}" {
+            hasShift := InStr(pendingModifiers, "+")
+            if hasShift {
+                SendToSystem('""')
+                SendToSystem("{Left}")
+                pendingModifiers := StrReplace(pendingModifiers, "+", "")
+                wordBuffer .= '""'
+                visualBuffer .= '""'
+            } else {
+                SendToSystem("''")
+                SendToSystem("{Left}")
+                wordBuffer .= "''"
+                visualBuffer .= "''"
+            }
+            LogBuffers("QuotesLeft executed")
+            UpdateOSD()
+            return
+        }
+
         ; Acentos (dead keys) → acumulam no prefixo como caractere literal
         if output = "^" || output = "~" || output = "´" || output = "``" {
             if (pendingAccent == output) {
@@ -437,6 +456,8 @@ ProcessSequence() {
                     ToolTip("Prefixo Macro: 1=3dPrecifier 2=SemantiCron 3=Dork", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
                 else if (output == "{SpotifyKey}")
                     ToolTip("Spotify: 1=Shuf 2=Rep 3=Like 4=Seek- 5=Seek+ 6=Srch", A_ScreenWidth / 2 - 250, A_ScreenHeight / 2)
+                else if (output == "{TeamsKey}")
+                    ToolTip("Teams: 1=Mic 2=Cam 3=Share 4=Hand 5=Leave 6=Chat", A_ScreenWidth / 2 - 250, A_ScreenHeight / 2)
                 else
                     ToolTip("Prefixo Customizado: " . output, A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             }
@@ -535,29 +556,52 @@ ProcessSequence() {
         }
 
         if pendingSpecial == "{SpotifyKey}" {
-            ; Como o Spotify ignora o ControlSend, chamamos o script em Python 
-            ; que foca o app, despacha a tecla via PyAutoGUI e retorna o foco.
-            spotifyMap := Map("1", "1", "2", "2", "3", "3", "4", "4", "5", "5", "6", "6")
+            ; Executa atalhos nativamente focando o Spotify e voltando o foco
+            spotifyMap := Map("1", "^s", "2", "^r", "3", "!+b", "4", "+{Left}", "5", "+{Right}", "6", "^l")
             sTarget := output
             if spotifyMap.Has(sTarget) {
                 if WinExist("ahk_exe Spotify.exe") {
-                    pythonExec := "python"
-                    if FileExist(A_ScriptDir . "\python\python.exe")
-                        pythonExec := '"' . A_ScriptDir . '\python\python.exe"'
-                    else if FileExist(A_ScriptDir . "\python-embed\python.exe")
-                        pythonExec := '"' . A_ScriptDir . '\python-embed\python.exe"'
-                    
-                    RunWait(pythonExec . ' "' . A_ScriptDir . '\spotify_macro.py" ' . sTarget, , "Hide")
-                    LogBuffers("SpotifyKey Python Macro Executed: " . sTarget)
+                    activeHwnd := WinExist("A")
+                    WinActivate("ahk_exe Spotify.exe")
+                    if WinWaitActive("ahk_exe Spotify.exe", , 1) {
+                        Send(spotifyMap[sTarget])
+                        Sleep(50)
+                        if (activeHwnd) {
+                            WinActivate("ahk_id " . activeHwnd)
+                        }
+                        LogBuffers("SpotifyKey Executed via AHK: " . sTarget)
+                    } else {
+                        LogBuffers("SpotifyKey Falha: Nao foi possivel focar o Spotify")
+                    }
                 } else {
-                    LogBuffers("SpotifyKey Falha: Spotify não encontrado")
-                    ToolTip("Spotify não está aberto!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
+                    LogBuffers("SpotifyKey Falha: Spotify nao encontrado")
+                    ToolTip("Spotify nao esta aberto!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
                     SetTimer(() => ToolTip(), -2000)
                 }
             } else {
                 modOnly := pendingModifiers
                 SendToSystem(modOnly . output)
                 LogBuffers("SpotifyKey Fallback: " . modOnly . output)
+            }
+            pendingSpecial := ""
+            pendingModifiers := ""
+            pendingAccent := ""
+            UpdateOSD()
+            return
+        }
+
+        if pendingSpecial == "{TeamsKey}" {
+            ; Mapear atalhos do Microsoft Teams
+            teamsMap := Map("1", "^+m", "2", "^+o", "3", "^+e", "4", "^+k", "5", "^+h", "6", "^2")
+            tTarget := output
+            if teamsMap.Has(tTarget) {
+                modOnly := pendingModifiers
+                SendToSystem(modOnly . teamsMap[tTarget])
+                LogBuffers("TeamsKey Resolved: " . modOnly . teamsMap[tTarget])
+            } else {
+                modOnly := pendingModifiers
+                SendToSystem(modOnly . output)
+                LogBuffers("TeamsKey Fallback: " . modOnly . output)
             }
             pendingSpecial := ""
             pendingModifiers := ""

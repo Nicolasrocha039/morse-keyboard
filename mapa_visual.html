@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Morse Keyboard — Mapa Visual de Sequências</title>
-    <meta name="description" content="Mapa visual interativo de todas as sequências do Morse Keyboard AHK">
+    <title>Morse Keyboard â€” Mapa Visual de SequÃªncias</title>
+    <meta name="description" content="Mapa visual interativo de todas as sequÃªncias do Morse Keyboard AHK">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -118,7 +118,7 @@
         }
 
         .search-box::before {
-            content: '🔍';
+            content: 'ðŸ”';
             position: absolute;
             left: 0.9rem;
             top: 50%;
@@ -810,43 +810,43 @@
 
 <div class="container">
     <header>
-        <h1>⌨ Morse Keyboard</h1>
-        <p>Mapa visual interativo — todas as sequências usando Q, A, Right (R)</p>
+        <h1>âŒ¨ Morse Keyboard</h1>
+        <p>Mapa visual interativo â€” todas as sequÃªncias usando Q, A, Right (R)</p>
     </header>
 
     <!-- Stats -->
     <div class="stats-bar">
         <div class="stat">
             <div class="stat-value" id="totalCount">0</div>
-            <div class="stat-label">Sequências</div>
+            <div class="stat-label">SequÃªncias</div>
         </div>
         <div class="stat">
             <div class="stat-value">4</div>
-            <div class="stat-label">Teclas Físicas</div>
+            <div class="stat-label">Teclas FÃ­sicas</div>
         </div>
         <div class="stat">
             <div class="stat-value">2-5</div>
             <div class="stat-label">Toques</div>
         </div>
         <div class="stat">
-            <div class="stat-value">⏎ Enter</div>
+            <div class="stat-value">âŽ Enter</div>
             <div class="stat-label">Confirmar</div>
         </div>
     </div>
 
     <!-- Interactive keyboard -->
     <div class="keyboard-preview">
-        <div class="kb-key key-q" data-key="Q" onclick="pressKey('Q')">Q<span class="key-number">Mão Esq</span></div>
-        <div class="kb-key key-a" data-key="A" onclick="pressKey('A')">A<span class="key-number">Mão Esq</span></div>
-        <div class="kb-key key-r" data-key="R" onclick="pressKey('R')">▶ R<span class="key-number">Mão Dir</span></div>
-        <div class="kb-key key-enter" data-key="Enter" onclick="confirmSequence()">⏎<span class="key-number">Confirmar</span></div>
+        <div class="kb-key key-q" data-key="Q" onclick="pressKey('Q')">Q<span class="key-number">MÃ£o Esq</span></div>
+        <div class="kb-key key-a" data-key="A" onclick="pressKey('A')">A<span class="key-number">MÃ£o Esq</span></div>
+        <div class="kb-key key-r" data-key="R" onclick="pressKey('R')">â–¶ R<span class="key-number">MÃ£o Dir</span></div>
+        <div class="kb-key key-enter" data-key="Enter" onclick="confirmSequence()">âŽ<span class="key-number">Confirmar</span></div>
     </div>
 
     <!-- Sequence display -->
     <div class="sequence-display">
         <div class="seq-keys" id="seqKeys"></div>
         <div class="seq-result" id="seqResult">
-            <span class="no-match">Clique nas teclas ou use o teclado físico (Q, A, Seta Direita, Enter)</span>
+            <span class="no-match">Clique nas teclas ou use o teclado fÃ­sico (Q, A, Seta Direita, Enter)</span>
         </div>
         <div class="seq-hint" id="seqHint"></div>
     </div>
@@ -854,23 +854,23 @@
     <!-- Controls -->
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar caractere, sequência ou descrição...">
+            <input type="text" id="searchInput" placeholder="Buscar caractere, sequÃªncia ou descriÃ§Ã£o...">
         </div>
         <div class="view-toggle">
             <button class="view-btn active" data-view="grid" onclick="setView('grid')">Grade</button>
-            <button class="view-btn" data-view="tree" onclick="setView('tree')">Árvore</button>
+            <button class="view-btn" data-view="tree" onclick="setView('tree')">Ãrvore</button>
         </div>
     </div>
 
     <div class="filter-pills" id="filterPills">
         <div class="pill active" data-filter="all" onclick="setFilter('all')">Todos</div>
-        <div class="pill" data-filter="lowercase" onclick="setFilter('lowercase')">🔤 Minúsculas</div>
-        <div class="pill" data-filter="accented" onclick="setFilter('accented')">ã Acentos & Cedilha</div>
-        <div class="pill" data-filter="uppercase" onclick="setFilter('uppercase')">🔠 Maiúsculas</div>
-        <div class="pill" data-filter="numbers" onclick="setFilter('numbers')">🔢 Números</div>
-        <div class="pill" data-filter="punctuation" onclick="setFilter('punctuation')">❗ Símbolos & Pontuação</div>
-        <div class="pill" data-filter="special" onclick="setFilter('special')">⌨ Especiais & Navegação</div>
-        <div class="pill" data-filter="shortcuts" onclick="setFilter('shortcuts')">⚡ Atalhos (Ctrl+)</div>
+        <div class="pill" data-filter="lowercase" onclick="setFilter('lowercase')">ðŸ”¤ MinÃºsculas</div>
+        <div class="pill" data-filter="accented" onclick="setFilter('accented')">Ã£ Acentos & Cedilha</div>
+        <div class="pill" data-filter="uppercase" onclick="setFilter('uppercase')">ðŸ”  MaiÃºsculas</div>
+        <div class="pill" data-filter="numbers" onclick="setFilter('numbers')">ðŸ”¢ NÃºmeros</div>
+        <div class="pill" data-filter="punctuation" onclick="setFilter('punctuation')">â— SÃ­mbolos & PontuaÃ§Ã£o</div>
+        <div class="pill" data-filter="special" onclick="setFilter('special')">âŒ¨ Especiais & NavegaÃ§Ã£o</div>
+        <div class="pill" data-filter="shortcuts" onclick="setFilter('shortcuts')">âš¡ Atalhos (Ctrl+)</div>
     </div>
 
     <!-- Grid view -->
@@ -881,21 +881,21 @@
 
     <footer>
         <p>
-            <kbd>CapsLock</kbd> ativa/desativa &nbsp;·&nbsp;
-            <kbd>Enter</kbd> confirma sequência &nbsp;·&nbsp;
-            <kbd>Esc</kbd> ou <kbd>LWin</kbd> cancela sequência &nbsp;·&nbsp;
-            <kbd>w</kbd> / <kbd>s</kbd> muda abas no OSD &nbsp;·&nbsp;
+            <kbd>CapsLock</kbd> ativa/desativa &nbsp;Â·&nbsp;
+            <kbd>Enter</kbd> confirma sequÃªncia &nbsp;Â·&nbsp;
+            <kbd>Esc</kbd> ou <kbd>LWin</kbd> cancela sequÃªncia &nbsp;Â·&nbsp;
+            <kbd>w</kbd> / <kbd>s</kbd> muda abas no OSD &nbsp;Â·&nbsp;
             <kbd>\</kbd> oculta/mostra abas
         </p>
     </footer>
 </div>
 
-<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">â†‘</button>
 
 <script>
-    // ══════════════════════════════════════════════════════════════════
-    // DADOS — Todas as sequências extraídas do script AHK
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // DADOS â€” Todas as sequÃªncias extraÃ­das do script AHK
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     const sequences = [
         {
                 "seq": "QQ",
@@ -1057,7 +1057,7 @@
                 "seq": "RR",
                 "output": " ",
                 "cat": "special",
-                "desc": "Espaço"
+                "desc": "EspaÃ§o"
         },
         {
                 "seq": "RQAQ",
@@ -1081,97 +1081,97 @@
                 "seq": "RQQ",
                 "output": "1",
                 "cat": "numbers",
-                "desc": "Número 1"
+                "desc": "NÃºmero 1"
         },
         {
                 "seq": "RQA",
                 "output": "2",
                 "cat": "numbers",
-                "desc": "Número 2"
+                "desc": "NÃºmero 2"
         },
         {
                 "seq": "RQR",
                 "output": "3",
                 "cat": "numbers",
-                "desc": "Número 3"
+                "desc": "NÃºmero 3"
         },
         {
                 "seq": "RAQ",
                 "output": "4",
                 "cat": "numbers",
-                "desc": "Número 4"
+                "desc": "NÃºmero 4"
         },
         {
                 "seq": "RAA",
                 "output": "5",
                 "cat": "numbers",
-                "desc": "Número 5"
+                "desc": "NÃºmero 5"
         },
         {
                 "seq": "RAR",
                 "output": "6",
                 "cat": "numbers",
-                "desc": "Número 6"
+                "desc": "NÃºmero 6"
         },
         {
                 "seq": "RRQ",
                 "output": "7",
                 "cat": "numbers",
-                "desc": "Número 7"
+                "desc": "NÃºmero 7"
         },
         {
                 "seq": "RRA",
                 "output": "8",
                 "cat": "numbers",
-                "desc": "Número 8"
+                "desc": "NÃºmero 8"
         },
         {
                 "seq": "RRR",
                 "output": "9",
                 "cat": "numbers",
-                "desc": "Número 9"
+                "desc": "NÃºmero 9"
         },
         {
                 "seq": "RRRRR",
                 "output": "0",
                 "cat": "numbers",
-                "desc": "Número 0"
+                "desc": "NÃºmero 0"
         },
         {
                 "seq": "RRRRQ",
                 "output": ".",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba '.'"
+                "desc": "DÃ­grafo/SÃ­laba '.'"
         },
         {
                 "seq": "RRRRA",
                 "output": ",",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba ','"
+                "desc": "DÃ­grafo/SÃ­laba ','"
         },
         {
                 "seq": "RRQQ",
                 "output": "A",
                 "cat": "uppercase",
-                "desc": "Letra A maiúscula"
+                "desc": "Letra A maiÃºscula"
         },
         {
                 "seq": "RRQA",
                 "output": "B",
                 "cat": "uppercase",
-                "desc": "Letra B maiúscula"
+                "desc": "Letra B maiÃºscula"
         },
         {
                 "seq": "RRQR",
                 "output": "C",
                 "cat": "uppercase",
-                "desc": "Letra C maiúscula"
+                "desc": "Letra C maiÃºscula"
         },
         {
                 "seq": "RRQQQ",
                 "output": "D",
                 "cat": "uppercase",
-                "desc": "Letra D maiúscula"
+                "desc": "Letra D maiÃºscula"
         },
         {
                 "seq": "RRQQA",
@@ -1183,55 +1183,55 @@
                 "seq": "RRQQR",
                 "output": "F",
                 "cat": "uppercase",
-                "desc": "Letra F maiúscula"
+                "desc": "Letra F maiÃºscula"
         },
         {
                 "seq": "RRQAQ",
                 "output": "G",
                 "cat": "uppercase",
-                "desc": "Letra G maiúscula"
+                "desc": "Letra G maiÃºscula"
         },
         {
                 "seq": "RRQAA",
                 "output": "H",
                 "cat": "uppercase",
-                "desc": "Letra H maiúscula"
+                "desc": "Letra H maiÃºscula"
         },
         {
                 "seq": "RRQAR",
                 "output": "I",
                 "cat": "uppercase",
-                "desc": "Letra I maiúscula"
+                "desc": "Letra I maiÃºscula"
         },
         {
                 "seq": "RRQRQ",
                 "output": "J",
                 "cat": "uppercase",
-                "desc": "Letra J maiúscula"
+                "desc": "Letra J maiÃºscula"
         },
         {
                 "seq": "RRQRA",
                 "output": "K",
                 "cat": "uppercase",
-                "desc": "Letra K maiúscula"
+                "desc": "Letra K maiÃºscula"
         },
         {
                 "seq": "RRQRR",
                 "output": "L",
                 "cat": "uppercase",
-                "desc": "Letra L maiúscula"
+                "desc": "Letra L maiÃºscula"
         },
         {
                 "seq": "RRAQ",
                 "output": "M",
                 "cat": "uppercase",
-                "desc": "Letra M maiúscula"
+                "desc": "Letra M maiÃºscula"
         },
         {
                 "seq": "RRAA",
                 "output": "N",
                 "cat": "uppercase",
-                "desc": "Letra N maiúscula"
+                "desc": "Letra N maiÃºscula"
         },
         {
                 "seq": "RRAR",
@@ -1243,19 +1243,19 @@
                 "seq": "RRAQQ",
                 "output": "P",
                 "cat": "uppercase",
-                "desc": "Letra P maiúscula"
+                "desc": "Letra P maiÃºscula"
         },
         {
                 "seq": "RRAQA",
                 "output": "Q",
                 "cat": "uppercase",
-                "desc": "Letra Q maiúscula"
+                "desc": "Letra Q maiÃºscula"
         },
         {
                 "seq": "RRAQR",
                 "output": "R",
                 "cat": "uppercase",
-                "desc": "Letra R maiúscula"
+                "desc": "Letra R maiÃºscula"
         },
         {
                 "seq": "RRAAQ",
@@ -1267,211 +1267,211 @@
                 "seq": "RRAAA",
                 "output": "T",
                 "cat": "uppercase",
-                "desc": "Letra T maiúscula"
+                "desc": "Letra T maiÃºscula"
         },
         {
                 "seq": "RRAAR",
                 "output": "U",
                 "cat": "uppercase",
-                "desc": "Letra U maiúscula"
+                "desc": "Letra U maiÃºscula"
         },
         {
                 "seq": "RRARQ",
                 "output": "V",
                 "cat": "uppercase",
-                "desc": "Letra V maiúscula"
+                "desc": "Letra V maiÃºscula"
         },
         {
                 "seq": "RRARA",
                 "output": "W",
                 "cat": "uppercase",
-                "desc": "Letra W maiúscula"
+                "desc": "Letra W maiÃºscula"
         },
         {
                 "seq": "RRARR",
                 "output": "X",
                 "cat": "uppercase",
-                "desc": "Letra X maiúscula"
+                "desc": "Letra X maiÃºscula"
         },
         {
                 "seq": "RRRQ",
                 "output": "Y",
                 "cat": "uppercase",
-                "desc": "Letra Y maiúscula"
+                "desc": "Letra Y maiÃºscula"
         },
         {
                 "seq": "RRRA",
                 "output": "Z",
                 "cat": "uppercase",
-                "desc": "Letra Z maiúscula"
+                "desc": "Letra Z maiÃºscula"
         },
         {
                 "seq": "RRRAQQ",
-                "output": "Ç",
+                "output": "Ã‡",
                 "cat": "accented",
-                "desc": "Letra Ç acentuada"
+                "desc": "Letra Ã‡ acentuada"
         },
         {
                 "seq": "RAQQ",
-                "output": "ç",
+                "output": "Ã§",
                 "cat": "lowercase",
-                "desc": "Letra ç"
+                "desc": "Letra Ã§"
         },
         {
                 "seq": "AQQQ",
-                "output": "á",
+                "output": "Ã¡",
                 "cat": "lowercase",
-                "desc": "Letra á"
+                "desc": "Letra Ã¡"
         },
         {
                 "seq": "AQQA",
-                "output": "é",
+                "output": "Ã©",
                 "cat": "lowercase",
-                "desc": "Letra é"
+                "desc": "Letra Ã©"
         },
         {
                 "seq": "AQQR",
-                "output": "í",
+                "output": "Ã­",
                 "cat": "lowercase",
-                "desc": "Letra í"
+                "desc": "Letra Ã­"
         },
         {
                 "seq": "AQRQ",
-                "output": "ó",
+                "output": "Ã³",
                 "cat": "lowercase",
-                "desc": "Letra ó"
+                "desc": "Letra Ã³"
         },
         {
                 "seq": "AQRA",
-                "output": "ú",
+                "output": "Ãº",
                 "cat": "lowercase",
-                "desc": "Letra ú"
+                "desc": "Letra Ãº"
         },
         {
                 "seq": "QARQ",
-                "output": "â",
+                "output": "Ã¢",
                 "cat": "lowercase",
-                "desc": "Letra â"
+                "desc": "Letra Ã¢"
         },
         {
                 "seq": "QARA",
-                "output": "ê",
+                "output": "Ãª",
                 "cat": "lowercase",
-                "desc": "Letra ê"
+                "desc": "Letra Ãª"
         },
         {
                 "seq": "QARR",
-                "output": "ô",
+                "output": "Ã´",
                 "cat": "lowercase",
-                "desc": "Letra ô"
+                "desc": "Letra Ã´"
         },
         {
                 "seq": "QAQQ",
-                "output": "ã",
+                "output": "Ã£",
                 "cat": "lowercase",
-                "desc": "Letra ã"
+                "desc": "Letra Ã£"
         },
         {
                 "seq": "QAQA",
-                "output": "õ",
+                "output": "Ãµ",
                 "cat": "lowercase",
-                "desc": "Letra õ"
+                "desc": "Letra Ãµ"
         },
         {
                 "seq": "QAQR",
-                "output": "ões",
+                "output": "Ãµes",
                 "cat": "accented",
-                "desc": "Letra ões acentuada"
+                "desc": "Letra Ãµes acentuada"
         },
         {
                 "seq": "AQRR",
-                "output": "ão",
+                "output": "Ã£o",
                 "cat": "accented",
-                "desc": "Letra ão acentuada"
+                "desc": "Letra Ã£o acentuada"
         },
         {
                 "seq": "RQQQ",
-                "output": "à",
+                "output": "Ã ",
                 "cat": "lowercase",
-                "desc": "Letra à"
+                "desc": "Letra Ã "
         },
         {
                 "seq": "RRAQQQ",
-                "output": "Á",
+                "output": "Ã",
                 "cat": "accented",
-                "desc": "Letra Á acentuada"
+                "desc": "Letra Ã acentuada"
         },
         {
                 "seq": "RRAQQA",
-                "output": "É",
+                "output": "Ã‰",
                 "cat": "accented",
-                "desc": "Letra É acentuada"
+                "desc": "Letra Ã‰ acentuada"
         },
         {
                 "seq": "RRAQQR",
-                "output": "Í",
+                "output": "Ã",
                 "cat": "accented",
-                "desc": "Letra Í acentuada"
+                "desc": "Letra Ã acentuada"
         },
         {
                 "seq": "RRAQRQ",
-                "output": "Ó",
+                "output": "Ã“",
                 "cat": "accented",
-                "desc": "Letra Ó acentuada"
+                "desc": "Letra Ã“ acentuada"
         },
         {
                 "seq": "RRAQRA",
-                "output": "Ú",
+                "output": "Ãš",
                 "cat": "accented",
-                "desc": "Letra Ú acentuada"
+                "desc": "Letra Ãš acentuada"
         },
         {
                 "seq": "RRQARQ",
-                "output": "Â",
+                "output": "Ã‚",
                 "cat": "accented",
-                "desc": "Letra Â acentuada"
+                "desc": "Letra Ã‚ acentuada"
         },
         {
                 "seq": "RRQARA",
-                "output": "Ê",
+                "output": "ÃŠ",
                 "cat": "accented",
-                "desc": "Letra Ê acentuada"
+                "desc": "Letra ÃŠ acentuada"
         },
         {
                 "seq": "RRQARR",
-                "output": "Ô",
+                "output": "Ã”",
                 "cat": "accented",
-                "desc": "Letra Ô acentuada"
+                "desc": "Letra Ã” acentuada"
         },
         {
                 "seq": "RRQAQQ",
-                "output": "Ã",
+                "output": "Ãƒ",
                 "cat": "accented",
-                "desc": "Letra Ã acentuada"
+                "desc": "Letra Ãƒ acentuada"
         },
         {
                 "seq": "RRQAQA",
-                "output": "Õ",
+                "output": "Ã•",
                 "cat": "accented",
-                "desc": "Letra Õ acentuada"
+                "desc": "Letra Ã• acentuada"
         },
         {
                 "seq": "RRQAQR",
-                "output": "ÕES",
+                "output": "Ã•ES",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'ÕES'"
+                "desc": "DÃ­grafo/SÃ­laba 'Ã•ES'"
         },
         {
                 "seq": "RRAQRR",
-                "output": "ÃO",
+                "output": "ÃƒO",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'ÃO'"
+                "desc": "DÃ­grafo/SÃ­laba 'ÃƒO'"
         },
         {
                 "seq": "RRRQQQ",
-                "output": "À",
+                "output": "Ã€",
                 "cat": "accented",
-                "desc": "Letra À acentuada"
+                "desc": "Letra Ã€ acentuada"
         },
         {
                 "seq": "RAQA",
@@ -1513,43 +1513,43 @@
                 "seq": "QAAQ",
                 "output": "ch",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'ch'"
+                "desc": "DÃ­grafo/SÃ­laba 'ch'"
         },
         {
                 "seq": "QAAA",
                 "output": "lh",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'lh'"
+                "desc": "DÃ­grafo/SÃ­laba 'lh'"
         },
         {
                 "seq": "QAAR",
                 "output": "nh",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'nh'"
+                "desc": "DÃ­grafo/SÃ­laba 'nh'"
         },
         {
                 "seq": "AQAQ",
                 "output": "qu",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'qu'"
+                "desc": "DÃ­grafo/SÃ­laba 'qu'"
         },
         {
                 "seq": "AQAA",
                 "output": "que",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'que'"
+                "desc": "DÃ­grafo/SÃ­laba 'que'"
         },
         {
                 "seq": "AQAR",
                 "output": "qui",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'qui'"
+                "desc": "DÃ­grafo/SÃ­laba 'qui'"
         },
         {
                 "seq": "QRQQ",
                 "output": "as",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'as'"
+                "desc": "DÃ­grafo/SÃ­laba 'as'"
         },
         {
                 "seq": "QRQA",
@@ -1561,109 +1561,109 @@
                 "seq": "QRQR",
                 "output": "is",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'is'"
+                "desc": "DÃ­grafo/SÃ­laba 'is'"
         },
         {
                 "seq": "QRAQ",
                 "output": "os",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'os'"
+                "desc": "DÃ­grafo/SÃ­laba 'os'"
         },
         {
                 "seq": "QRAA",
                 "output": "us",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'us'"
+                "desc": "DÃ­grafo/SÃ­laba 'us'"
         },
         {
                 "seq": "QQQQ",
                 "output": "an",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'an'"
+                "desc": "DÃ­grafo/SÃ­laba 'an'"
         },
         {
                 "seq": "QQQA",
                 "output": "en",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'en'"
+                "desc": "DÃ­grafo/SÃ­laba 'en'"
         },
         {
                 "seq": "QQQR",
                 "output": "in",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'in'"
+                "desc": "DÃ­grafo/SÃ­laba 'in'"
         },
         {
                 "seq": "QQAQ",
                 "output": "on",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'on'"
+                "desc": "DÃ­grafo/SÃ­laba 'on'"
         },
         {
                 "seq": "QQAA",
                 "output": "un",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'un'"
+                "desc": "DÃ­grafo/SÃ­laba 'un'"
         },
         {
                 "seq": "ARQQ",
                 "output": "am",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'am'"
+                "desc": "DÃ­grafo/SÃ­laba 'am'"
         },
         {
                 "seq": "ARQA",
                 "output": "em",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'em'"
+                "desc": "DÃ­grafo/SÃ­laba 'em'"
         },
         {
                 "seq": "ARQR",
                 "output": "im",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'im'"
+                "desc": "DÃ­grafo/SÃ­laba 'im'"
         },
         {
                 "seq": "ARAQ",
                 "output": "om",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'om'"
+                "desc": "DÃ­grafo/SÃ­laba 'om'"
         },
         {
                 "seq": "ARAA",
                 "output": "um",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'um'"
+                "desc": "DÃ­grafo/SÃ­laba 'um'"
         },
         {
                 "seq": "AAQQ",
                 "output": "al",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'al'"
+                "desc": "DÃ­grafo/SÃ­laba 'al'"
         },
         {
                 "seq": "AAQA",
                 "output": "el",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'el'"
+                "desc": "DÃ­grafo/SÃ­laba 'el'"
         },
         {
                 "seq": "AAQR",
                 "output": "il",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'il'"
+                "desc": "DÃ­grafo/SÃ­laba 'il'"
         },
         {
                 "seq": "AAAQ",
                 "output": "ol",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'ol'"
+                "desc": "DÃ­grafo/SÃ­laba 'ol'"
         },
         {
                 "seq": "AAAA",
                 "output": "ul",
                 "cat": "special",
-                "desc": "Dígrafo/Sílaba 'ul'"
+                "desc": "DÃ­grafo/SÃ­laba 'ul'"
         },
         {
                 "seq": "RQRQ",
@@ -1735,19 +1735,19 @@
                 "seq": "RARAQ",
                 "output": "?",
                 "cat": "punctuation",
-                "desc": "Interrogação"
+                "desc": "InterrogaÃ§Ã£o"
         },
         {
                 "seq": "RARAA",
                 "output": "!",
                 "cat": "punctuation",
-                "desc": "Exclamação"
+                "desc": "ExclamaÃ§Ã£o"
         },
         {
                 "seq": "RARAR",
                 "output": ";",
                 "cat": "punctuation",
-                "desc": "Ponto e vírgula"
+                "desc": "Ponto e vÃ­rgula"
         },
         {
                 "seq": "RARRQ",
@@ -1783,7 +1783,7 @@
                 "seq": "RARAQR",
                 "output": "$",
                 "cat": "punctuation",
-                "desc": "Cifrão"
+                "desc": "CifrÃ£o"
         },
         {
                 "seq": "RARAAQ",
@@ -1807,19 +1807,19 @@
                 "seq": "RARRQQ",
                 "output": "(",
                 "cat": "punctuation",
-                "desc": "Parêntese abre"
+                "desc": "ParÃªntese abre"
         },
         {
                 "seq": "RARRQA",
                 "output": ")",
                 "cat": "punctuation",
-                "desc": "Parêntese fecha"
+                "desc": "ParÃªntese fecha"
         },
         {
                 "seq": "RARRQR",
                 "output": "-",
                 "cat": "punctuation",
-                "desc": "Hífen"
+                "desc": "HÃ­fen"
         },
         {
                 "seq": "RARRAQ",
@@ -1827,6 +1827,12 @@
                 "cat": "punctuation",
                 "desc": "Sublinhado"
         },
+          {
+                  "seq": "RARRAQQ",
+                  "output": "{QuotesLeft}",
+                  "cat": "punctuation",
+                  "desc": "Aspas duplas/simples"
+          },
         {
                 "seq": "RARRAA",
                 "output": "+",
@@ -1932,30 +1938,30 @@
 ];
 
     const categories = {
-        lowercase:   { icon: "🔤", title: "Letras Minúsculas", order: 0 },
-        accented:    { icon: "ã",  title: "Acentos & Cedilha", order: 1 },
-        uppercase:   { icon: "🔠", title: "Letras Maiúsculas", order: 2 },
-        numbers:     { icon: "🔢", title: "Números", order: 3 },
-        punctuation: { icon: "❗", title: "Símbolos & Pontuação", order: 4 },
-        special:     { icon: "⌨",  title: "Especiais & Navegação", order: 5 },
-        shortcuts:   { icon: "⚡", title: "Atalhos (Ctrl+)", order: 6 }
+        lowercase:   { icon: "ðŸ”¤", title: "Letras MinÃºsculas", order: 0 },
+        accented:    { icon: "Ã£",  title: "Acentos & Cedilha", order: 1 },
+        uppercase:   { icon: "ðŸ” ", title: "Letras MaiÃºsculas", order: 2 },
+        numbers:     { icon: "ðŸ”¢", title: "NÃºmeros", order: 3 },
+        punctuation: { icon: "â—", title: "SÃ­mbolos & PontuaÃ§Ã£o", order: 4 },
+        special:     { icon: "âŒ¨",  title: "Especiais & NavegaÃ§Ã£o", order: 5 },
+        shortcuts:   { icon: "âš¡", title: "Atalhos (Ctrl+)", order: 6 }
     };
 
     // Build lookup map
     const seqMap = new Map();
     sequences.forEach(s => seqMap.set(s.seq, s));
 
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     // STATE
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     let currentSeq = "";
     let wordBuffer = "";
     let currentFilter = "all";
     let currentView = "grid";
 
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     // RENDER
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     function getKeyClass(k) {
         return `k-${k.toLowerCase()}`;
@@ -1964,7 +1970,7 @@
     function renderSeqKeys(seq) {
         return seq.split('').map(k =>
             `<span class="card-seq-key ${getKeyClass(k)}">${k}</span>`
-        ).join('<span class="card-seq-dot">·</span>');
+        ).join('<span class="card-seq-dot">Â·</span>');
     }
 
     function isSpecialOutput(item) {
@@ -2065,16 +2071,16 @@
             node.innerHTML = `
                 <div class="tree-node-header">
                     <div class="tree-node-key" style="background: ${keyColors[firstKey]}20; color: ${keyColors[firstKey]}">${firstKey}</div>
-                    <div class="tree-node-title">Grupo ${firstKey} · ${children.length} itens</div>
+                    <div class="tree-node-title">Grupo ${firstKey} Â· ${children.length} itens</div>
                 </div>
                 <div class="tree-children">
                     ${children.map(item => {
-                        const lastKey = item.seq.length === 1 ? '⏎' : item.seq[item.seq.length - 1];
+                        const lastKey = item.seq.length === 1 ? 'âŽ' : item.seq[item.seq.length - 1];
                         const lastKeyColor = item.seq.length === 1 ? 'var(--text-muted)' : keyColors[lastKey];
                         const outputClass = (isSpecialOutput(item) || isShortcut(item)) ? 'small' : '';
                         return `
                             <div class="tree-child" title="${item.desc}">
-                                <div class="tree-child-key" style="color: ${lastKeyColor}">${item.seq.length === 1 ? '(só)' : '+' + lastKey}</div>
+                                <div class="tree-child-key" style="color: ${lastKeyColor}">${item.seq.length === 1 ? '(sÃ³)' : '+' + lastKey}</div>
                                 <div class="tree-child-output ${outputClass}">${escapeHtml(item.output)}</div>
                             </div>
                         `;
@@ -2099,8 +2105,8 @@
         title2.className = 'category-header';
         title2.style.marginTop = '1.5rem';
         title2.innerHTML = `
-            <span class="category-icon">🌳</span>
-            <span class="category-title">Sequências de 3 Teclas (por prefixo)</span>
+            <span class="category-icon">ðŸŒ³</span>
+            <span class="category-title">SequÃªncias de 3 Teclas (por prefixo)</span>
             <span class="category-count">${threeKey.length}</span>
         `;
         container.appendChild(title2);
@@ -2139,9 +2145,9 @@
         container.appendChild(level2);
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     // INTERACTIVITY
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     function pressKey(key) {
         const el = document.querySelector(`.kb-key[data-key="${key}"]`);
@@ -2165,7 +2171,7 @@
             if (match) {
                 const output = match.output;
                 
-                // Verificar se é comando
+                // Verificar se Ã© comando
                 const isCommand = output.includes('^') || output.includes('+{') || 
                                   (output.startsWith('{') && !output.includes('Space') && !output.includes('Enter') && !output.includes('Backspace') && !output.includes('Escape'));
                 
@@ -2206,7 +2212,7 @@
 
         if (currentSeq === "" && wordBuffer === "") {
             keysEl.innerHTML = '';
-            resultEl.innerHTML = '<span class="no-match">Clique nas teclas ou use o teclado físico (Q, A, Seta Direita, Enter)</span>';
+            resultEl.innerHTML = '<span class="no-match">Clique nas teclas ou use o teclado fÃ­sico (Q, A, Seta Direita, Enter)</span>';
             hintEl.textContent = '';
             return;
         }
@@ -2217,7 +2223,7 @@
         keysEl.innerHTML = currentSeq.split('').map((k, i) => {
             const bg = keyColors[k] || '#fff';
             return `<div class="seq-key" style="background: ${bg}22; color: ${bg}; border: 2px solid ${bg}44">${k}</div>`;
-        }).join('<span class="seq-separator">·</span>');
+        }).join('<span class="seq-separator">Â·</span>');
 
         // Check result
         const match = seqMap.get(currentSeq);
@@ -2229,9 +2235,9 @@
                 const extensions = sequences.filter(s => s.seq.startsWith(currentSeq) && s.seq !== currentSeq);
                 if (extensions.length > 0) {
                     resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="no-match">+${extensions.length} possibilidades...</span>`;
-                    hintEl.textContent = extensions.slice(0, 5).map(e => `${e.seq} → ${e.output}`).join('  ·  ');
+                    hintEl.textContent = extensions.slice(0, 5).map(e => `${e.seq} â†’ ${e.output}`).join('  Â·  ');
                 } else {
-                    resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="no-match" style="color: #ff6b6b">✗ Sem match</span>`;
+                    resultEl.innerHTML = `${wordBuffer !== "" ? escapeHtml(wordBuffer) + " + " : ""}<span class="no-match" style="color: #ff6b6b">âœ— Sem match</span>`;
                     hintEl.textContent = 'Pressione Escape para limpar';
                 }
             }
@@ -2323,7 +2329,7 @@
         document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
     });
 
-    // Conexão WebSocket para rastreamento em tempo real
+    // ConexÃ£o WebSocket para rastreamento em tempo real
     function connectWebSocket() {
         const host = window.location.hostname || 'localhost';
         const ws = new WebSocket(`ws://${host}:8765`);
@@ -2356,9 +2362,9 @@
     }
     connectWebSocket();
 
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     // INIT
-    // ══════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     renderGrid();
     document.getElementById('totalCount').textContent = sequences.length;
 </script>

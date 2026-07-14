@@ -6,11 +6,11 @@ A  + [Q:m A:n R:o]
 AQ + [Q:p A:q R:r]
 AA + [Q:s A:t R:u]
 AR + [Q:v A:w R:x]
-R  + [Q:y A:z AQQ:ç]
-RARR + [RQ:´ QAQ:`]
+R  + [Q:y A:z AQQ:Ã§]
+RARR + [RQ:Â´ QAQ:`]
 RARA + [QQR:^ QAQ:~]
 
-RR  : Espaço   | RQAQ : Apagar
+RR  : EspaÃ§o   | RQAQ : Apagar
 RQAA: Enter    | RQAQA: Ctrl+Apag
 RQAR: Escape   | RQARR: Repetir
 
@@ -21,4 +21,5 @@ R + [RRRR:0 RRRRQ:. RRRA:,]
 RAAA(Ctrl) | RAAQ(Shift)
 RAQA(Alt)  | FKey: RAAR
 MKey: RRQQQ | Macro: RRQQQQA
-Spotify: RRQQQQ
+Spotify: RRQQQQ | Teams: RRQQQQR
+

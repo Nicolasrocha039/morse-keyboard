@@ -3,7 +3,7 @@
     "certeza": 1,
     "acentos": 1,
     "observabilidade": 1,
-    "um": 6,
+    "um": 7,
     "todos": 1,
     "os": 1,
     "precisão": 1
@@ -42,11 +42,12 @@
     "para": 1,
     "parafuso": 3,
     "lembretes": 1,
-    "conjunto": 1,
+    "conjunto": 2,
     "projeto": 1,
     "assistente": 1,
     "pouquinho": 1,
-    "modelo": 1
+    "modelo": 1,
+    "atalho": 1
   },
   "mais": {
     "ou": 1,
@@ -76,7 +77,7 @@
     "estou": 5,
     "vou": 3,
     "ainda": 1,
-    "preciso": 5,
+    "preciso": 6,
     "peguei": 1,
     "gostaria": 1,
     "possa": 1,
@@ -446,7 +447,7 @@
     "na": 2,
     "nave": 2,
     "navegação": 2,
-    "um": 5,
+    "um": 6,
     "ti": 1,
     "tira": 1,
     "tirar": 1,
@@ -461,7 +462,8 @@
     "trabalhar": 1,
     "cabeça": 1,
     "sangue": 1,
-    "macro": 1
+    "macro": 1,
+    "atalhos": 1
   },
   "projetos de": {
     "qualidade": 1
@@ -746,10 +748,11 @@
     "faz": 1,
     "faze": 1,
     "fazer": 3,
-    "um": 1,
+    "um": 2,
     "começar": 1,
     "executar": 1,
-    "imprimir": 2
+    "imprimir": 2,
+    "duas": 1
   },
   "delay para": {
     "digitar": 1
@@ -991,7 +994,7 @@
     "me": 1
   },
   "preciso": {
-    "de": 1,
+    "de": 2,
     "se": 1,
     "ser": 5,
     "ver": 1,
@@ -1001,13 +1004,14 @@
     "fazer": 1
   },
   "eu preciso": {
-    "de": 1,
+    "de": 2,
     "simplificar": 1,
     "que": 1,
     "fazer": 1
   },
   "preciso de": {
-    "teclas": 1
+    "teclas": 1,
+    "um": 1
   },
   "mortas": {
     "para": 1
@@ -1158,7 +1162,8 @@
     "vagos": 3,
     "referente": 1,
     "referentes": 1,
-    "no": 1
+    "no": 1,
+    "para": 1
   },
   "os atalhos": {
     "de": 2,
@@ -1319,7 +1324,7 @@
     "crie": 2
   },
   "crie": {
-    "um": 5,
+    "um": 6,
     "uma": 6
   },
   "atalhos crie": {
@@ -1353,7 +1358,8 @@
   },
   "com um": {
     "bo": 1,
-    "bota": 1
+    "bota": 1,
+    "conjunto": 1
   },
   "botão": {
     "qu": 1,
@@ -1429,7 +1435,8 @@
   "crie um": {
     "bo": 1,
     "botão": 3,
-    "lembretes": 1
+    "lembretes": 1,
+    "atalho": 1
   },
   "um botão": {
     "pa": 1,
@@ -1849,7 +1856,7 @@
   },
   "atalho": {
     "pa": 1,
-    "para": 1
+    "para": 2
   },
   "script": {
     "no": 3
@@ -2123,10 +2130,10 @@
     "peça": 1
   },
   "conjunto": {
-    "de": 1
+    "de": 2
   },
   "um conjunto": {
-    "de": 1
+    "de": 2
   },
   "implementação": {
     "geral": 1
@@ -2807,5 +2814,23 @@
   },
   "só preciso": {
     "que": 1
+  },
+  "um atalho": {
+    "para": 1
+  },
+  "atalho para": {
+    "duas": 1
+  },
+  "aspas": {
+    "simples": 1
+  },
+  "conjunto de": {
+    "atalhos": 1
+  },
+  "de atalhos": {
+    "para": 1
+  },
+  "atalhos para": {
+    "um": 1
   }
 }
