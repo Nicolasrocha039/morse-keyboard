@@ -148,17 +148,31 @@ FormatOutput(val) {
 }
 
 UpdateVisualBufferFromWordBuffer() {
-    global wordBuffer, visualBuffer
+    global wordBuffer, visualBuffer, cursorOffset
     if wordBuffer = "" {
         visualBuffer := ""
         return
     }
-    lastSpaceIdx := InStr(wordBuffer, " ", , -1)
-    if lastSpaceIdx = 0 {
-        visualBuffer := wordBuffer
-    } else {
-        visualBuffer := SubStr(wordBuffer, lastSpaceIdx + 1)
+    cursorPos := StrLen(wordBuffer) - cursorOffset
+    
+    ; Find the last space before or at cursorPos
+    lastSpace := 0
+    Loop cursorPos {
+        if SubStr(wordBuffer, A_Index, 1) = " " {
+            lastSpace := A_Index
+        }
     }
+    
+    ; Find the first space after cursorPos
+    nextSpace := StrLen(wordBuffer) + 1
+    Loop StrLen(wordBuffer) - cursorPos {
+        if SubStr(wordBuffer, cursorPos + A_Index, 1) = " " {
+            nextSpace := cursorPos + A_Index
+            break
+        }
+    }
+    
+    visualBuffer := SubStr(wordBuffer, lastSpace + 1, nextSpace - lastSpace - 1)
 }
 
 LogBuffers(action) {
@@ -192,6 +206,24 @@ SendToSystem(output) {
         ToolTip("Mouse Esq " . (lbuttonLocked ? "BLOQUEADO (Limpa buffers)" : "LIBERADO (Clique normal)"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle LButton Locked: " . (lbuttonLocked ? "ON" : "OFF"))
+        return
+    }
+
+    if output = "{TobiiF2}" {
+        prevHidden := A_DetectHiddenWindows
+        DetectHiddenWindows(True)
+        
+        if WinExist("ahk_exe TobiiDynavox.WindowsControl.Settings.exe") {
+            ControlSend("{F2}", , "ahk_exe TobiiDynavox.WindowsControl.Settings.exe")
+            LogBuffers("Tobii F2 Command Sent")
+        } else if WinExist("Windows Control") {
+            ControlSend("{F2}", , "Windows Control")
+            LogBuffers("Tobii F2 Command Sent (by Title)")
+        } else {
+            LogBuffers("Tobii F2 Failed: Not Found")
+        }
+        
+        DetectHiddenWindows(prevHidden)
         return
     }
 
@@ -327,7 +359,7 @@ SendToSystem(output) {
 }
 
 ProcessSequence() {
-    global currentSequence, morseMap, wordBuffer, visualBuffer, adbMode
+    global currentSequence, morseMap, wordBuffer, visualBuffer, adbMode, cursorOffset, textSelectedAll
 
     if currentSequence = ""
         return
@@ -409,18 +441,27 @@ ProcessSequence() {
 
         if output = "{QuotesLeft}" {
             hasShift := InStr(pendingModifiers, "+")
+            insertedString := hasShift ? '""' : "''"
+            
             if hasShift {
                 SendToSystem('""')
                 SendToSystem("{Left}")
                 pendingModifiers := StrReplace(pendingModifiers, "+", "")
-                wordBuffer .= '""'
-                visualBuffer .= '""'
             } else {
                 SendToSystem("''")
                 SendToSystem("{Left}")
-                wordBuffer .= "''"
-                visualBuffer .= "''"
             }
+            
+            if cursorOffset > 0 {
+                leftPart := SubStr(wordBuffer, 1, StrLen(wordBuffer) - cursorOffset)
+                rightPart := SubStr(wordBuffer, StrLen(wordBuffer) - cursorOffset + 1)
+                wordBuffer := leftPart . insertedString . rightPart
+            } else {
+                wordBuffer .= insertedString
+            }
+            cursorOffset++
+            UpdateVisualBufferFromWordBuffer()
+            
             LogBuffers("QuotesLeft executed")
             UpdateOSD()
             return
@@ -559,12 +600,17 @@ ProcessSequence() {
             ; Executa atalhos nativamente focando o Spotify e voltando o foco
             spotifyMap := Map("1", "^s", "2", "^r", "3", "!+b", "4", "+{Left}", "5", "+{Right}", "6", "^l")
             sTarget := output
-            if spotifyMap.Has(sTarget) {
+            if spotifyMap.Has(sTarget) or sTarget == "7" {
                 if WinExist("ahk_exe Spotify.exe") {
                     activeHwnd := WinExist("A")
                     WinActivate("ahk_exe Spotify.exe")
                     if WinWaitActive("ahk_exe Spotify.exe", , 1) {
-                        Send(spotifyMap[sTarget])
+                        if (sTarget == "7") {
+                            WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
+                            Run("python click_buttons.py spotify_dj.png " . spX . " " . spY . " " . spW . " " . spH, , "Hide")
+                        } else {
+                            Send(spotifyMap[sTarget])
+                        }
                         Sleep(50)
                         if (activeHwnd) {
                             WinActivate("ahk_id " . activeHwnd)
@@ -641,12 +687,52 @@ ProcessSequence() {
                 SendToSystem(modifierChars . output)
             else
                 SendToSystem(output)
+            
+            ; Rastrear cursor virtual para navega��o
+            if (output = "{Left}") {
+                textSelectedAll := false
+                if (cursorOffset < StrLen(wordBuffer))
+                    cursorOffset++
+                UpdateVisualBufferFromWordBuffer()
+            } else if (output = "{Right}") {
+                textSelectedAll := false
+                if (cursorOffset > 0)
+                    cursorOffset--
+                UpdateVisualBufferFromWordBuffer()
+            } else if (output = "{Home}") {
+                textSelectedAll := false
+                cursorOffset := StrLen(wordBuffer)
+                UpdateVisualBufferFromWordBuffer()
+            } else if (output = "{End}") {
+                textSelectedAll := false
+                cursorOffset := 0
+                UpdateVisualBufferFromWordBuffer()
+            } else if (output = "{Delete}") {
+                if textSelectedAll {
+                    wordBuffer := ""
+                    cursorOffset := 0
+                    textSelectedAll := false
+                    UpdateVisualBufferFromWordBuffer()
+                } else if (cursorOffset > 0) {
+                    leftPart := SubStr(wordBuffer, 1, StrLen(wordBuffer) - cursorOffset)
+                    rightPart := SubStr(wordBuffer, StrLen(wordBuffer) - cursorOffset + 2)
+                    wordBuffer := leftPart . rightPart
+                    cursorOffset--
+                    UpdateVisualBufferFromWordBuffer()
+                }
+            }
+
             LogBuffers("Executed Command: " . modifierChars . output)
             pendingModifiers := ""
             pendingAccent := ""
         } else {
             ; Comandos que alteram o buffer em tempo real
             if output = "{Space}" || output = "" || output = " " {
+                if textSelectedAll {
+                    wordBuffer := ""
+                    cursorOffset := 0
+                    textSelectedAll := false
+                }
                 wordBuffer .= " "
                 visualBuffer := ""
                 if modifierChars != ""
@@ -657,6 +743,11 @@ ProcessSequence() {
                 pendingModifiers := ""
             pendingAccent := ""
             } else if output = "{Enter}" {
+                if textSelectedAll {
+                    wordBuffer := ""
+                    cursorOffset := 0
+                    textSelectedAll := false
+                }
                 wordBuffer .= "`n"
                 visualBuffer := ""
                 if modifierChars != ""
@@ -667,8 +758,15 @@ ProcessSequence() {
                 pendingModifiers := ""
             pendingAccent := ""
             } else if output = "{Backspace}" {
-                if wordBuffer != "" {
-                    wordBuffer := SubStr(wordBuffer, 1, -1)
+                if textSelectedAll {
+                    wordBuffer := ""
+                    cursorOffset := 0
+                    textSelectedAll := false
+                    UpdateVisualBufferFromWordBuffer()
+                } else if wordBuffer != "" && cursorOffset <= StrLen(wordBuffer) {
+                    leftPart := SubStr(wordBuffer, 1, StrLen(wordBuffer) - cursorOffset - 1)
+                    rightPart := SubStr(wordBuffer, StrLen(wordBuffer) - cursorOffset + 1)
+                    wordBuffer := leftPart . rightPart
                     UpdateVisualBufferFromWordBuffer()
                 }
                 SendToSystem("{Backspace}")
@@ -680,7 +778,9 @@ ProcessSequence() {
             pendingAccent := ""
             } else if output = "{Escape}" {
                 wordBuffer := ""
+                cursorOffset := 0
                 visualBuffer := ""
+                textSelectedAll := false
                 SendToSystem("{Escape}")
                 pendingModifiers := ""
             pendingAccent := ""
@@ -719,6 +819,15 @@ ProcessSequence() {
                 }
 
                 if modifierChars != "" {
+                    if modifierChars == "^" && (output == "a" || output == "A") {
+                        textSelectedAll := true
+                    } else if modifierChars == "^" && (output == "v" || output == "V") {
+                        ; Colar substitui selecao e insere texto desconhecido, entao limpamos o buffer
+                        wordBuffer := ""
+                        cursorOffset := 0
+                        textSelectedAll := false
+                        UpdateVisualBufferFromWordBuffer()
+                    }
                     if adbMode && accentChars != "" {
                         SendToSystem(modifierChars . EscapeAHK(finalChar))
                     } else {
@@ -731,8 +840,21 @@ ProcessSequence() {
                         SendToSystem(EscapeAHK(output))
                     }
                     if modifierChars == "" {
-                        wordBuffer .= finalChar
-                        visualBuffer .= finalChar
+                        if textSelectedAll {
+                            wordBuffer := ""
+                            cursorOffset := 0
+                            visualBuffer := ""
+                            textSelectedAll := false
+                        }
+                        if cursorOffset > 0 {
+                            leftPart := SubStr(wordBuffer, 1, StrLen(wordBuffer) - cursorOffset)
+                            rightPart := SubStr(wordBuffer, StrLen(wordBuffer) - cursorOffset + 1)
+                            wordBuffer := leftPart . finalChar . rightPart
+                            UpdateVisualBufferFromWordBuffer()
+                        } else {
+                            wordBuffer .= finalChar
+                            visualBuffer .= finalChar
+                        }
                     }
                 }
                 pendingModifiers := ""
@@ -755,12 +877,14 @@ AddToSequence(key) {
 }
 
 CancelSequence() {
-    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+    global currentSequence, wordBuffer, visualBuffer, historyBuffer, cursorOffset, textSelectedAll
     LogBuffers("CancelSequence Start")
     if currentSequence != "" {
         currentSequence := ""
     } else {
         wordBuffer := ""
+        cursorOffset := 0
+        textSelectedAll := false
         visualBuffer := ""
         historyBuffer := []
     }
@@ -769,12 +893,17 @@ CancelSequence() {
 }
 
 DeleteLastWord() {
-    global currentSequence, wordBuffer, visualBuffer, historyBuffer
+    global currentSequence, wordBuffer, visualBuffer, historyBuffer, cursorOffset, textSelectedAll
     LogBuffers("DeleteLastWord Start")
     if currentSequence != "" {
         currentSequence := ""
     } else {
-        if wordBuffer != "" {
+        if textSelectedAll {
+            wordBuffer := ""
+            cursorOffset := 0
+            textSelectedAll := false
+            visualBuffer := ""
+        } else if wordBuffer != "" {
             wordBuffer := RegExReplace(wordBuffer, "\s*\S+\s*$", "")
             UpdateVisualBufferFromWordBuffer()
         }
@@ -840,4 +969,7 @@ EscapeAHK(char) {
         return "{" . char . "}"
     return char
 }
+
+
+
 

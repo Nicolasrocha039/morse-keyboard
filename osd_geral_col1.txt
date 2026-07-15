@@ -1,4 +1,4 @@
-Q  + [Q:a A:b R:c]
+﻿Q  + [Q:a A:b R:c]
 QQ + [Q:d A:e R:f]
 QA + [Q:g A:h R:i]
 QR + [Q:j A:k R:l]
@@ -6,11 +6,11 @@ A  + [Q:m A:n R:o]
 AQ + [Q:p A:q R:r]
 AA + [Q:s A:t R:u]
 AR + [Q:v A:w R:x]
-R  + [Q:y A:z AQQ:Ã§]
-RARR + [RQ:Â´ QAQ:`]
+R  + [Q:y A:z AQQ:ç]
+RARR + [RQ:´ QAQ:`]
 RARA + [QQR:^ QAQ:~]
 
-RR  : EspaÃ§o   | RQAQ : Apagar
+RR  : Espaço   | RQAQ : Apagar
 RQAA: Enter    | RQAQA: Ctrl+Apag
 RQAR: Escape   | RQARR: Repetir
 
@@ -22,4 +22,3 @@ RAAA(Ctrl) | RAAQ(Shift)
 RAQA(Alt)  | FKey: RAAR
 MKey: RRQQQ | Macro: RRQQQQA
 Spotify: RRQQQQ | Teams: RRQQQQR
-

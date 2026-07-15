@@ -1,4 +1,4 @@
-; ═══════════════════════════════════════════════════════════════════════════════
+﻿; ═══════════════════════════════════════════════════════════════════════════════
 ; MORSE KEYBOARD (v2.0) - Refatorado com SRP
 ; ═══════════════════════════════════════════════════════════════════════════════
 
@@ -8,7 +8,9 @@
 ; ── Configuração Global ──
 global morseActive := false
 global currentSequence := ""
-global wordBuffer := ""      
+global wordBuffer := ""
+global cursorOffset := 0
+global textSelectedAll := false
 global visualBuffer := ""    
 global showMaps := true
 global USE_BROWSER_OSD := false
@@ -142,6 +144,7 @@ $Enter:: {
             LearnWordContext()
         } else {
             wordBuffer := ""
+            cursorOffset := 0
             visualBuffer := ""
             historyBuffer := []
             LogBuffers("Cleared Word Buffer")
@@ -221,6 +224,7 @@ $LButton:: {
         LearnWordContext()
     } else {
         wordBuffer := ""
+            cursorOffset := 0
         visualBuffer := ""
         historyBuffer := []
         LogBuffers("Cleared Word Buffer")
@@ -231,4 +235,5 @@ $LButton:: {
     LogBuffers("Physical LButton End")
 }
 #HotIf
+
 

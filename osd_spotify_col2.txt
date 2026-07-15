@@ -3,3 +3,4 @@ SPOTIFY - CONTROLES (2)
 RAQ: Voltar (Seek)
 RAA: Avancar (Seek)
 RAR: Buscar
+RRQ: Botao DJ
