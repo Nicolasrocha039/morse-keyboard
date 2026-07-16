@@ -438,6 +438,13 @@ ProcessSequence() {
             UpdateOSD()
             return
         }
+        
+        if output = "{WinMenu}" {
+            SendToSystem("^{Esc}")
+            LogBuffers("WinMenu Triggered")
+            UpdateOSD()
+            return
+        }
 
         if output = "{QuotesLeft}" {
             hasShift := InStr(pendingModifiers, "+")
@@ -600,7 +607,7 @@ ProcessSequence() {
             ; Executa atalhos nativamente focando o Spotify e voltando o foco
             spotifyMap := Map("1", "^s", "2", "^r", "3", "!+b", "4", "+{Left}", "5", "+{Right}", "6", "^l")
             sTarget := output
-            if spotifyMap.Has(sTarget) or sTarget == "7" {
+            if spotifyMap.Has(sTarget) or sTarget == "7" or sTarget == "8" or sTarget == "9" or sTarget == "0" or StrUpper(sTarget) == "L" {
                 if WinExist("ahk_exe Spotify.exe") {
                     activeHwnd := WinExist("A")
                     WinActivate("ahk_exe Spotify.exe")
@@ -608,6 +615,15 @@ ProcessSequence() {
                         if (sTarget == "7") {
                             WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
                             Run("python click_buttons.py spotify_dj.png " . spX . " " . spY . " " . spW . " " . spH, , "Hide")
+                        } else if (StrUpper(sTarget) == "L") {
+                            WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
+                            Run("python click_buttons.py spotify_lyrics.png " . spX . " " . spY . " " . spW . " " . spH, , "Hide")
+                        } else if (sTarget == "8") {
+                            AdjustSpotifyVolume(-1)
+                        } else if (sTarget == "9") {
+                            AdjustSpotifyVolume(1)
+                        } else if (sTarget == "0") {
+                            AdjustSpotifyVolume("MAX")
                         } else {
                             Send(spotifyMap[sTarget])
                         }
@@ -970,6 +986,30 @@ EscapeAHK(char) {
     return char
 }
 
+global SpotifyVolumeLevel := 4 ; 0 a 4 (0%, 25%, 50%, 75%, 100%)
 
-
-
+AdjustSpotifyVolume(change) {
+    global SpotifyVolumeLevel
+    if (change == "MAX") {
+        SpotifyVolumeLevel := 4
+    } else {
+        SpotifyVolumeLevel += change
+        if (SpotifyVolumeLevel > 4)
+            SpotifyVolumeLevel := 4
+        if (SpotifyVolumeLevel < 0)
+            SpotifyVolumeLevel := 0
+    }
+    
+    ; Força o volume a partir do zero para contornar o gargalo de não salvar a % manual no AHK
+    Send("{Ctrl down}{Down 50}{Ctrl up}")
+    Sleep(50)
+    
+    if (SpotifyVolumeLevel == 1)
+        Send("{Ctrl down}{Up 5}{Ctrl up}")  ; 25%
+    else if (SpotifyVolumeLevel == 2)
+        Send("{Ctrl down}{Up 10}{Ctrl up}") ; 50%
+    else if (SpotifyVolumeLevel == 3)
+        Send("{Ctrl down}{Up 15}{Ctrl up}") ; 75%
+    else if (SpotifyVolumeLevel == 4)
+        Send("{Ctrl down}{Up 50}{Ctrl up}") ; 100%
+}

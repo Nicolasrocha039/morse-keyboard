@@ -4,3 +4,7 @@ RAQ: Voltar (Seek)
 RAA: Avancar (Seek)
 RAR: Buscar
 RRQ: Botao DJ
+[8]: Vol -25%
+[9]: Vol +25%
+[0]: Vol 100%
+[L]: Letras (Lyrics)
