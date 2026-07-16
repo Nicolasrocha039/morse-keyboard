@@ -98,7 +98,7 @@
     "estou": 5,
     "vou": 5,
     "ainda": 1,
-    "preciso": 10,
+    "preciso": 11,
     "peguei": 1,
     "gostaria": 1,
     "possa": 1,
@@ -1122,7 +1122,7 @@
     "ser": 5,
     "ver": 1,
     "verificar": 1,
-    "que": 4,
+    "que": 5,
     "simplificar": 1,
     "fazer": 1,
     "criar": 2,
@@ -1132,7 +1132,7 @@
   "eu preciso": {
     "de": 3,
     "simplificar": 1,
-    "que": 1,
+    "que": 2,
     "fazer": 1,
     "simular": 1,
     "criar": 1
@@ -1413,7 +1413,8 @@
     "do": 1,
     "dor": 1,
     "de": 1,
-    "que": 2
+    "que": 2,
+    "tenha": 1
   },
   "apartamento": {
     "de": 3
@@ -3863,5 +3864,8 @@
   },
   "ao som": {
     "de": 1
+  },
+  "aí": {
+    "enzo": 1
   }
 }

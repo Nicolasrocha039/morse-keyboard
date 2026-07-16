@@ -373,15 +373,26 @@ ProcessSequence() {
         output := morseMap[seq]
 
         if output = "{RepeatLast}" {
-            global lastSentCommand
+            global lastSentCommand, lastSentModifiers, lastSentAccent, lastSentSpecial
             if lastSentCommand != "" {
                 output := lastSentCommand
+                global pendingModifiers, pendingAccent, pendingSpecial
+                if IsSet(lastSentModifiers)
+                    pendingModifiers := lastSentModifiers
+                if IsSet(lastSentAccent)
+                    pendingAccent := lastSentAccent
+                if IsSet(lastSentSpecial)
+                    pendingSpecial := lastSentSpecial
             } else {
                 return ; Nada para repetir
             }
         } else {
-            global lastSentCommand
+            global lastSentCommand, lastSentModifiers, lastSentAccent, lastSentSpecial
+            global pendingModifiers, pendingAccent, pendingSpecial
             lastSentCommand := output
+            lastSentModifiers := IsSet(pendingModifiers) ? pendingModifiers : ""
+            lastSentAccent := IsSet(pendingAccent) ? pendingAccent : ""
+            lastSentSpecial := IsSet(pendingSpecial) ? pendingSpecial : ""
         }
 
         ; === DEAD KEYS: Modificadores e Acentos acumulam separadamente ===
