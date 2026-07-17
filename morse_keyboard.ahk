@@ -6,15 +6,15 @@
 #SingleInstance Force
 
 ; ── Configuração Global ──
-global morseActive := false
+global morseActive := true
 global currentSequence := ""
 global wordBuffer := ""
 global cursorOffset := 0
 global textSelectedAll := false
-global visualBuffer := ""    
+global visualBuffer := ""
 global showMaps := true
 global USE_BROWSER_OSD := false
-global historyBuffer := []   
+global historyBuffer := []
 global adbMode := false
 global lbuttonLocked := true
 global lastSentCommand := ""
@@ -34,10 +34,8 @@ try {
 
 UpdateOSD()
 
-ToolTip("Morse Keyboard carregado!`nCapsLock para ativar/desativar", A_ScreenWidth/2 - 150, A_ScreenHeight/2 - 50)
+ToolTip("Morse Keyboard carregado!`nCapsLock para ativar/desativar", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2 - 50)
 SetTimer(() => ToolTip(), -2500)
-
-
 
 
 ; ═══════════════════════════════════════════════════════════════════════════════
@@ -60,9 +58,9 @@ CapsLock:: {
     global adbMode
     adbMode := !adbMode
     if adbMode
-        ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        ToolTip("ADB Mode: ON`nKeys will be sent to Android", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
     else
-        ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth/2 - 150, A_ScreenHeight/2)
+        ToolTip("ADB Mode: OFF`nKeys will be sent to Windows", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
     SetTimer(() => ToolTip(), -2500)
     LogBuffers("Toggle ADB Mode: " . (adbMode ? "ON" : "OFF"))
     UpdateOSD()
@@ -71,7 +69,6 @@ CapsLock:: {
 #HotIf morseActive
 Escape:: CancelSequence()
 LWin:: CancelSequence()
-
 
 
 #HotIf morseActive
@@ -130,13 +127,13 @@ $Enter:: {
                 SendToSystem("{Backspace}")
             }
             SendToSystem(suggestion . " ")
-            
+
             ; Adjust wordBuffer
             if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
                 wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
             }
             wordBuffer .= suggestion . " "
-            
+
             visualBuffer := ""
             historyBuffer.Push(suggestion . " ")
             LogBuffers("Autocompleted/Corrected: " . suggestion)
@@ -164,7 +161,7 @@ MouseIsOverOSD() {
 #HotIf morseActive && lbuttonLocked && !MouseIsOverOSD()
 $LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
-    
+
     ; Se houver sequência pendente, o LButton funciona apenas como botão de confirmação imediato
     if currentSequence != "" {
         ProcessSequence()
@@ -183,11 +180,11 @@ $LButton:: {
     Loop {
         if !GetKeyState("LButton", "P")
             break
-            
+
         MouseGetPos(&curX, &curY)
         moved := Abs(curX - lbDownX) + Abs(curY - lbDownY)
         held := A_TickCount - lbDownTime
-        
+
         if (moved > 5 || held > 200) {
             isDrag := true
             break
@@ -224,7 +221,7 @@ $LButton:: {
         LearnWordContext()
     } else {
         wordBuffer := ""
-            cursorOffset := 0
+        cursorOffset := 0
         visualBuffer := ""
         historyBuffer := []
         LogBuffers("Cleared Word Buffer")
@@ -235,5 +232,3 @@ $LButton:: {
     LogBuffers("Physical LButton End")
 }
 #HotIf
-
-

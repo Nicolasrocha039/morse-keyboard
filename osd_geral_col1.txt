@@ -20,5 +20,5 @@ R + [RQ:7   RA:8    RR:9]
 R + [RRRR:0 RRRRQ:. RRRA:,]
 RAAA(Ctrl) | RAAQ(Shift)
 RAQA(Alt)  | FKey: RAAR
-MKey: RRQQQ | Macro: RRQQQQA
-Spotify: RRQQQQ | Teams: RRQQQQR
+MKey: RAQR | Macro: QRQR
+Spotify: QAQR | Teams: QAQA

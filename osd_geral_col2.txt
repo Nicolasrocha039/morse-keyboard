@@ -8,8 +8,8 @@ RQRRA: PgUp    | RQRRR: PgDn
 RQRRRA: Shift+Tab
 
 Mouse: RQQA(Esq) RQQR(Dir) RARA(Meio)
-Travar Esq: RQQQ | Swipe: QQQQQ / AAAAA
-Rolagem: RARR(Cima) RRRR(Baixo)
+Travar Esq: RQQQ | Swipe: ARAR / RARA
+Rolagem: AQAQ(Cima) RRRR(Baixo)
 QAQAQA: Ativar ADB | RQRAR: Android Power
 RQRQQRQ: BT Power  | RQRQQR: BT Connect
 
@@ -17,4 +17,5 @@ RQARA: Reload
 
 RARR + [Q:/ A:; R:-]
 RARR + [QQ:= QA:[ QR:]]
-RARR + [AQ:' AQQ:'' AA:\]
+RARR + [AQ:' AR:\]
+RRRRRR: QuotesLeft
