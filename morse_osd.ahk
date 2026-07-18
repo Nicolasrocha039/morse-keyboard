@@ -98,14 +98,14 @@ UpdateKeyGuide(seq) {
     UpdateCard("Ent", "Conf", true)
 }
 
-global osdPosX := IniRead(A_ScriptDir . "\osd_pos.ini", "Position", "X", 10)
-global osdPosY := IniRead(A_ScriptDir . "\osd_pos.ini", "Position", "Y", 10)
-global osdFullW := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "FullW", 950)
-global osdFullH := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "FullH", 550)
-global osdMiniW := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "MiniW", 250)
-global osdMiniH := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "MiniH", 195)
-global osdOffW := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "OffW", "Auto")
-global osdOffH := IniRead(A_ScriptDir . "\osd_pos.ini", "Size", "OffH", "Auto")
+global osdPosX := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Position", "X", 10)
+global osdPosY := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Position", "Y", 10)
+global osdFullW := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "FullW", 950)
+global osdFullH := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "FullH", 550)
+global osdMiniW := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "MiniW", 250)
+global osdMiniH := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "MiniH", 195)
+global osdOffW := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "OffW", "Auto")
+global osdOffH := IniRead(A_ScriptDir . "\config\osd_pos.ini", "Size", "OffH", "Auto")
 
 OnMessage(0x0201, WM_LBUTTONDOWN)
 WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
@@ -122,32 +122,32 @@ WM_EXITSIZEMOVE(wParam, lParam, msg, hwnd) {
 
     if (hwnd == osd.Hwnd) {
         osd.GetPos(&X, &Y, &W, &H)
-        IniWrite(X, A_ScriptDir . "\osd_pos.ini", "Position", "X")
-        IniWrite(Y, A_ScriptDir . "\osd_pos.ini", "Position", "Y")
+        IniWrite(X, A_ScriptDir . "\config\osd_pos.ini", "Position", "X")
+        IniWrite(Y, A_ScriptDir . "\config\osd_pos.ini", "Position", "Y")
         osdPosX := X
         osdPosY := Y
 
         if showMaps {
-            IniWrite(W, A_ScriptDir . "\osd_pos.ini", "Size", "FullW")
-            IniWrite(H, A_ScriptDir . "\osd_pos.ini", "Size", "FullH")
+            IniWrite(W, A_ScriptDir . "\config\osd_pos.ini", "Size", "FullW")
+            IniWrite(H, A_ScriptDir . "\config\osd_pos.ini", "Size", "FullH")
             osdFullW := W
             osdFullH := H
         } else {
-            IniWrite(W, A_ScriptDir . "\osd_pos.ini", "Size", "MiniW")
-            IniWrite(H, A_ScriptDir . "\osd_pos.ini", "Size", "MiniH")
+            IniWrite(W, A_ScriptDir . "\config\osd_pos.ini", "Size", "MiniW")
+            IniWrite(H, A_ScriptDir . "\config\osd_pos.ini", "Size", "MiniH")
             osdMiniW := W
             osdMiniH := H
         }
         try osdMini.Move(X, Y)
     } else if (hwnd == osdMini.Hwnd) {
         osdMini.GetPos(&X, &Y, &W, &H)
-        IniWrite(X, A_ScriptDir . "\osd_pos.ini", "Position", "X")
-        IniWrite(Y, A_ScriptDir . "\osd_pos.ini", "Position", "Y")
+        IniWrite(X, A_ScriptDir . "\config\osd_pos.ini", "Position", "X")
+        IniWrite(Y, A_ScriptDir . "\config\osd_pos.ini", "Position", "Y")
         osdPosX := X
         osdPosY := Y
 
-        IniWrite(W, A_ScriptDir . "\osd_pos.ini", "Size", "OffW")
-        IniWrite(H, A_ScriptDir . "\osd_pos.ini", "Size", "OffH")
+        IniWrite(W, A_ScriptDir . "\config\osd_pos.ini", "Size", "OffW")
+        IniWrite(H, A_ScriptDir . "\config\osd_pos.ini", "Size", "OffH")
         osdOffW := W
         osdOffH := H
 
@@ -318,7 +318,25 @@ UpdateOSD() {
             if showMaps {
                 global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, osdTeams1, osdTeams2, adbMode, pendingSpecial
 
-                if (IsSet(pendingSpecial) && pendingSpecial == "{MKey}") {
+                osdUpdatedDynamic := false
+                global customOSDCache
+                if (IsSet(pendingSpecial) && RegExMatch(pendingSpecial, "^\{([a-zA-Z0-9]+Key)\}$", &match)) {
+                    prefixName := match[1]
+                    
+                    if customOSDCache.Has(prefixName) {
+                        col1Text := customOSDCache[prefixName].Has("col1") ? customOSDCache[prefixName]["col1"] : ""
+                        col2Text := customOSDCache[prefixName].Has("col2") ? customOSDCache[prefixName]["col2"] : ""
+                        
+                        t1c1.Text := col1Text
+                        t1c2.Text := col2Text
+                        statusText.Text := "⌨ MORSE KEYBOARD: " . StrUpper(prefixName) . " ATIVO"
+                        osdUpdatedDynamic := true
+                    }
+                }
+
+                if (osdUpdatedDynamic) {
+                    ; Já atualizado pela leitura dinâmica
+                } else if (IsSet(pendingSpecial) && pendingSpecial == "{MKey}") {
                     t1c1.Text := osdMKey1
                     t1c2.Text := osdMKey2
                     statusText.Text := "⌨ MORSE KEYBOARD: FUNÇÕES MKEY ATIVAS"
@@ -345,7 +363,12 @@ UpdateOSD() {
                 } else {
                     t1c1.Text := osdGeral1
                     t1c2.Text := osdGeral2
-                    statusText.Text := "⌨ MORSE KEYBOARD: WINDOWS ATIVO"
+                    statusText.Text := "💻 MORSE KEYBOARD: WINDOWS ATIVO"
+                }
+
+                global isSpecialLocked
+                if (IsSet(isSpecialLocked) && isSpecialLocked) {
+                    statusText.Text := statusText.Text . " [ TRAVADO ]"
                 }
 
                 curW := Max(osdFullW, 750)

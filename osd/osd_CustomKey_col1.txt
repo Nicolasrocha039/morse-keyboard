@@ -1,0 +1,8 @@
+RAQAR = EmailKey
+RQAAA = CadastroKey
+RAQQR = VisionKey
+RARAR = SiteKey
+RARAQ = SysKey
+QAQA  = TeamsKey
+QAQR  = SpotifyKey
+QRQR  = MacroKey

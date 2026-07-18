@@ -1,0 +1,3 @@
+RQQ = Pessoal
+RQA = Corporativo
+RQR = 3D

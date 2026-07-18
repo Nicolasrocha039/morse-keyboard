@@ -1,0 +1,2 @@
+RQQ = Gemini | RQA = MakerWorld
+RQR = Mercado Livre

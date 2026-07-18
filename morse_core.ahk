@@ -1,4 +1,5 @@
 #Requires AutoHotkey v2.0
+global isSpecialLocked := false
 
 SendStateToPython() {
     global wordBuffer, visualBuffer, currentSequence, morseActive
@@ -154,7 +155,7 @@ UpdateVisualBufferFromWordBuffer() {
         return
     }
     cursorPos := StrLen(wordBuffer) - cursorOffset
-    
+
     ; Find the last space before or at cursorPos
     lastSpace := 0
     Loop cursorPos {
@@ -162,7 +163,7 @@ UpdateVisualBufferFromWordBuffer() {
             lastSpace := A_Index
         }
     }
-    
+
     ; Find the first space after cursorPos
     nextSpace := StrLen(wordBuffer) + 1
     Loop StrLen(wordBuffer) - cursorPos {
@@ -171,14 +172,14 @@ UpdateVisualBufferFromWordBuffer() {
             break
         }
     }
-    
+
     visualBuffer := SubStr(wordBuffer, lastSpace + 1, nextSpace - lastSpace - 1)
 }
 
 LogBuffers(action) {
     global wordBuffer, visualBuffer, currentSequence
     try {
-        FileAppend("[" . A_Now . "] Action: " . action . " | seq: '" . currentSequence . "' | word: '" . wordBuffer . "' | vis: '" . visualBuffer . "'`n", "debug_buffer.txt", "UTF-8")
+        FileAppend("[" . A_Now . "] Action: " . action . " | seq: '" . currentSequence . "' | word: '" . wordBuffer . "' | vis: '" . visualBuffer . "'`n", "logs\debug_buffer.txt", "UTF-8")
     }
 }
 
@@ -212,7 +213,7 @@ SendToSystem(output) {
     if output = "{TobiiF2}" {
         prevHidden := A_DetectHiddenWindows
         DetectHiddenWindows(True)
-        
+
         if WinExist("ahk_exe TobiiDynavox.WindowsControl.Settings.exe") {
             ControlSend("{F2}", , "ahk_exe TobiiDynavox.WindowsControl.Settings.exe")
             LogBuffers("Tobii F2 Command Sent")
@@ -222,7 +223,7 @@ SendToSystem(output) {
         } else {
             LogBuffers("Tobii F2 Failed: Not Found")
         }
-        
+
         DetectHiddenWindows(prevHidden)
         return
     }
@@ -376,7 +377,7 @@ ProcessSequence() {
             global lastSentCommand, lastSentModifiers, lastSentAccent, lastSentSpecial
             if lastSentCommand != "" {
                 output := lastSentCommand
-                global pendingModifiers, pendingAccent, pendingSpecial
+                global pendingModifiers, pendingAccent, pendingSpecial, isSpecialLocked
                 if IsSet(lastSentModifiers)
                     pendingModifiers := lastSentModifiers
                 if IsSet(lastSentAccent)
@@ -388,7 +389,7 @@ ProcessSequence() {
             }
         } else {
             global lastSentCommand, lastSentModifiers, lastSentAccent, lastSentSpecial
-            global pendingModifiers, pendingAccent, pendingSpecial
+            global pendingModifiers, pendingAccent, pendingSpecial, isSpecialLocked
             lastSentCommand := output
             lastSentModifiers := IsSet(pendingModifiers) ? pendingModifiers : ""
             lastSentAccent := IsSet(pendingAccent) ? pendingAccent : ""
@@ -396,7 +397,7 @@ ProcessSequence() {
         }
 
         ; === DEAD KEYS: Modificadores e Acentos acumulam separadamente ===
-        global pendingModifiers, pendingAccent, pendingSpecial
+        global pendingModifiers, pendingAccent, pendingSpecial, isSpecialLocked
         if !IsSet(pendingModifiers)
             pendingModifiers := ""
         if !IsSet(pendingAccent)
@@ -449,7 +450,7 @@ ProcessSequence() {
             UpdateOSD()
             return
         }
-        
+
         if output = "{WinMenu}" {
             SendToSystem("^{Esc}")
             LogBuffers("WinMenu Triggered")
@@ -460,7 +461,7 @@ ProcessSequence() {
         if output = "{QuotesLeft}" {
             hasShift := InStr(pendingModifiers, "+")
             insertedString := hasShift ? '""' : "''"
-            
+
             if hasShift {
                 SendToSystem('""')
                 SendToSystem("{Left}")
@@ -469,7 +470,7 @@ ProcessSequence() {
                 SendToSystem("''")
                 SendToSystem("{Left}")
             }
-            
+
             if cursorOffset > 0 {
                 leftPart := SubStr(wordBuffer, 1, StrLen(wordBuffer) - cursorOffset)
                 rightPart := SubStr(wordBuffer, StrLen(wordBuffer) - cursorOffset + 1)
@@ -479,7 +480,7 @@ ProcessSequence() {
             }
             cursorOffset++
             UpdateVisualBufferFromWordBuffer()
-            
+
             LogBuffers("QuotesLeft executed")
             UpdateOSD()
             return
@@ -504,6 +505,7 @@ ProcessSequence() {
         if RegExMatch(output, "^\{[a-zA-Z0-9]+Key\}$") {
             if (pendingSpecial == output) {
                 pendingSpecial := ""
+                isSpecialLocked := false
                 ToolTip("Prefixo " . output . ": Desativado", A_ScreenWidth / 2 - 180, A_ScreenHeight / 2)
             } else {
                 pendingSpecial := output
@@ -528,167 +530,75 @@ ProcessSequence() {
 
         ; === A partir daqui, é uma tecla final — montar o envio completo ===
 
-        ; Resolver FKey, MKey, MacroKey ou custom se estão no pendingSpecial
-        if pendingSpecial == "{FKey}" {
-            ; Mapear: 1-9→F1-F9, 0→F10, a→F11, b→F12
-            fkeyMap := Map("1", "{F1}", "2", "{F2}", "3", "{F3}", "4", "{F4}", "5", "{F5}", "6", "{F6}", "7", "{F7}", "8", "{F8}", "9", "{F9}", "0", "{F10}", "a", "{F11}", "b", "{F12}", "A", "{F11}", "B", "{F12}")
-            fTarget := output
-            if fkeyMap.Has(fTarget) {
-                ; Extrair modificadores remanescentes (^, !, +, #)
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . fkeyMap[fTarget])
-                LogBuffers("FKey Resolved: " . modOnly . fkeyMap[fTarget])
-            } else {
-                ; Tecla não reconhecida para FKey, enviar como comando direto
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . output)
-                LogBuffers("FKey Fallback: " . modOnly . output)
-            }
-            pendingSpecial := ""
-            pendingModifiers := ""
-            pendingAccent := ""
-            UpdateOSD()
-            return
-        }
-
-        if pendingSpecial == "{MKey}" {
-            ; Layout Kumara Elite K552 (Fn+F1 a Fn+F12)
-            ; 1=MyPC 2=Search 3=Calc 4=Player 5=Prev 6=Next 7=Play/Pause 8=Stop 9=Mute 0=Vol- a=Vol+ b=Lock
-            mkeyMap := Map("1", "#e", "2", "#s", "3", "{Launch_App2}", "4", "{Launch_Media}", "5", "{Media_Prev}", "6", "{Media_Next}", "7", "{Media_Play_Pause}", "8", "{Media_Stop}", "9", "{Volume_Mute}", "0", "{Volume_Down}", "a", "{Volume_Up}", "A", "{Volume_Up}", "b", "#l", "B", "#l")
-            mTarget := output
-            if mkeyMap.Has(mTarget) {
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . mkeyMap[mTarget])
-                LogBuffers("MKey Resolved: " . modOnly . mkeyMap[mTarget])
-            } else {
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . output)
-                LogBuffers("MKey Fallback: " . modOnly . output)
-            }
-            pendingSpecial := ""
-            pendingModifiers := ""
-            pendingAccent := ""
-            UpdateOSD()
-            return
-        }
-
-        if pendingSpecial == "{MacroKey}" {
-            ; O output aqui é o caractere decodificado pelo morseMap
-            ; Aceita tanto letras (a,b,c,d) quanto números (1,2,3,4)
-            ; Disparo HTTP para a nova API Spring Boot
-            endpoint := ""
-            if (output == "a" || output == "1")
-                endpoint := "3d-precifier"
-            else if (output == "b" || output == "2")
-                endpoint := "semanticron"
-            else if (output == "c" || output == "3")
-                endpoint := "dork"
-            
-            if (endpoint != "") {
-                try {
-                    req := ComObject("WinHttp.WinHttpRequest.5.1")
-                    req.Open("POST", "http://127.0.0.1:8080/api/macros/" . endpoint, true) ; assíncrono
-                    req.SetRequestHeader("Content-Type", "application/json")
-                    
-                    ; Payload genérico para Dork/Semanticron
-                    payload := '{"target":"sicredi.com.br", "intent":"avise em 10 minutos"}'
-                    req.Send(payload)
-                    
-                    LogBuffers("MacroKey HTTP Sent: " . endpoint . " (input: " . output . ")")
-                    ToolTip("API Macro: " . endpoint, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
-                    SetTimer(() => ToolTip(), -2000)
-                } catch as e {
-                    LogBuffers("MacroKey Erro de Conexão: " . e.Message)
-                    ToolTip("Erro API: " . endpoint, A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
-                    SetTimer(() => ToolTip(), -2000)
-                }
-            } else {
-                LogBuffers("MacroKey Fallback: tecla não mapeada para API (" . output . ")")
-                ToolTip("Macro não mapeada: '" . output . "'", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
-                SetTimer(() => ToolTip(), -2000)
-            }
-            pendingSpecial := ""
-            pendingModifiers := ""
-            pendingAccent := ""
-            UpdateOSD()
-            return
-        }
-
-        if pendingSpecial == "{SpotifyKey}" {
-            ; Executa atalhos nativamente focando o Spotify e voltando o foco
-            spotifyMap := Map("1", "^s", "2", "^r", "3", "!+b", "4", "+{Left}", "5", "+{Right}", "6", "^l")
-            sTarget := output
-            if spotifyMap.Has(sTarget) or sTarget == "7" or sTarget == "8" or sTarget == "9" or sTarget == "0" or StrUpper(sTarget) == "L" {
-                if WinExist("ahk_exe Spotify.exe") {
-                    activeHwnd := WinExist("A")
-                    WinActivate("ahk_exe Spotify.exe")
-                    if WinWaitActive("ahk_exe Spotify.exe", , 1) {
-                        if (sTarget == "7") {
-                            WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
-                            Run("python click_buttons.py spotify_dj.png " . spX . " " . spY . " " . spW . " " . spH, , "Hide")
-                        } else if (StrUpper(sTarget) == "L") {
-                            WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
-                            Run("python click_buttons.py spotify_lyrics.png " . spX . " " . spY . " " . spW . " " . spH, , "Hide")
-                        } else if (sTarget == "8") {
-                            AdjustSpotifyVolume(-1)
-                        } else if (sTarget == "9") {
-                            AdjustSpotifyVolume(1)
-                        } else if (sTarget == "0") {
-                            AdjustSpotifyVolume("MAX")
-                        } else {
-                            Send(spotifyMap[sTarget])
-                        }
-                        Sleep(50)
-                        if (activeHwnd) {
-                            WinActivate("ahk_id " . activeHwnd)
-                        }
-                        LogBuffers("SpotifyKey Executed via AHK: " . sTarget)
-                    } else {
-                        LogBuffers("SpotifyKey Falha: Nao foi possivel focar o Spotify")
-                    }
-                } else {
-                    LogBuffers("SpotifyKey Falha: Spotify nao encontrado")
-                    ToolTip("Spotify nao esta aberto!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
-                    SetTimer(() => ToolTip(), -2000)
-                }
-            } else {
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . output)
-                LogBuffers("SpotifyKey Fallback: " . modOnly . output)
-            }
-            pendingSpecial := ""
-            pendingModifiers := ""
-            pendingAccent := ""
-            UpdateOSD()
-            return
-        }
-
-        if pendingSpecial == "{TeamsKey}" {
-            ; Mapear atalhos do Microsoft Teams
-            teamsMap := Map("1", "^+m", "2", "^+o", "3", "^+e", "4", "^+k", "5", "^+h", "6", "^2")
-            tTarget := output
-            if teamsMap.Has(tTarget) {
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . teamsMap[tTarget])
-                LogBuffers("TeamsKey Resolved: " . modOnly . teamsMap[tTarget])
-            } else {
-                modOnly := pendingModifiers
-                SendToSystem(modOnly . output)
-                LogBuffers("TeamsKey Fallback: " . modOnly . output)
-            }
-            pendingSpecial := ""
-            pendingModifiers := ""
-            pendingAccent := ""
-            UpdateOSD()
-            return
-        }
 
         if pendingSpecial != "" {
-            ; Se for alguma outra tecla {CustomKey} genérica, apenas repassamos
-            modOnly := pendingModifiers
-            SendToSystem(modOnly . output)
-            LogBuffers("CustomKey (" . pendingSpecial . ") Resolved: " . modOnly . output)
-            pendingSpecial := ""
+            ; Remover chaves do pendingSpecial para pegar o nome. Ex: "{SiteKey}" -> "SiteKey"
+            prefixName := SubStr(pendingSpecial, 2, StrLen(pendingSpecial) - 2)
+            mapFile := A_ScriptDir . "\" . prefixName . ".txt"
+            
+            global customKeysCache
+            resolved := false
+            if customKeysCache.Has(prefixName) && customKeysCache[prefixName].Has(output) {
+                targetValue := customKeysCache[prefixName][output]
+
+                if (targetValue != "") {
+                    actionType := "text"
+                    target := targetValue
+                    payload := ""
+                    
+                    if InStr(targetValue, "|") {
+                        valParts := StrSplit(targetValue, "|")
+                        actionType := valParts[1]
+                        target := valParts[2]
+                        if valParts.Length > 2
+                            payload := valParts[3]
+                    } else {
+                        if SubStr(targetValue, 1, 4) == "http"
+                            actionType := "site"
+                        else if InStr(targetValue, ".py")
+                            actionType := "python"
+                        else if InStr(targetValue, ".exe") || InStr(targetValue, ".bat")
+                            actionType := "app"
+                    }
+                    
+                    ExecuteCustomAction(actionType, target, payload, pendingModifiers)
+                    LogBuffers(prefixName . " Resolved via txt: " . targetValue)
+                    resolved := true
+                }
+            }
+            
+            if !resolved {
+                ; VERIFICAR SE O OUTPUT É OUTRA TECLA ESPECIAL
+                if RegExMatch(output, "^\{([a-zA-Z0-9]+Key)\}$") {
+                    pendingSpecial := output
+                    UpdateOSD()
+                    return
+                }
+
+                if (output == "{ToggleLock}") {
+                    isSpecialLocked := !isSpecialLocked
+                    if (!isSpecialLocked) {
+                        pendingSpecial := ""
+                    }
+                    UpdateOSD()
+                    return
+                }
+
+                if (output == "{Escape}") {
+                    pendingSpecial := ""
+                    isSpecialLocked := false
+                    UpdateOSD()
+                    return
+                }
+
+                modOnly := pendingModifiers
+                SendToSystem(modOnly . output)
+                LogBuffers("CustomKey (" . pendingSpecial . ") Fallback: " . modOnly . output)
+            }
+            
+            if (!isSpecialLocked) {
+                pendingSpecial := ""
+            }
             pendingModifiers := ""
             pendingAccent := ""
             UpdateOSD()
@@ -714,7 +624,7 @@ ProcessSequence() {
                 SendToSystem(modifierChars . output)
             else
                 SendToSystem(output)
-            
+
             ; Rastrear cursor virtual para navega��o
             if (output = "{Left}") {
                 textSelectedAll := false
@@ -768,7 +678,7 @@ ProcessSequence() {
                     SendToSystem("{Space}")
                 LearnWordContext()
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             } else if output = "{Enter}" {
                 if textSelectedAll {
                     wordBuffer := ""
@@ -783,7 +693,7 @@ ProcessSequence() {
                     SendToSystem("{Enter}")
                 LearnWordContext()
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             } else if output = "{Backspace}" {
                 if textSelectedAll {
                     wordBuffer := ""
@@ -798,11 +708,11 @@ ProcessSequence() {
                 }
                 SendToSystem("{Backspace}")
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             } else if output = "^{Backspace}" {
                 DeleteLastWord()
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             } else if output = "{Escape}" {
                 wordBuffer := ""
                 cursorOffset := 0
@@ -810,7 +720,7 @@ ProcessSequence() {
                 textSelectedAll := false
                 SendToSystem("{Escape}")
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             } else {
                 ; Caractere normal — montar envio com acentos e modificadores
                 finalChar := output
@@ -885,7 +795,7 @@ ProcessSequence() {
                     }
                 }
                 pendingModifiers := ""
-            pendingAccent := ""
+                pendingAccent := ""
             }
             LogBuffers("Added Character: " . output)
         }
@@ -1010,11 +920,11 @@ AdjustSpotifyVolume(change) {
         if (SpotifyVolumeLevel < 0)
             SpotifyVolumeLevel := 0
     }
-    
+
     ; Força o volume a partir do zero para contornar o gargalo de não salvar a % manual no AHK
     Send("{Ctrl down}{Down 50}{Ctrl up}")
     Sleep(50)
-    
+
     if (SpotifyVolumeLevel == 1)
         Send("{Ctrl down}{Up 5}{Ctrl up}")  ; 25%
     else if (SpotifyVolumeLevel == 2)
@@ -1023,4 +933,77 @@ AdjustSpotifyVolume(change) {
         Send("{Ctrl down}{Up 15}{Ctrl up}") ; 75%
     else if (SpotifyVolumeLevel == 4)
         Send("{Ctrl down}{Up 50}{Ctrl up}") ; 100%
+}
+
+; Método dinâmico para ações customizadas
+ExecuteCustomAction(actionType, target, payload := "", modifiers := "") {
+    try {
+        if (actionType = "text") {
+            savedClip := ClipboardAll()
+            A_Clipboard := target
+            Sleep(50)
+            Send("^{v}")
+            Sleep(50)
+            A_Clipboard := savedClip
+        } else if (actionType = "send") {
+            SendToSystem(modifiers . target)
+        } else if (actionType = "site" || actionType = "app") {
+            Run(target)
+        } else if (actionType = "python") {
+            scriptName := target
+            args := ""
+            if (pos := InStr(target, ".py ")) {
+                scriptName := SubStr(target, 1, pos + 2)
+                args := SubStr(target, pos + 4)
+            }
+            Run("python\python.exe `"scripts\" . scriptName . "`" " . args, , "Hide")
+        } else if (actionType = "http") {
+            req := ComObject("WinHttp.WinHttpRequest.5.1")
+            ; Se não houver payload, tenta fazer um GET, se houver payload faz um POST
+            method := (payload != "") ? "POST" : "GET"
+            req.Open(method, target, true)
+            req.SetRequestHeader("Content-Type", "application/json")
+            if (payload != "")
+                req.Send(payload)
+            else
+                req.Send()
+        } else if (SubStr(actionType, 1, 8) = "spotify_") {
+            if WinExist("ahk_exe Spotify.exe") {
+                activeHwnd := WinExist("A")
+                WinActivate("ahk_exe Spotify.exe")
+                if WinWaitActive("ahk_exe Spotify.exe", , 1) {
+                    if (actionType = "spotify_send") {
+                        Send(target)
+                    } else if (actionType = "spotify_python") {
+                        WinGetPos(&spX, &spY, &spW, &spH, "ahk_exe Spotify.exe")
+                        scriptName := target
+                        args := spX . " " . spY . " " . spW . " " . spH
+                        if (pos := InStr(target, ".py ")) {
+                            scriptName := SubStr(target, 1, pos + 2)
+                            args := SubStr(target, pos + 4) . " " . args
+                        }
+                        Run("python\python.exe `"scripts\" . scriptName . "`" " . args, , "Hide")
+                    } else if (actionType = "spotify_func") {
+                        if (target = "AdjustSpotifyVolume")
+                            AdjustSpotifyVolume(payload)
+                    }
+                    Sleep(50)
+                    if (activeHwnd)
+                        WinActivate("ahk_id " . activeHwnd)
+                }
+            } else {
+                ToolTip("Spotify nao esta aberto!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
+                SetTimer(() => ToolTip(), -2000)
+            }
+        } else if (actionType = "func") {
+            if (target = "ReloadConfig") {
+                LoadConfig()
+                ToolTip("Arquivos INI Recarregados!", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2)
+                SetTimer(() => ToolTip(), -2000)
+            }
+        }
+    } catch as e {
+        ToolTip("Erro CustomAction (" . actionType . "): " . e.Message, A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+        SetTimer(() => ToolTip(), -3000)
+    }
 }

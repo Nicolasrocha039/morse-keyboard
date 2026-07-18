@@ -123,7 +123,7 @@ def click_buttons_from_folder(folder_path, region=None, target_image=None):
             
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    buttons_folder = os.path.join(current_dir, "Buttons")
+    buttons_folder = os.path.join(current_dir, "..", "Buttons")
     
     # Parâmetros esperados:
     # python click_buttons.py [nome_da_imagem] [X] [Y] [W] [H]

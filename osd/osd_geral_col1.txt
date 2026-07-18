@@ -19,6 +19,4 @@ R + [AQ:4   AA:5    AR:6]
 R + [RQ:7   RA:8    RR:9]
 R + [RRRR:0 RRRRQ:. RRRA:,]
 RAAA(Ctrl) | RAAQ(Shift)
-RAQA(Alt)  | FKey: RAAR
-MKey: RAQR | Macro: QRQR
-Spotify: QAQR | Teams: QAQA
+RAQA(Alt)  | CustomKey: RAQRA
