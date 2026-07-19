@@ -1,4 +1,4 @@
-﻿; ═══════════════════════════════════════════════════════════════════════════════
+; ═══════════════════════════════════════════════════════════════════════════════
 ; MORSE KEYBOARD (v2.0) - Refatorado com SRP
 ; ═══════════════════════════════════════════════════════════════════════════════
 
@@ -13,7 +13,7 @@ global cursorOffset := 0
 global textSelectedAll := false
 global visualBuffer := ""
 global showMaps := true
-global USE_BROWSER_OSD := false
+
 global historyBuffer := []
 global adbMode := false
 global lbuttonLocked := true
@@ -28,9 +28,6 @@ global pendingSpecial := ""
 #Include "%A_ScriptDir%\morse_osd.ahk"
 
 ; ── Inicialização ──
-try {
-    Run('"' . A_ScriptDir . '\python\python.exe" "' . A_ScriptDir . '\websocket_server.py"', A_ScriptDir, "Hide")
-}
 
 UpdateOSD()
 
@@ -74,7 +71,6 @@ LWin:: CancelSequence()
 #HotIf morseActive
 
 \:: ToggleMaps()
-b:: ToggleBrowserMode()
 
 q:: AddToSequence("Q")
 a:: AddToSequence("A")

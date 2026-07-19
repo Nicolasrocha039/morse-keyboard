@@ -261,23 +261,9 @@ ToggleMaps() {
     UpdateOSD()
 }
 
-ToggleBrowserMode() {
-    global USE_BROWSER_OSD, osd, osdMini
-    USE_BROWSER_OSD := !USE_BROWSER_OSD
-    if USE_BROWSER_OSD {
-        osd.Hide()
-        osdMini.Hide()
-        ToolTip("Modo Navegador ATIVO ─ http://localhost:8766", A_ScreenWidth / 2 - 200, A_ScreenHeight / 2 - 30)
-    } else {
-        ToolTip("Modo OSD ATIVO", A_ScreenWidth / 2 - 100, A_ScreenHeight / 2 - 30)
-    }
-    SetTimer(() => ToolTip(), -1800)
-    UpdateOSD()
-}
-
 UpdateOSD() {
     global morseActive, currentSequence, statusText, seqText, hintText, showMaps, visualBuffer
-    global osd, osdMini, miniStatus, sepLine, USE_BROWSER_OSD
+    global osd, osdMini, miniStatus, sepLine
 
     displayText := ""
     if morseActive {
@@ -301,19 +287,15 @@ UpdateOSD() {
         }
     }
 
-    if USE_BROWSER_OSD {
-        osd.Hide()
+    if morseActive {
         osdMini.Hide()
-    } else {
-        if morseActive {
-            osdMini.Hide()
-            seqText.Text := displayText
-            if currentSequence != "" {
-                hintText.Text := GetPossibleMatches(currentSequence)
-            } else {
-                hintText.Text := "Confirmar: Enter | Mapas: d"
-            }
-            UpdateKeyGuide(currentSequence)
+        seqText.Text := displayText
+        if currentSequence != "" {
+            hintText.Text := GetPossibleMatches(currentSequence)
+        } else {
+            hintText.Text := "Confirmar: Enter | Mapas: d"
+        }
+        UpdateKeyGuide(currentSequence)
 
             if showMaps {
                 global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, osdTeams1, osdTeams2, adbMode, pendingSpecial
@@ -395,18 +377,16 @@ UpdateOSD() {
                 try osd.Show("w" . osdMiniW . " h" . osdMiniH . " NoActivate")
                 try WinSetTransparent(220, osd)
             }
-            statusText.Redraw()
-            seqText.Redraw()
-            sepLine.Redraw()
+        statusText.Redraw()
+        seqText.Redraw()
+        sepLine.Redraw()
+    } else {
+        osd.Hide()
+        miniStatus.Text := "⌨ MORSE KB: OFF"
+        if (osdOffW = "Auto" || osdOffH = "Auto") {
+            try osdMini.Show("NoActivate")
         } else {
-            osd.Hide()
-            miniStatus.Text := "⌨ MORSE KB: OFF"
-            if (osdOffW = "Auto" || osdOffH = "Auto") {
-                try osdMini.Show("NoActivate")
-            } else {
-                try osdMini.Show("w" . osdOffW . " h" . osdOffH . " NoActivate")
-            }
+            try osdMini.Show("w" . osdOffW . " h" . osdOffH . " NoActivate")
         }
     }
-    SendStateToPython()
 }

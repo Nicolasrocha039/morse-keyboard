@@ -1,0 +1,6 @@
+RQQ = ^ | RQA = ~
+RQR = ¨ | RAQ = `
+RAA = ´ 
+
+RAR = LWord
+RRQ = RWord

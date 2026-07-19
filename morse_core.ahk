@@ -1,34 +1,6 @@
 #Requires AutoHotkey v2.0
 global isSpecialLocked := false
 
-SendStateToPython() {
-    global wordBuffer, visualBuffer, currentSequence, morseActive
-
-    ; Tratar escapes JSON simples
-    escapedWord := StrReplace(wordBuffer, '\', '\\')
-    escapedWord := StrReplace(escapedWord, '"', '\"')
-    escapedWord := StrReplace(escapedWord, '`n', '\n')
-    escapedWord := StrReplace(escapedWord, '`r', '\r')
-
-    escapedVisual := StrReplace(visualBuffer, '\', '\\')
-    escapedVisual := StrReplace(escapedVisual, '"', '\"')
-    escapedVisual := StrReplace(escapedVisual, '`n', '\n')
-    escapedVisual := StrReplace(escapedVisual, '`r', '\r')
-
-    suggestion := GetAutocompleteSuggestion(visualBuffer)
-    escapedSuggestion := StrReplace(suggestion, '\', '\\')
-    escapedSuggestion := StrReplace(escapedSuggestion, '"', '\"')
-
-    jsonData := '{"word": "' . escapedWord . '", "visual": "' . escapedVisual . '", "seq": "' . currentSequence . '", "suggestion": "' . escapedSuggestion . '", "active": ' . (morseActive ? "true" : "false") . '}'
-
-    try {
-        http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://127.0.0.1:8766/state", true)
-        http.setRequestHeader("Content-Type", "application/json")
-        http.send(jsonData)
-    }
-}
-
 FormatSequence(seq) {
     result := ""
     Loop Parse, seq {
@@ -56,32 +28,18 @@ RemoveAccents(str) {
 }
 
 GetAutocompleteSuggestion(visualWord) {
-    global wordBuffer
+    global dictArray
     if (visualWord = "" || StrLen(visualWord) < 2)
         return ""
 
     isFirstUpper := IsUpper(SubStr(visualWord, 1, 1))
+    searchLower := StrLower(RemoveAccents(visualWord))
 
-    escapedWordBuffer := StrReplace(wordBuffer, '\', '\\')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
-
-    escapedVisual := StrReplace(visualWord, '\', '\\')
-    escapedVisual := StrReplace(escapedVisual, '"', '\"')
-
-    jsonData := '{"wordBuffer": "' . escapedWordBuffer . '", "visualBuffer": "' . escapedVisual . '"}'
-
-    try {
-        http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://127.0.0.1:8766/suggest", false) ; síncrono
-        http.setRequestHeader("Content-Type", "application/json")
-        http.send(jsonData)
-
-        response := http.responseText
-        if RegExMatch(response, '"suggestion"\s*:\s*"([^"]*)"', &match) {
-            suggestion := match[1]
-            if (suggestion != "" && isFirstUpper) {
+    for item in dictArray {
+        itemLower := StrLower(item.key)
+        if (SubStr(itemLower, 1, StrLen(searchLower)) = searchLower) {
+            suggestion := item.word
+            if (isFirstUpper) {
                 suggestion := StrUpper(SubStr(suggestion, 1, 1)) . SubStr(suggestion, 2)
             }
             return suggestion
@@ -91,19 +49,7 @@ GetAutocompleteSuggestion(visualWord) {
 }
 
 LearnWordContext() {
-    global wordBuffer
-    escapedWordBuffer := StrReplace(wordBuffer, '\', '\\')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '"', '\"')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '`n', '\n')
-    escapedWordBuffer := StrReplace(escapedWordBuffer, '`r', '\r')
-
-    jsonData := '{"wordBuffer": "' . escapedWordBuffer . '"}'
-    try {
-        http := ComObject("Msxml2.XMLHTTP")
-        http.open("POST", "http://127.0.0.1:8766/learn", true) ; assíncrono
-        http.setRequestHeader("Content-Type", "application/json")
-        http.send(jsonData)
-    }
+    ; Desativado localmente. O usuário insere palavras no dict.ini manualmente.
 }
 
 GetPossibleMatches(seq) {
