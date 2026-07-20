@@ -5,7 +5,7 @@ import pyautogui
 from PIL import ImageGrab
 import pygetwindow as gw
 
-def click_buttons_from_folder(folder_path, region=None, target_image=None):
+def click_buttons_from_folder(folder_path, region=None, target_image=None, click_last=False):
     if not os.path.exists(folder_path):
         print(f"A pasta '{folder_path}' não foi encontrada.")
         return
@@ -62,7 +62,11 @@ def click_buttons_from_folder(folder_path, region=None, target_image=None):
             
             for conf in [0.9, 0.8, 0.7]:
                 try:
-                    location = pyautogui.locate(image_path, haystack_image, confidence=conf)
+                    if click_last:
+                        locations = list(pyautogui.locateAll(image_path, haystack_image, confidence=conf))
+                        location = locations[-1] if locations else None
+                    else:
+                        location = pyautogui.locate(image_path, haystack_image, confidence=conf)
                     
                     if location:
                         center_x, center_y = pyautogui.center(location)
@@ -89,7 +93,11 @@ def click_buttons_from_folder(folder_path, region=None, target_image=None):
                     if "confidence" in str(e).lower():
                         print("AVISO: Falta instalar o opencv-python para buscas com confiança.")
                         try:
-                            location = pyautogui.locate(image_path, haystack_image)
+                            if click_last:
+                                locations = list(pyautogui.locateAll(image_path, haystack_image))
+                                location = locations[-1] if locations else None
+                            else:
+                                location = pyautogui.locate(image_path, haystack_image)
                             if location:
                                 center_x, center_y = pyautogui.center(location)
                                 if region:
@@ -126,17 +134,23 @@ if __name__ == "__main__":
     buttons_folder = os.path.join(current_dir, "..", "Buttons")
     
     # Parâmetros esperados:
-    # python click_buttons.py [nome_da_imagem] [X] [Y] [W] [H]
+    # python click_buttons.py [--last] [nome_da_imagem] [X] [Y] [W] [H]
     
     target_image = None
     search_region = None
+    click_last = False
     
-    if len(sys.argv) >= 2:
-        target_image = sys.argv[1]
+    args = sys.argv[1:]
+    if "--last" in args:
+        click_last = True
+        args.remove("--last")
         
-    if len(sys.argv) == 6:
+    if len(args) >= 1:
+        target_image = args[0]
+        
+    if len(args) == 5:
         try:
-            search_region = (int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
+            search_region = (int(args[1]), int(args[2]), int(args[3]), int(args[4]))
         except ValueError:
             pass
             
@@ -144,4 +158,5 @@ if __name__ == "__main__":
         print("Aguardando 3 segundos...")
         time.sleep(3)
         
-    click_buttons_from_folder(buttons_folder, region=search_region, target_image=target_image)
+    click_buttons_from_folder(buttons_folder, region=search_region, target_image=target_image, click_last=click_last)
+
