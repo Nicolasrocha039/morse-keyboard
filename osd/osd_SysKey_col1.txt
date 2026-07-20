@@ -1,3 +1,5 @@
 RQQ = CrealityPrint | RQA = Spotify
 RQR = Ollama | RAQ = Thread
 RAA = Reload INIs
+RAR = Cakewalk
+RRQ = IntelliJ

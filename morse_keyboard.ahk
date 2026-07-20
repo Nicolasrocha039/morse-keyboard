@@ -154,13 +154,26 @@ MouseIsOverOSD() {
     return (hwnd == osd.Hwnd || hwnd == osdMini.Hwnd)
 }
 
-#HotIf morseActive && lbuttonLocked && !MouseIsOverOSD()
+#HotIf morseActive && (lbuttonLocked || (IsSet(lbuttonEnterToggle) && lbuttonEnterToggle)) && !MouseIsOverOSD()
 $LButton:: {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer
 
     ; Se houver sequência pendente, o LButton funciona apenas como botão de confirmação imediato
     if currentSequence != "" {
         ProcessSequence()
+        return
+    }
+
+    global lbuttonEnterToggle
+    if (IsSet(lbuttonEnterToggle) && lbuttonEnterToggle) {
+        wordBuffer := ""
+        global cursorOffset := 0
+        visualBuffer := ""
+        historyBuffer := []
+        LogBuffers("Physical LButton -> Enter (Immediate)")
+        SendToSystem("{Enter}")
+        UpdateOSD()
+        KeyWait("LButton")
         return
     }
 

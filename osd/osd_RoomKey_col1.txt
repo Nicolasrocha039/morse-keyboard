@@ -1,0 +1,4 @@
+RQQ = Ligar Luz do quarto
+RQA = Desligar Luz do quarto
+RQR = Ligar Ar Condicionado
+RAQ = Desligar Ar Condicionado

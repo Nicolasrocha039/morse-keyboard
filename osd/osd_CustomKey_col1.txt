@@ -6,3 +6,6 @@ RARAQ = SysKey
 QAQA  = TeamsKey
 QAQR  = SpotifyKey
 QRQR  = MacroKey
+RAAR  = FKey
+RAQR  = MKey
+QAAQ  = TextKey

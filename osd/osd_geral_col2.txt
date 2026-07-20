@@ -5,7 +5,7 @@ Setas: RQRRQ(C) RQRQA(B) RQRQQ(E) RQRQR(D)
 RQRQ: Tab      | RQRA: Delete
 RQRR: Home     | RQRRRQ: End
 RQRRA: PgUp    | RQRRR: PgDn
-RQRRRA: Shift+Tab
+RQRRRA: S+Tab  | QRAQ: Insert
 
 Mouse: RQQA(Esq) RQQR(Dir) RARA(Meio)
 Travar Esq: RQQQ | Swipe: ARAR / RARA

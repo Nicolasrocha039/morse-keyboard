@@ -142,6 +142,47 @@ LoadConfig(useTraditionalMap := false) {
             }
         }
     }
+
+    ; Carregar Modifiers
+    global modifiersCache := Map()
+    try {
+        fileContent := FileRead(A_ScriptDir . "\config\Modifiers.ini", "UTF-8")
+        Loop Parse, fileContent, "`n", "`r" {
+            line := Trim(A_LoopField, " `t")
+            if (line != "" && SubStr(line, 1, 1) != "[" && SubStr(line, 1, 1) != ";" && InStr(line, "=")) {
+                parts := StrSplit(line, "=", , 2)
+                if (Trim(parts[1]) != "")
+                    modifiersCache[Trim(parts[1])] := Trim(parts[2])
+            }
+        }
+    } catch {
+        ; Ignorar se não existir
+    }
+
+    ; Carregar DeadKeys (Acentos)
+    global deadKeysCache := Map()
+    try {
+        fileContent := FileRead(A_ScriptDir . "\config\DeadKeys.ini", "UTF-8")
+        currentSection := ""
+        Loop Parse, fileContent, "`n", "`r" {
+            line := Trim(A_LoopField, " `t")
+            if (line = "" || SubStr(line, 1, 1) = ";")
+                continue
+            if RegExMatch(line, "^\[(.*?)\]$", &match) {
+                currentSection := match[1]
+                if (currentSection != "List" && !deadKeysCache.Has(currentSection))
+                    deadKeysCache[currentSection] := Map()
+                continue
+            }
+            if (currentSection != "List" && currentSection != "" && InStr(line, "=")) {
+                parts := StrSplit(line, "=", , 2)
+                if (Trim(parts[1]) != "")
+                    deadKeysCache[currentSection][Trim(parts[1])] := Trim(parts[2])
+            }
+        }
+    } catch {
+        ; Ignorar se não existir
+    }
 }
 
 ; Executar no momento da inclusão

@@ -156,6 +156,17 @@ SendToSystem(output) {
         return
     }
 
+    if output = "{ToggleLBtnReturn}" {
+        global lbuttonEnterToggle
+        if !IsSet(lbuttonEnterToggle)
+            lbuttonEnterToggle := false
+        lbuttonEnterToggle := !lbuttonEnterToggle
+        ToolTip("LButton+Enter " . (lbuttonEnterToggle ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle LButton+Enter: " . (lbuttonEnterToggle ? "ON" : "OFF"))
+        return
+    }
+
     if output = "{TobiiF2}" {
         prevHidden := A_DetectHiddenWindows
         DetectHiddenWindows(True)
@@ -351,48 +362,17 @@ ProcessSequence() {
         if !IsSet(pendingSpecial)
             pendingSpecial := ""
 
-        ; Modificadores sticky → acumulam prefixo AHK (^, !, +, #)
-        if output = "{Ctrl}" {
-            if InStr(pendingModifiers, "^")
-                pendingModifiers := StrReplace(pendingModifiers, "^", "")
+        ; Modificadores sticky dinâmicos → acumulam prefixo AHK (^, !, +, #)
+        global modifiersCache
+        if modifiersCache.Has(output) {
+            modChar := modifiersCache[output]
+            if InStr(pendingModifiers, modChar)
+                pendingModifiers := StrReplace(pendingModifiers, modChar, "")
             else
-                pendingModifiers .= "^"
+                pendingModifiers .= modChar
             ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Toggle Ctrl → pendingModifiers: " . pendingModifiers)
-            UpdateOSD()
-            return
-        }
-        if output = "{Shift}" {
-            if InStr(pendingModifiers, "+")
-                pendingModifiers := StrReplace(pendingModifiers, "+", "")
-            else
-                pendingModifiers .= "+"
-            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
-            SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Toggle Shift → pendingModifiers: " . pendingModifiers)
-            UpdateOSD()
-            return
-        }
-        if output = "{Alt}" {
-            if InStr(pendingModifiers, "!")
-                pendingModifiers := StrReplace(pendingModifiers, "!", "")
-            else
-                pendingModifiers .= "!"
-            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
-            SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Toggle Alt → pendingModifiers: " . pendingModifiers)
-            UpdateOSD()
-            return
-        }
-        if output = "{LWin}" || output = "{RWin}" {
-            if InStr(pendingModifiers, "#")
-                pendingModifiers := StrReplace(pendingModifiers, "#", "")
-            else
-                pendingModifiers .= "#"
-            ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
-            SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Modifier Toggle Win → pendingModifiers: " . pendingModifiers)
+            LogBuffers("Modifier Toggle " . output . " → pendingModifiers: " . pendingModifiers)
             UpdateOSD()
             return
         }
@@ -432,23 +412,24 @@ ProcessSequence() {
             return
         }
 
-        ; Acentos (dead keys) → acumulam no prefixo como caractere literal
-        if output = "^" || output = "~" || output = "´" || output = "``" {
+        ; Teclas mortas (Acentos) dinâmicas → acumulam no prefixo como caractere literal
+        global deadKeysCache
+        if deadKeysCache.Has(output) {
             if (pendingAccent == output) {
                 pendingAccent := ""
-                ToolTip("Acento pendente: Desativado", A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                ToolTip("Tecla morta pendente: Desativada", A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             } else {
                 pendingAccent := output
-                ToolTip("Acento pendente: " . pendingAccent, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
+                ToolTip("Tecla morta pendente: " . pendingAccent, A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             }
             SetTimer(() => ToolTip(), -1500)
-            LogBuffers("Accent: " . pendingAccent)
+            LogBuffers("DeadKey: " . pendingAccent)
             UpdateOSD()
             return
         }
 
         ; FKey, MKey, MacroKey e teclas personalizadas genéricas (*Key) → toggle no prefixo
-        if RegExMatch(output, "^\{[a-zA-Z0-9]+Key\}$") {
+        if RegExMatch(output, "^\{[a-zA-Z0-9]+Key\}$") && output != "{AppsKey}" {
             if (pendingSpecial == output) {
                 pendingSpecial := ""
                 isSpecialLocked := false
@@ -515,7 +496,7 @@ ProcessSequence() {
             
             if !resolved {
                 ; VERIFICAR SE O OUTPUT É OUTRA TECLA ESPECIAL
-                if RegExMatch(output, "^\{([a-zA-Z0-9]+Key)\}$") {
+                if RegExMatch(output, "^\{([a-zA-Z0-9]+Key)\}$") && output != "{AppsKey}" {
                     pendingSpecial := output
                     UpdateOSD()
                     return
@@ -761,6 +742,7 @@ AddToSequence(key) {
 
 CancelSequence() {
     global currentSequence, wordBuffer, visualBuffer, historyBuffer, cursorOffset, textSelectedAll
+    global pendingModifiers, pendingAccent, pendingSpecial, isSpecialLocked
     LogBuffers("CancelSequence Start")
     if currentSequence != "" {
         currentSequence := ""
@@ -771,6 +753,10 @@ CancelSequence() {
         visualBuffer := ""
         historyBuffer := []
     }
+    pendingModifiers := ""
+    pendingAccent := ""
+    pendingSpecial := ""
+    isSpecialLocked := false
     LogBuffers("CancelSequence End")
     UpdateOSD()
 }
@@ -796,21 +782,9 @@ DeleteLastWord() {
     UpdateOSD()
 }
 CombineAccent(accent, char) {
-    if accent = "´" {
-        MapA := Map("a", "á", "e", "é", "i", "í", "o", "ó", "u", "ú", "A", "Á", "E", "É", "I", "Í", "O", "Ó", "U", "Ú", "c", "ç", "C", "Ç")
-        return MapA.Has(char) ? MapA[char] : char
-    }
-    if accent = "~" {
-        MapT := Map("a", "ã", "o", "õ", "n", "ñ", "A", "Ã", "O", "Õ", "N", "Ñ")
-        return MapT.Has(char) ? MapT[char] : char
-    }
-    if accent = "^" {
-        MapC := Map("a", "â", "e", "ê", "i", "î", "o", "ô", "u", "û", "A", "Â", "E", "Ê", "I", "Î", "O", "Ô", "U", "Û")
-        return MapC.Has(char) ? MapC[char] : char
-    }
-    if accent = "``" {
-        MapG := Map("a", "à", "e", "è", "i", "ì", "o", "ò", "u", "ù", "A", "À", "E", "È", "I", "Ì", "O", "Ò", "U", "Ù")
-        return MapG.Has(char) ? MapG[char] : char
+    global deadKeysCache
+    if deadKeysCache.Has(accent) && deadKeysCache[accent].Has(char) {
+        return deadKeysCache[accent][char]
     }
     return char
 }
@@ -883,6 +857,16 @@ AdjustSpotifyVolume(change) {
 
 ; Método dinâmico para ações customizadas
 ExecuteCustomAction(actionType, target, payload := "", modifiers := "") {
+    if (InStr(target, "click_buttons.py")) {
+        global lbuttonEnterToggle
+        if (IsSet(lbuttonEnterToggle) && lbuttonEnterToggle) {
+            lbuttonEnterToggle := false
+            ToolTip("LButton+Enter DESATIVADO (Auto)", A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+            SetTimer(() => ToolTip(), -2500)
+            UpdateOSD()
+        }
+    }
+
     try {
         if (actionType = "text") {
             savedClip := ClipboardAll()
@@ -905,14 +889,18 @@ ExecuteCustomAction(actionType, target, payload := "", modifiers := "") {
             Run("python\python.exe `"scripts\" . scriptName . "`" " . args, , "Hide")
         } else if (actionType = "http") {
             req := ComObject("WinHttp.WinHttpRequest.5.1")
-            ; Se não houver payload, tenta fazer um GET, se houver payload faz um POST
+            req.SetTimeouts(3000, 3000, 3000, 3000)
             method := (payload != "") ? "POST" : "GET"
-            req.Open(method, target, true)
+            req.Open(method, target, false)
             req.SetRequestHeader("Content-Type", "application/json")
-            if (payload != "")
-                req.Send(payload)
-            else
-                req.Send()
+            try {
+                if (payload != "")
+                    req.Send(payload)
+                else
+                    req.Send()
+            } catch {
+                ; Ignorar erros de rede
+            }
         } else if (SubStr(actionType, 1, 8) = "spotify_") {
             if WinExist("ahk_exe Spotify.exe") {
                 activeHwnd := WinExist("A")
