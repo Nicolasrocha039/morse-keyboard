@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 
 global MONO_FONT := "Consolas"
 
@@ -275,12 +275,7 @@ UpdateOSD() {
             }
         } else {
             if visualBuffer != "" {
-                suggestion := GetAutocompleteSuggestion(visualBuffer)
-                if (suggestion != "") {
-                    displayText := "Acumulado: " . visualBuffer . "`n-> [Enter: " . suggestion . "]"
-                } else {
-                    displayText := "Acumulado: " . visualBuffer
-                }
+                displayText := "Acumulado: " . visualBuffer
             } else {
                 displayText := "aguardando..."
             }

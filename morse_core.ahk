@@ -27,31 +27,6 @@ RemoveAccents(str) {
     return str
 }
 
-GetAutocompleteSuggestion(visualWord) {
-    global dictArray
-    if (visualWord = "" || StrLen(visualWord) < 2)
-        return ""
-
-    isFirstUpper := IsUpper(SubStr(visualWord, 1, 1))
-    searchLower := StrLower(RemoveAccents(visualWord))
-
-    for item in dictArray {
-        itemLower := StrLower(item.key)
-        if (SubStr(itemLower, 1, StrLen(searchLower)) = searchLower) {
-            suggestion := item.word
-            if (isFirstUpper) {
-                suggestion := StrUpper(SubStr(suggestion, 1, 1)) . SubStr(suggestion, 2)
-            }
-            return suggestion
-        }
-    }
-    return ""
-}
-
-LearnWordContext() {
-    ; Desativado localmente. O usuário insere palavras no dict.ini manualmente.
-}
-
 GetPossibleMatches(seq) {
     global morseMap
     matches := ""
@@ -164,6 +139,36 @@ SendToSystem(output) {
         ToolTip("LButton+Enter " . (lbuttonEnterToggle ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
         SetTimer(() => ToolTip(), -2500)
         LogBuffers("Toggle LButton+Enter: " . (lbuttonEnterToggle ? "ON" : "OFF"))
+        return
+    }
+
+    if output = "{ToggleLButtonHold}" {
+        global lbuttonHeld
+        if !IsSet(lbuttonHeld)
+            lbuttonHeld := false
+        lbuttonHeld := !lbuttonHeld
+        if lbuttonHeld
+            Send("{LButton Down}")
+        else
+            Send("{LButton Up}")
+        ToolTip("LButton Hold " . (lbuttonHeld ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle LButton Hold: " . (lbuttonHeld ? "ON" : "OFF"))
+        return
+    }
+
+    if output = "{ToggleRButtonHold}" {
+        global rbuttonHeld
+        if !IsSet(rbuttonHeld)
+            rbuttonHeld := false
+        rbuttonHeld := !rbuttonHeld
+        if rbuttonHeld
+            Send("{RButton Down}")
+        else
+            Send("{RButton Up}")
+        ToolTip("RButton Hold " . (rbuttonHeld ? "ATIVADO" : "DESATIVADO"), A_ScreenWidth / 2 - 150, A_ScreenHeight / 2)
+        SetTimer(() => ToolTip(), -2500)
+        LogBuffers("Toggle RButton Hold: " . (rbuttonHeld ? "ON" : "OFF"))
         return
     }
 
@@ -362,14 +367,18 @@ ProcessSequence() {
         if !IsSet(pendingSpecial)
             pendingSpecial := ""
 
-        ; Modificadores sticky dinâmicos → acumulam prefixo AHK (^, !, +, #)
+        ; Modificadores sticky dinâmicos → acumulam prefixo AHK (^, !, +, #) e dígitos
         global modifiersCache
         if modifiersCache.Has(output) {
             modChar := modifiersCache[output]
-            if InStr(pendingModifiers, modChar)
-                pendingModifiers := StrReplace(pendingModifiers, modChar, "")
-            else
+            if RegExMatch(modChar, "^\d$") {
                 pendingModifiers .= modChar
+            } else {
+                if InStr(pendingModifiers, modChar)
+                    pendingModifiers := StrReplace(pendingModifiers, modChar, "")
+                else
+                    pendingModifiers .= modChar
+            }
             ToolTip("Modificadores: " . (pendingModifiers != "" ? pendingModifiers : "(nenhum)"), A_ScreenWidth / 2 - 80, A_ScreenHeight / 2)
             SetTimer(() => ToolTip(), -1500)
             LogBuffers("Modifier Toggle " . output . " → pendingModifiers: " . pendingModifiers)
@@ -603,8 +612,7 @@ ProcessSequence() {
                     SendToSystem(modifierChars . "{Space}")
                 else
                     SendToSystem("{Space}")
-                LearnWordContext()
-                pendingModifiers := ""
+                            pendingModifiers := ""
                 pendingAccent := ""
             } else if output = "{Enter}" {
                 if textSelectedAll {
@@ -618,8 +626,7 @@ ProcessSequence() {
                     SendToSystem(modifierChars . "{Enter}")
                 else
                     SendToSystem("{Enter}")
-                LearnWordContext()
-                pendingModifiers := ""
+                            pendingModifiers := ""
                 pendingAccent := ""
             } else if output = "{Backspace}" {
                 if textSelectedAll {
@@ -646,6 +653,14 @@ ProcessSequence() {
                 visualBuffer := ""
                 textSelectedAll := false
                 SendToSystem("{Escape}")
+                pendingModifiers := ""
+                pendingAccent := ""
+            } else if output = "{Clear}" {
+                wordBuffer := ""
+                cursorOffset := 0
+                visualBuffer := ""
+                textSelectedAll := false
+                historyBuffer := []
                 pendingModifiers := ""
                 pendingAccent := ""
             } else {

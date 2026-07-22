@@ -107,7 +107,6 @@ $Space:: {
     historyBuffer.Push(" ")
     LogBuffers("Physical Space End")
     UpdateOSD()
-    LearnWordContext()
 }
 
 $Enter:: {
@@ -116,35 +115,13 @@ $Enter:: {
     if currentSequence != "" {
         ProcessSequence()
     } else {
-        suggestion := GetAutocompleteSuggestion(visualBuffer)
-        if (suggestion != "") {
-            ; Envia os backspaces e a sugestao
-            loop StrLen(visualBuffer) {
-                SendToSystem("{Backspace}")
-            }
-            SendToSystem(suggestion . " ")
-
-            ; Adjust wordBuffer
-            if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
-                wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
-            }
-            wordBuffer .= suggestion . " "
-
-            visualBuffer := ""
-            historyBuffer.Push(suggestion . " ")
-            LogBuffers("Autocompleted/Corrected: " . suggestion)
-            UpdateOSD()
-            LearnWordContext()
-        } else {
-            wordBuffer := ""
-            cursorOffset := 0
-            visualBuffer := ""
-            historyBuffer := []
-            LogBuffers("Cleared Word Buffer")
-            SendToSystem("{Enter}")
-            UpdateOSD()
-            LearnWordContext()
-        }
+        wordBuffer := ""
+        cursorOffset := 0
+        visualBuffer := ""
+        historyBuffer := []
+        LogBuffers("Cleared Word Buffer")
+        SendToSystem("{Enter}")
+        UpdateOSD()
     }
     LogBuffers("Physical Enter End")
 }
@@ -212,32 +189,14 @@ $LButton:: {
         return
     }
 
-    ; Clique rápido — aplicar lógica morse/autocomplete
-    suggestion := GetAutocompleteSuggestion(visualBuffer)
-    if (suggestion != "") {
-        loop StrLen(visualBuffer) {
-            SendToSystem("{Backspace}")
-        }
-        SendToSystem(suggestion . " ")
-        if (StrLen(wordBuffer) >= StrLen(visualBuffer)) {
-            wordBuffer := SubStr(wordBuffer, 1, StrLen(wordBuffer) - StrLen(visualBuffer))
-        }
-        wordBuffer .= suggestion . " "
-        visualBuffer := ""
-        historyBuffer.Push(suggestion . " ")
-        LogBuffers("Autocompleted/Corrected: " . suggestion)
-        UpdateOSD()
-        LearnWordContext()
-    } else {
-        wordBuffer := ""
-        cursorOffset := 0
-        visualBuffer := ""
-        historyBuffer := []
-        LogBuffers("Cleared Word Buffer")
-        Send("{Blind}{LButton}")
-        UpdateOSD()
-        LearnWordContext()
-    }
+    ; Clique rápido — aplicar lógica morse normal
+    wordBuffer := ""
+    cursorOffset := 0
+    visualBuffer := ""
+    historyBuffer := []
+    LogBuffers("Cleared Word Buffer")
+    Send("{Blind}{LButton}")
+    UpdateOSD()
     LogBuffers("Physical LButton End")
 }
 #HotIf

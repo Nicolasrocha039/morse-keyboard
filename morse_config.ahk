@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 
 ; Variáveis globais de interface
 global osdGeral1 := ""
@@ -20,12 +20,10 @@ global osdTriples := ""
 
 ; Dicionário de atalhos e dicionário de palavras
 global morseMap := Map()
-global dictArray := []
-
 global traditionalMode := false
 
 LoadConfig(useTraditionalMap := false) {
-    global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, osdTeams1, osdTeams2, osdSyllables, osdTriples, morseMap, dictArray, traditionalMode
+    global osdGeral1, osdGeral2, osdAdb1, osdAdb2, osdMKey1, osdMKey2, osdMacro1, osdMacro2, osdFKey1, osdFKey2, osdSpotify1, osdSpotify2, osdTeams1, osdTeams2, osdSyllables, osdTriples, morseMap, traditionalMode
     traditionalMode := useTraditionalMap
 
     ; Carregar os textos da interface
@@ -67,24 +65,6 @@ LoadConfig(useTraditionalMap := false) {
         }
     } catch as err {
         MsgBox("Erro ao carregar morse_map.ini: " . err.Message)
-    }
-
-    ; Carregar dicionário de palavras na memória RAM
-    try {
-        dictContent := FileRead(A_ScriptDir . "\config\dict.ini", "UTF-8")
-        Loop Parse, dictContent, "`n", "`r"
-        {
-            if (A_LoopField != "" && SubStr(A_LoopField, 1, 1) != "[") {
-                parts := StrSplit(A_LoopField, "=")
-                if (parts.Length >= 2 && parts[2] != "") {
-                    dictArray.Push({key: parts[1], word: parts[2]})
-                } else if (parts.Length >= 1 && parts[1] != "") {
-                    dictArray.Push({key: parts[1], word: parts[1]})
-                }
-            }
-        }
-    } catch as err {
-        MsgBox("Erro ao carregar dict.ini: " . err.Message)
     }
 
     ; Limpar e popular caches de Custom Keys
